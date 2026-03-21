@@ -33,10 +33,7 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
           border: Border(
-            top: BorderSide(
-              color: SmithMkColors.glassBorder,
-              width: 0.5,
-            ),
+            top: BorderSide(color: SmithMkColors.glassBorder, width: 0.5),
           ),
         ),
         child: NavigationBar(

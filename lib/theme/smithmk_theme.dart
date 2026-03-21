@@ -11,9 +11,8 @@ class SmithMkColors {
   static const Color textPrimary = Color(0xFFE8E8ED);
   static const Color textSecondary = Color(0xFF8B8B9E);
   static const Color textTertiary = Color(0xFF55556A);
-  static const Color accentPrimary = Color(0xFF4FC3F7);
-  static const Color accentWarm = Color(0xFFC4A96B);
-  static const Color accentAmber = Color(0xFFFFC107);
+  static const Color accentPrimary = Color(0xFFFFC107);   // Amber - primary accent
+  static const Color accentWarm = Color(0xFFFFC107);       // Amber
   static const Color accentPurple = Color(0xFF9C27B0);
   static const Color success = Color(0xFF4ADE80);
   static const Color warning = Color(0xFFFBBF24);
@@ -39,7 +38,7 @@ class SmithMkTheme {
       colorScheme: const ColorScheme.dark(
         surface: SmithMkColors.background,
         primary: SmithMkColors.accentPrimary,
-        secondary: SmithMkColors.accentWarm,
+        secondary: SmithMkColors.accentPrimary,
         error: SmithMkColors.error,
         onSurface: SmithMkColors.textPrimary,
         onPrimary: SmithMkColors.background,
