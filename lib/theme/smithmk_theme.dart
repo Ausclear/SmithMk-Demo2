@@ -3,20 +3,29 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SmithMkColors {
-  static const Color background = Color(0xFF0D0D14);
-  static const Color cardSurface = Color(0xFF1A1A24);
-  static const Color elevatedSurface = Color(0xFF252532);
+  // Backgrounds - NO BLUE/NAVY
+  static const Color background = Color(0xFF080E1C);     // rgba(8,14,28,1)
+  static const Color cardSurface = Color(0xFF16161F);     // #16161F dark near-black
+  static const Color elevatedSurface = Color(0xFF1E1E28);
   static const Color glassOverlay = Color(0x0DFFFFFF);
   static const Color glassBorder = Color(0x14FFFFFF);
+
+  // Text
   static const Color textPrimary = Color(0xFFE8E8ED);
   static const Color textSecondary = Color(0xFF8B8B9E);
   static const Color textTertiary = Color(0xFF55556A);
-  static const Color accentPrimary = Color(0xFFFFC107);   // Amber - primary accent
-  static const Color accentWarm = Color(0xFFFFC107);       // Amber
-  static const Color accentPurple = Color(0xFF9C27B0);
+
+  // Accents - AMBER/GOLD ONLY
+  static const Color accentPrimary = Color(0xFFFFC107);   // Amber - active states
+  static const Color gold = Color(0xFFC4A96B);            // Gold - labels/text
+  static const Color accentPurple = Color(0xFF9C27B0);    // Blinds open only
+
+  // Semantic
   static const Color success = Color(0xFF4ADE80);
   static const Color warning = Color(0xFFFBBF24);
   static const Color error = Color(0xFFF87171);
+
+  // Device states
   static const Color lightOn = Color(0xFFFFC107);
   static const Color lightOff = Color(0xFF55556A);
   static const Color heatingActive = Color(0xFFFF6B35);
@@ -38,7 +47,7 @@ class SmithMkTheme {
       colorScheme: const ColorScheme.dark(
         surface: SmithMkColors.background,
         primary: SmithMkColors.accentPrimary,
-        secondary: SmithMkColors.accentPrimary,
+        secondary: SmithMkColors.gold,
         error: SmithMkColors.error,
         onSurface: SmithMkColors.textPrimary,
         onPrimary: SmithMkColors.background,
