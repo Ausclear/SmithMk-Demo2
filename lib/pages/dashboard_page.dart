@@ -198,7 +198,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
         children: [
           _statusItem(PhosphorIcons.shieldCheck(PhosphorIconsStyle.light), _securityArmed ? 'Armed' : 'Off', _securityArmed ? SmithMkColors.success : SmithMkColors.error),
           _divider(),
-          _statusItem(PhosphorIcons.lockSimple(PhosphorIconsStyle.light), _frontDoorLocked ? 'Locked' : 'Open', _frontDoorLocked ? SmithMkColors.success : SmithMkColors.warning),
+          _statusItem(PhosphorIcons.lockSimple(PhosphorIconsStyle.light), _frontDoorLocked ? 'Locked' : 'Open', _frontDoorLocked ? SmithMkColors.success : SmithMkColors.accentPrimary),
           _divider(),
           _statusItem(PhosphorIcons.lightbulb(PhosphorIconsStyle.light), '${_activeLightCount} On', _activeLightCount > 0 ? SmithMkColors.accentPrimary : SmithMkColors.textTertiary),
           _divider(),
@@ -677,7 +677,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
   }
 
   Widget _lockTile(String name, bool locked, VoidCallback onTap) {
-    final c = locked ? SmithMkColors.success : SmithMkColors.warning;
+    final c = locked ? SmithMkColors.success : SmithMkColors.accentPrimary;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -721,7 +721,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
               Icon(exporting ? PhosphorIcons.arrowRight(PhosphorIconsStyle.bold) : PhosphorIcons.arrowLeft(PhosphorIconsStyle.bold), color: SmithMkColors.textTertiary, size: 18),
               const SizedBox(height: 4),
               Text(exporting ? 'Exporting' : 'Importing', style: const TextStyle(fontSize: 9, color: SmithMkColors.textTertiary)),
-              Text('${net}kW', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: exporting ? SmithMkColors.success : SmithMkColors.warning)),
+              Text('${net}kW', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: exporting ? SmithMkColors.success : SmithMkColors.accentPrimary)),
             ],
           ),
           _energyNode(PhosphorIcons.house(PhosphorIconsStyle.light), 'Home', '${_homeKw}kW', SmithMkColors.gold),
