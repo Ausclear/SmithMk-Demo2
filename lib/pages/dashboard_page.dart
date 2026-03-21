@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../theme/smithmk_theme.dart';
 import '../widgets/glass_card.dart';
 
@@ -272,98 +273,143 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
 
   // ─── THERMOSTAT ───
   Widget _buildThermostat() {
+    final tempColour = _getTemperatureColour(_targetTemp);
+
     return GlassCard(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       glowColor: _heatingOn ? SmithMkColors.heatingActive : null,
       child: Column(
         children: [
           SizedBox(
-            width: 240, height: 240,
+            width: 260,
+            height: 260,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Outer ring — sharp bevelled edge with drop shadow
+                // Outer shadow ring for 3D depth
                 Container(
-                  width: 240, height: 240,
+                  width: 260, height: 260,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF151515),
                     boxShadow: [
-                      // Heavy drop shadow
                       BoxShadow(color: Colors.black.withValues(alpha: 0.7), blurRadius: 30, offset: const Offset(0, 10), spreadRadius: -5),
-                      // Ambient shadow
-                      BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 15, spreadRadius: -2),
+                      BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 12),
                     ],
                   ),
                 ),
-                // Bevelled ring — light top, dark bottom
+                // Bevelled bezel ring
                 Container(
-                  width: 236, height: 236,
+                  width: 258, height: 258,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF222222), Color(0xFF0C0C0C)],
+                      colors: [Color(0xFF2A2A2A), Color(0xFF0A0A0A)],
                     ),
                   ),
                 ),
-                // Inner face — dark matte
+                // Inner face
                 Container(
-                  width: 224, height: 224,
+                  width: 238, height: 238,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: const Color(0xFF101010),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.04), width: 0.5),
+                    color: const Color(0xFF111111),
+                    border: Border.all(color: Colors.black.withValues(alpha: 0.5), width: 1),
                   ),
                 ),
-                // Subtle top highlight — sharp, not blurred
+                // Top specular highlight
                 Positioned(
-                  top: 12, left: 50, right: 50,
+                  top: 6, left: 55, right: 55,
                   child: Container(
                     height: 2,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(1),
                       gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.white.withValues(alpha: 0.08),
-                          Colors.transparent,
+                        colors: [Colors.transparent, Colors.white.withValues(alpha: 0.1), Colors.transparent],
+                      ),
+                    ),
+                  ),
+                ),
+                // Syncfusion radial gauge
+                SizedBox(
+                  width: 240, height: 240,
+                  child: SfRadialGauge(
+                    axes: <RadialAxis>[
+                      RadialAxis(
+                        minimum: 12,
+                        maximum: 30,
+                        startAngle: 135,
+                        endAngle: 45,
+                        showLabels: true,
+                        showTicks: true,
+                        labelOffset: 20,
+                        interval: 3,
+                        axisLabelStyle: const GaugeTextStyle(
+                          fontSize: 9,
+                          color: Color(0xFF55556A),
+                          fontFamily: 'PlusJakartaSans',
+                          fontWeight: FontWeight.w500,
+                        ),
+                        axisLineStyle: const AxisLineStyle(
+                          thickness: 8,
+                          color: Color(0xFF1A1A1A),
+                          cornerStyle: CornerStyle.bothCurve,
+                        ),
+                        majorTickStyle: const MajorTickStyle(
+                          length: 10,
+                          thickness: 1.5,
+                          color: Color(0xFF333333),
+                        ),
+                        minorTickStyle: const MinorTickStyle(
+                          length: 5,
+                          thickness: 0.8,
+                          color: Color(0xFF222222),
+                        ),
+                        minorTicksPerInterval: 5,
+                        ranges: <GaugeRange>[
+                          GaugeRange(
+                            startValue: 12,
+                            endValue: _targetTemp,
+                            startWidth: 8,
+                            endWidth: 8,
+                            gradient: const SweepGradient(
+                              colors: <Color>[
+                                Color(0xFF48CAE4),  // Cool blue 12°
+                                Color(0xFF78D6B0),  // Neutral 18°
+                                Color(0xFFFFC107),  // Amber 22°
+                                Color(0xFFFF8C00),  // Deep orange 26°
+                                Color(0xFFFF5722),  // Hot 30°
+                              ],
+                              stops: <double>[0.0, 0.3, 0.55, 0.78, 1.0],
+                            ),
+                          ),
                         ],
+                        pointers: <GaugePointer>[
+                          MarkerPointer(
+                            value: _targetTemp,
+                            markerType: MarkerType.circle,
+                            markerWidth: 20,
+                            markerHeight: 20,
+                            color: tempColour,
+                            borderColor: const Color(0xFFE8E8ED),
+                            borderWidth: 3,
+                            enableDragging: true,
+                            onValueChanged: (value) {
+                              final snapped = (value * 2).round() / 2;
+                              if (snapped != _targetTemp) {
+                                HapticFeedback.selectionClick();
+                              }
+                              setState(() => _targetTemp = snapped.clamp(12, 30));
+                            },
+                          ),
+                        ],
+                        annotations: <GaugeAnnotation>[],
                       ),
-                    ),
+                    ],
                   ),
                 ),
-                // Arc dial
-                GestureDetector(
-                  onPanUpdate: (details) {
-                    final dx = details.localPosition.dx - 120;
-                    final dy = details.localPosition.dy - 120;
-                    var angle = atan2(dy, dx) * (180 / pi);
-                    if (angle < 0) angle += 360;
-                    var arcDeg = angle - 135;
-                    if (arcDeg < 0) arcDeg += 360;
-                    if (arcDeg > 270) {
-                      arcDeg = arcDeg > 315 ? 0 : 270;
-                    }
-                    final frac = arcDeg / 270;
-                    final newTemp = (16 + frac * 14);
-                    final snapped = (newTemp * 2).round() / 2;
-                    if (snapped != _targetTemp) HapticFeedback.selectionClick();
-                    setState(() => _targetTemp = snapped.clamp(16, 30));
-                  },
-                  child: SizedBox(
-                    width: 240, height: 240,
-                    child: CustomPaint(
-                      painter: _ThermostatPainter(
-                        currentTemp: _temperature,
-                        targetTemp: _targetTemp,
-                        isHeating: _heatingOn,
-                      ),
-                    ),
-                  ),
-                ),
-                // Centre text
+                // Centre text overlay
                 IgnorePointer(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -382,7 +428,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Currently ${_temperature}°',
+                        'Currently $_temperature°',
                         style: const TextStyle(fontSize: 11, color: SmithMkColors.textSecondary),
                       ),
                     ],
@@ -395,7 +441,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _thermoBtn('−', () { HapticFeedback.selectionClick(); setState(() => _targetTemp = (_targetTemp - 0.5).clamp(16, 30)); }),
+              _thermoBtn('−', () { HapticFeedback.selectionClick(); setState(() => _targetTemp = (_targetTemp - 0.5).clamp(12, 30)); }),
               const SizedBox(width: 36),
               GestureDetector(
                 onTap: () { HapticFeedback.mediumImpact(); setState(() => _heatingOn = !_heatingOn); },
@@ -412,12 +458,20 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
                 ),
               ),
               const SizedBox(width: 36),
-              _thermoBtn('+', () { HapticFeedback.selectionClick(); setState(() => _targetTemp = (_targetTemp + 0.5).clamp(16, 30)); }),
+              _thermoBtn('+', () { HapticFeedback.selectionClick(); setState(() => _targetTemp = (_targetTemp + 0.5).clamp(12, 30)); }),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Color _getTemperatureColour(double temp) {
+    final f = (temp - 12) / 18;
+    if (f <= 0.3) return Color.lerp(const Color(0xFF48CAE4), const Color(0xFF78D6B0), f / 0.3)!;
+    if (f <= 0.55) return Color.lerp(const Color(0xFF78D6B0), const Color(0xFFFFC107), (f - 0.3) / 0.25)!;
+    if (f <= 0.78) return Color.lerp(const Color(0xFFFFC107), const Color(0xFFFF8C00), (f - 0.55) / 0.23)!;
+    return Color.lerp(const Color(0xFFFF8C00), const Color(0xFFFF5722), (f - 0.78) / 0.22)!;
   }
 
   Widget _thermoBtn(String label, VoidCallback onTap) {
@@ -694,58 +748,6 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
       ],
     );
   }
-}
-
-// ─── THERMOSTAT PAINTER ───
-class _ThermostatPainter extends CustomPainter {
-  final double currentTemp;
-  final double targetTemp;
-  final bool isHeating;
-
-  _ThermostatPainter({required this.currentTemp, required this.targetTemp, required this.isHeating});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = size.width / 2;
-    final cy = size.height / 2;
-    final r = min(size.width, size.height) / 2 - 18;
-    const startAngle = 135 * pi / 180;
-    const totalSweep = 270 * pi / 180;
-
-    // Background arc
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r),
-      startAngle, totalSweep, false,
-      Paint()..color = Colors.white.withValues(alpha: 0.07)..style = PaintingStyle.stroke..strokeWidth = 6..strokeCap = StrokeCap.round,
-    );
-
-    // Active arc
-    final frac = (targetTemp - 16) / 14;
-    final sweep = frac * totalSweep;
-    final gradient = SweepGradient(
-      startAngle: startAngle,
-      endAngle: startAngle + totalSweep,
-      colors: const [Color(0xFF48CAE4), Color(0xFFFFC107), Color(0xFFFF6B35)],
-    );
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(cx, cy), radius: r),
-      startAngle, sweep, false,
-      Paint()
-        ..shader = gradient.createShader(Rect.fromCircle(center: Offset(cx, cy), radius: r))
-        ..style = PaintingStyle.stroke..strokeWidth = 6..strokeCap = StrokeCap.round,
-    );
-
-    // Thumb
-    final thumbAngle = startAngle + sweep;
-    final tx = cx + r * cos(thumbAngle);
-    final ty = cy + r * sin(thumbAngle);
-    canvas.drawCircle(Offset(tx, ty), 8, Paint()..color = isHeating ? const Color(0xFFFF6B35) : const Color(0xFF55556A));
-    canvas.drawCircle(Offset(tx, ty), 4.5, Paint()..color = const Color(0xFFE8E8ED));
-  }
-
-  @override
-  bool shouldRepaint(covariant _ThermostatPainter old) =>
-      old.targetTemp != targetTemp || old.isHeating != isHeating;
 }
 
 // ─── BLIND PAINTER ───
