@@ -5,6 +5,7 @@ import '../theme/smithmk_theme.dart';
 import '../pages/home_page.dart';
 import '../pages/dashboard_page.dart';
 import '../pages/placeholder_page.dart';
+import '../pages/lighting_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -19,7 +20,7 @@ class _AppShellState extends State<AppShell> {
   final List<Widget> _pages = [
     const HomePage(),
     const DashboardPage(),
-    PlaceholderPage(title: 'Lighting', icon: PhosphorIcons.lightbulb(PhosphorIconsStyle.light)),
+    const LightingPage(),
     PlaceholderPage(title: 'Media', icon: PhosphorIcons.musicNotes(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Settings', icon: PhosphorIcons.gear(PhosphorIconsStyle.light)),
   ];
