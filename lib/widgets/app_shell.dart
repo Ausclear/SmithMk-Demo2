@@ -22,14 +22,24 @@ class _AppShellState extends State<AppShell> {
   final List<_InnerPage> _innerPages = [
     _InnerPage('Dashboard', '📊'),
     _InnerPage('Lights', '💡'),
+    _InnerPage('Security', '🛡️'),
+    _InnerPage('Climate', '🌡️'),
+    _InnerPage('Blinds', '🪟'),
+    _InnerPage('Energy', '⚡'),
     _InnerPage('Media', '🎵'),
+    _InnerPage('Rooms', '🚪'),
     _InnerPage('Settings', '🔧'),
   ];
 
   List<Widget> get _pageWidgets => [
     const DashboardPage(),
     const LightingPage(),
+    PlaceholderPage(title: 'Security', icon: PhosphorIcons.shieldCheck(PhosphorIconsStyle.light)),
+    PlaceholderPage(title: 'Climate', icon: PhosphorIcons.thermometerSimple(PhosphorIconsStyle.light)),
+    PlaceholderPage(title: 'Blinds', icon: PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.light)),
+    PlaceholderPage(title: 'Energy', icon: PhosphorIcons.lightning(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Media', icon: PhosphorIcons.musicNotes(PhosphorIconsStyle.light)),
+    PlaceholderPage(title: 'Rooms', icon: PhosphorIcons.door(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Settings', icon: PhosphorIcons.gear(PhosphorIconsStyle.light)),
   ];
 
@@ -48,8 +58,13 @@ class _AppShellState extends State<AppShell> {
     final map = {
       'Dashboard': 0,
       'Lights': 1,
-      'Media': 2,
-      'Settings': 3,
+      'Security': 2,
+      'Climate': 3,
+      'Blinds': 4,
+      'Energy': 5,
+      'Media': 6,
+      'Rooms': 7,
+      'Settings': 8,
     };
     final idx = map[tileName];
     if (idx != null) {
@@ -156,18 +171,19 @@ class _AppShellState extends State<AppShell> {
             ),
             child: SafeArea(
               right: false,
-              child: Column(
-                children: [
-                  const SizedBox(height: 12),
-                  // Home button
-                  _buildSideNavItem(-1, '🏠', 'Home', false),
-                  const SizedBox(height: 8),
-                  // Inner pages
-                  ...List.generate(_innerPages.length, (i) =>
-                    _buildSideNavItem(i, _innerPages[i].emoji, _innerPages[i].label, _currentPage == i),
-                  ),
-                  const Spacer(),
-                ],
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    // Home button
+                    _buildSideNavItem(-1, '🏠', 'Home', false),
+                    const SizedBox(height: 4),
+                    // Inner pages
+                    ...List.generate(_innerPages.length, (i) =>
+                      _buildSideNavItem(i, _innerPages[i].emoji, _innerPages[i].label, _currentPage == i),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
