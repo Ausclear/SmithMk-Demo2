@@ -16,17 +16,17 @@ class _HomePageState extends State<HomePage> {
   DateTime _now = DateTime.now();
   int? _selectedTile;
 
-  // Animated Noto emojis — renders beautifully on web AND native
-  final List<_HomeTile> _tiles = [
-    _HomeTile('Dashboard', AnimatedEmojis.fromEmojiString('📊')!),
-    _HomeTile('Lights', AnimatedEmojis.fromEmojiString('💡')!),
-    _HomeTile('Security', AnimatedEmojis.fromEmojiString('🛡️')!),
-    _HomeTile('Climate', AnimatedEmojis.fromEmojiString('🌡️')!),
-    _HomeTile('Blinds', AnimatedEmojis.fromEmojiString('🪟')!),
-    _HomeTile('Energy', AnimatedEmojis.fromEmojiString('⚡')!),
-    _HomeTile('Media', AnimatedEmojis.fromEmojiString('🎵')!),
-    _HomeTile('Rooms', AnimatedEmojis.fromEmojiString('🚪')!),
-    _HomeTile('Settings', AnimatedEmojis.fromEmojiString('🔧')!),
+  // Use plain text emojis as labels, AnimatedEmoji widget handles rendering
+  static final List<_HomeTile> _tiles = [
+    _HomeTile('Dashboard', '📊'),
+    _HomeTile('Lights', '💡'),
+    _HomeTile('Security', '🛡️'),
+    _HomeTile('Climate', '🌡️'),
+    _HomeTile('Blinds', '🪟'),
+    _HomeTile('Energy', '⚡'),
+    _HomeTile('Media', '🎵'),
+    _HomeTile('Rooms', '🚪'),
+    _HomeTile('Settings', '🔧'),
   ];
 
   @override
@@ -52,112 +52,47 @@ class _HomePageState extends State<HomePage> {
     return '${days[_now.weekday - 1]} ${_now.day} ${months[_now.month - 1]}';
   }
 
+  // Try to get AnimatedEmoji, fall back to plain text emoji
+  Widget _buildEmoji(String emoji, double size) {
+    final animated = AnimatedEmojis.fromEmojiString(emoji);
+    if (animated != null) {
+      return AnimatedEmoji(animated, size: size, repeat: true);
+    }
+    // Fallback: render as plain text emoji
+    return Text(emoji, style: TextStyle(fontSize: size * 0.8));
+  }
+
   @override
   Widget build(BuildContext context) {
+    // NO side panel here — the app shell already provides the side rail.
+    // This is JUST the page content.
     return Scaffold(
       backgroundColor: SmithMkColors.background,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final w = constraints.maxWidth;
-            // Desktop gets two-panel when wide enough (side nav already takes 72px)
-            if (w >= 900) {
-              return _buildDesktopLayout(constraints);
-            } else {
-              return _buildMobileLayout(constraints);
-            }
-          },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              _buildHeader(),
+              const SizedBox(height: 14),
+              _buildConnectionPills(),
+              const SizedBox(height: 24),
+              Expanded(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 480),
+                    child: _buildTileGrid(),
+                  ),
+                ),
+              ),
+              if (_selectedTile != null) _buildSelectedLabel(),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  // ─── MOBILE / TABLET LAYOUT ───
-  Widget _buildMobileLayout(BoxConstraints constraints) {
-    final w = constraints.maxWidth;
-    final isTablet = w >= 600;
-    final pad = isTablet ? 28.0 : 20.0;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: pad),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          _buildHeader(),
-          const SizedBox(height: 14),
-          _buildConnectionPills(),
-          const SizedBox(height: 24),
-          Expanded(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: _buildTileGrid(3),
-              ),
-            ),
-          ),
-          if (_selectedTile != null) _buildSelectedLabel(),
-          const SizedBox(height: 16),
-        ],
-      ),
-    );
-  }
-
-  // ─── DESKTOP LAYOUT (two-panel) ───
-  Widget _buildDesktopLayout(BoxConstraints constraints) {
-    return Row(
-      children: [
-        // Left panel
-        SizedBox(
-          width: 320,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(28, 28, 20, 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'SMITHMK HOME',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: SmithMkColors.gold, letterSpacing: 4),
-                ),
-                const SizedBox(height: 4),
-                Text(_dateStr, style: const TextStyle(fontSize: 13, color: SmithMkColors.textTertiary)),
-                const SizedBox(height: 24),
-                Text(
-                  _timeStr,
-                  style: const TextStyle(fontSize: 64, fontWeight: FontWeight.w200, color: SmithMkColors.textPrimary, letterSpacing: -3, height: 1),
-                ),
-                const SizedBox(height: 8),
-                const Row(
-                  children: [
-                    Text('☁ ', style: TextStyle(fontSize: 16)),
-                    Text('14°C  Partly cloudy', style: TextStyle(fontSize: 14, color: SmithMkColors.textSecondary)),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                _buildConnectionPills(),
-                const Spacer(),
-                if (_selectedTile != null) ...[
-                  _buildSelectedLabel(),
-                  const SizedBox(height: 16),
-                ],
-              ],
-            ),
-          ),
-        ),
-        Container(width: 1, color: SmithMkColors.glassBorder),
-        // Right panel — tile grid
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(28),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: _buildTileGrid(3),
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -235,9 +170,10 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildTileGrid(int columns) {
+  Widget _buildTileGrid() {
     return LayoutBuilder(
       builder: (context, constraints) {
+        const columns = 3;
         const spacing = 14.0;
         final availableWidth = constraints.maxWidth - (spacing * (columns - 1));
         final tileSize = availableWidth / columns;
@@ -248,7 +184,7 @@ class _HomePageState extends State<HomePage> {
           height: totalHeight.clamp(0.0, constraints.maxHeight),
           child: GridView.builder(
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: columns,
               mainAxisSpacing: spacing,
               crossAxisSpacing: spacing,
@@ -291,7 +227,6 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Stack(
           children: [
-            // Top shine
             Positioned(
               top: 0, left: 0, right: 0,
               child: Container(
@@ -310,12 +245,7 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Animated Noto emoji
-                  AnimatedEmoji(
-                    tile.emoji,
-                    size: emojiSize,
-                    repeat: true,
-                  ),
+                  _buildEmoji(tile.emoji, emojiSize),
                   SizedBox(height: tileSize * 0.05),
                   Text(
                     tile.name.toUpperCase(),
@@ -374,6 +304,6 @@ class _HomePageState extends State<HomePage> {
 
 class _HomeTile {
   final String name;
-  final AnimatedEmojiData emoji;
+  final String emoji;
   const _HomeTile(this.name, this.emoji);
 }
