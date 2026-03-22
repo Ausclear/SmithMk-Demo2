@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../theme/smithmk_theme.dart';
+import '../widgets/status_bar.dart';
 import '../widgets/glass_card.dart';
 
 class LightingPage extends StatefulWidget {
@@ -36,6 +37,8 @@ class _LightingPageState extends State<LightingPage> {
                   const Text('LIGHTING', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: SmithMkColors.textTertiary, letterSpacing: 1.5)),
                   const SizedBox(height: 4),
                   const Text('Bedroom', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: SmithMkColors.textPrimary)),
+                  const SizedBox(height: 10),
+                  const StatusBar(),
                 ],
               ),
             ),

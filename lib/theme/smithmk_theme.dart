@@ -59,6 +59,7 @@ class SmithMkColors {
 class SmithMkTheme {
   static ThemeData get darkTheme {
     // "No premium platform uses a custom typeface... use Inter"
+    // Inter as primary, with emoji font fallback for all platforms
     final baseTextTheme = GoogleFonts.interTextTheme(
       ThemeData.dark().textTheme,
     );

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../theme/smithmk_theme.dart';
+import '../widgets/status_bar.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -98,6 +99,8 @@ class _DashboardPageState extends State<DashboardPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHeader(),
+                  const SizedBox(height: 10),
+                  const StatusBar(),
                       const SizedBox(height: 20),
                       if (isWide)
                         _buildTwoColumnLayout()
@@ -322,6 +325,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return ReorderableListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      buildDefaultDragHandles: false,
       onReorder: (oldIndex, newIndex) {
         HapticFeedback.mediumImpact();
         setState(() {
@@ -355,7 +359,26 @@ class _DashboardPageState extends State<DashboardPage> {
         return Padding(
           key: ValueKey(e.value),
           padding: const EdgeInsets.only(bottom: 12),
-          child: _buildSectionByKey(e.value),
+          child: Stack(
+            children: [
+              _buildSectionByKey(e.value),
+              // Drag handle — top right corner
+              Positioned(
+                top: 4, right: 4,
+                child: ReorderableDragStartListener(
+                  index: e.key,
+                  child: Container(
+                    width: 28, height: 28,
+                    decoration: BoxDecoration(
+                      color: SmithMkColors.cardSurfaceAlt.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(child: Text('⠿', style: TextStyle(fontSize: 14, color: SmithMkColors.textTertiary))),
+                  ),
+                ),
+              ),
+            ],
+          ),
         );
       }).toList(),
     );
