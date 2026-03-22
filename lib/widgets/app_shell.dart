@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:animated_emoji/animated_emoji.dart';
 import '../theme/smithmk_theme.dart';
 import '../pages/home_page.dart';
 import '../pages/dashboard_page.dart';
 import '../pages/lighting_page.dart';
 import '../pages/placeholder_page.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -15,31 +16,55 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  int _currentIndex = 0;
+  // null = home launcher, 0-4 = inner pages
+  int? _currentPage;
 
-  final List<Widget> _pages = [
-    const HomePage(),
+  final List<_InnerPage> _innerPages = [
+    _InnerPage('Dashboard', '📊'),
+    _InnerPage('Lights', '💡'),
+    _InnerPage('Media', '🎵'),
+    _InnerPage('Settings', '🔧'),
+  ];
+
+  List<Widget> get _pageWidgets => [
     const DashboardPage(),
     const LightingPage(),
     PlaceholderPage(title: 'Media', icon: PhosphorIcons.musicNotes(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Settings', icon: PhosphorIcons.gear(PhosphorIconsStyle.light)),
   ];
 
-  final List<_NavItem> _navItems = [
-    _NavItem('Home', PhosphorIcons.house(PhosphorIconsStyle.light), PhosphorIcons.house(PhosphorIconsStyle.fill)),
-    _NavItem('Dashboard', PhosphorIcons.squaresFour(PhosphorIconsStyle.light), PhosphorIcons.squaresFour(PhosphorIconsStyle.fill)),
-    _NavItem('Lights', PhosphorIcons.lightbulb(PhosphorIconsStyle.light), PhosphorIcons.lightbulb(PhosphorIconsStyle.fill)),
-    _NavItem('Media', PhosphorIcons.musicNotes(PhosphorIconsStyle.light), PhosphorIcons.musicNotes(PhosphorIconsStyle.fill)),
-    _NavItem('Settings', PhosphorIcons.gear(PhosphorIconsStyle.light), PhosphorIcons.gear(PhosphorIconsStyle.fill)),
-  ];
+  void _goHome() {
+    HapticFeedback.lightImpact();
+    setState(() => _currentPage = null);
+  }
 
-  void _onNavTap(int index) {
+  void _goToPage(int index) {
     HapticFeedback.selectionClick();
-    setState(() => _currentIndex = index);
+    setState(() => _currentPage = index);
+  }
+
+  // Called from HomePage when a tile is tapped
+  void navigateToTile(String tileName) {
+    final map = {
+      'Dashboard': 0,
+      'Lights': 1,
+      'Media': 2,
+      'Settings': 3,
+    };
+    final idx = map[tileName];
+    if (idx != null) {
+      _goToPage(idx);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Home launcher — no nav
+    if (_currentPage == null) {
+      return HomePage(onTileTap: navigateToTile);
+    }
+
+    // Inner page — with nav
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth >= 800;
@@ -55,10 +80,18 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  // ─── BOTTOM NAV (portrait phone/small tablet) ───
+  Widget _buildEmojiIcon(String emoji, double size) {
+    final animated = AnimatedEmojis.fromEmojiString(emoji);
+    if (animated != null) {
+      return AnimatedEmoji(animated, size: size, repeat: false);
+    }
+    return Text(emoji, style: TextStyle(fontSize: size * 0.8));
+  }
+
+  // ─── BOTTOM NAV ───
   Widget _buildBottomNavLayout() {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(index: _currentPage!, children: _pageWidgets),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: SmithMkColors.cardSurface,
@@ -67,10 +100,17 @@ class _AppShellState extends State<AppShell> {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(_navItems.length, (i) => _buildBottomNavItem(i)),
+              children: [
+                // Home button
+                _buildBottomNavItem(-1, '🏠', 'Home', _currentPage == null),
+                // Inner pages
+                ...List.generate(_innerPages.length, (i) =>
+                  _buildBottomNavItem(i, _innerPages[i].emoji, _innerPages[i].label, _currentPage == i),
+                ),
+              ],
             ),
           ),
         ),
@@ -78,34 +118,19 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  Widget _buildBottomNavItem(int index) {
-    final item = _navItems[index];
-    final isActive = _currentIndex == index;
-
+  Widget _buildBottomNavItem(int index, String emoji, String label, bool isActive) {
     return GestureDetector(
-      onTap: () => _onNavTap(index),
+      onTap: () => index == -1 ? _goHome() : _goToPage(index),
       behavior: HitTestBehavior.opaque,
       child: SizedBox(
-        width: 64,
+        width: 60,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              decoration: BoxDecoration(
-                color: isActive ? SmithMkColors.accent.withValues(alpha: 0.12) : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                isActive ? item.activeIcon : item.icon,
-                color: isActive ? SmithMkColors.accent : SmithMkColors.textTertiary,
-                size: 22,
-              ),
-            ),
-            const SizedBox(height: 3),
+            _buildEmojiIcon(emoji, isActive ? 22 : 18),
+            const SizedBox(height: 2),
             Text(
-              item.label,
+              label,
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
@@ -118,12 +143,11 @@ class _AppShellState extends State<AppShell> {
     );
   }
 
-  // ─── SIDE NAV (landscape / tablet / desktop) ───
+  // ─── SIDE NAV ───
   Widget _buildSideNavLayout() {
     return Scaffold(
       body: Row(
         children: [
-          // Side rail
           Container(
             width: 72,
             decoration: BoxDecoration(
@@ -134,45 +158,34 @@ class _AppShellState extends State<AppShell> {
               right: false,
               child: Column(
                 children: [
-                  const SizedBox(height: 16),
-                  // SmithMk logo/brand mark
-                  Container(
-                    width: 40, height: 40,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: SmithMkColors.accent.withValues(alpha: 0.1),
-                    ),
-                    child: const Center(
-                      child: Text('S', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: SmithMkColors.gold)),
-                    ),
+                  const SizedBox(height: 12),
+                  // Home button
+                  _buildSideNavItem(-1, '🏠', 'Home', false),
+                  const SizedBox(height: 8),
+                  // Inner pages
+                  ...List.generate(_innerPages.length, (i) =>
+                    _buildSideNavItem(i, _innerPages[i].emoji, _innerPages[i].label, _currentPage == i),
                   ),
-                  const SizedBox(height: 24),
-                  // Nav items
-                  ...List.generate(_navItems.length, (i) => _buildSideNavItem(i)),
                   const Spacer(),
                 ],
               ),
             ),
           ),
-          // Page content
           Expanded(
-            child: IndexedStack(index: _currentIndex, children: _pages),
+            child: IndexedStack(index: _currentPage!, children: _pageWidgets),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSideNavItem(int index) {
-    final item = _navItems[index];
-    final isActive = _currentIndex == index;
-
+  Widget _buildSideNavItem(int index, String emoji, String label, bool isActive) {
     return GestureDetector(
-      onTap: () => _onNavTap(index),
+      onTap: () => index == -1 ? _goHome() : _goToPage(index),
       behavior: HitTestBehavior.opaque,
       child: Container(
         width: 72,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(vertical: 10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -183,15 +196,11 @@ class _AppShellState extends State<AppShell> {
                 color: isActive ? SmithMkColors.accent.withValues(alpha: 0.12) : Colors.transparent,
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                isActive ? item.activeIcon : item.icon,
-                color: isActive ? SmithMkColors.accent : SmithMkColors.textTertiary,
-                size: 20,
-              ),
+              child: Center(child: _buildEmojiIcon(emoji, isActive ? 20 : 17)),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
-              item.label,
+              label,
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
@@ -205,9 +214,8 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class _NavItem {
+class _InnerPage {
   final String label;
-  final IconData icon;
-  final IconData activeIcon;
-  const _NavItem(this.label, this.icon, this.activeIcon);
+  final String emoji;
+  const _InnerPage(this.label, this.emoji);
 }

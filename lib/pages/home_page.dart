@@ -5,7 +5,9 @@ import 'package:animated_emoji/animated_emoji.dart';
 import '../theme/smithmk_theme.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final void Function(String tileName) onTileTap;
+
+  const HomePage({super.key, required this.onTileTap});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -14,9 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late Timer _clockTimer;
   DateTime _now = DateTime.now();
-  int? _selectedTile;
 
-  // Use plain text emojis as labels, AnimatedEmoji widget handles rendering
   static final List<_HomeTile> _tiles = [
     _HomeTile('Dashboard', '📊'),
     _HomeTile('Lights', '💡'),
@@ -52,20 +52,16 @@ class _HomePageState extends State<HomePage> {
     return '${days[_now.weekday - 1]} ${_now.day} ${months[_now.month - 1]}';
   }
 
-  // Try to get AnimatedEmoji, fall back to plain text emoji
   Widget _buildEmoji(String emoji, double size) {
     final animated = AnimatedEmojis.fromEmojiString(emoji);
     if (animated != null) {
       return AnimatedEmoji(animated, size: size, repeat: true);
     }
-    // Fallback: render as plain text emoji
     return Text(emoji, style: TextStyle(fontSize: size * 0.8));
   }
 
   @override
   Widget build(BuildContext context) {
-    // NO side panel here — the app shell already provides the side rail.
-    // This is JUST the page content.
     return Scaffold(
       backgroundColor: SmithMkColors.background,
       body: SafeArea(
@@ -87,7 +83,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-              if (_selectedTile != null) _buildSelectedLabel(),
               const SizedBox(height: 16),
             ],
           ),
@@ -199,30 +194,22 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildTile(int index, double tileSize) {
     final tile = _tiles[index];
-    final isSelected = _selectedTile == index;
     final emojiSize = (tileSize * 0.32).clamp(32.0, 56.0);
     final fontSize = (tileSize * 0.08).clamp(9.0, 12.0);
 
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        setState(() => _selectedTile = index);
+        widget.onTileTap(tile.name);
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
+      child: Container(
         decoration: BoxDecoration(
           color: SmithMkColors.cardSurface,
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: isSelected ? SmithMkColors.gold.withValues(alpha: 0.5) : SmithMkColors.glassBorder,
-            width: isSelected ? 1.5 : 1,
-          ),
+          border: Border.all(color: SmithMkColors.glassBorder),
           boxShadow: [
             BoxShadow(color: Colors.black.withValues(alpha: 0.5), blurRadius: 16, offset: const Offset(0, 6), spreadRadius: -4),
             BoxShadow(color: Colors.white.withValues(alpha: 0.03), blurRadius: 1, offset: const Offset(0, -1)),
-            if (isSelected)
-              BoxShadow(color: SmithMkColors.gold.withValues(alpha: 0.15), blurRadius: 20, spreadRadius: -4),
           ],
         ),
         child: Stack(
@@ -251,50 +238,16 @@ class _HomePageState extends State<HomePage> {
                     tile.name.toUpperCase(),
                     style: TextStyle(
                       fontSize: fontSize, fontWeight: FontWeight.w600,
-                      color: isSelected ? SmithMkColors.textPrimary : SmithMkColors.textSecondary,
+                      color: SmithMkColors.textSecondary,
                       letterSpacing: 1,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (isSelected)
-                    Container(
-                      margin: EdgeInsets.only(top: tileSize * 0.04),
-                      width: 20, height: 2,
-                      decoration: BoxDecoration(color: SmithMkColors.gold, borderRadius: BorderRadius.circular(1)),
-                    ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSelectedLabel() {
-    final tile = _tiles[_selectedTile!];
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Center(
-        child: Column(
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(width: 3, height: 16, color: SmithMkColors.gold),
-                const SizedBox(width: 10),
-                Text(
-                  tile.name.toUpperCase(),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: SmithMkColors.textPrimary, letterSpacing: 2),
-                ),
-                const SizedBox(width: 10),
-                Container(width: 3, height: 16, color: SmithMkColors.gold),
-              ],
-            ),
-            const SizedBox(height: 6),
-            const Text('TAP TO OPEN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: SmithMkColors.textTertiary, letterSpacing: 1)),
           ],
         ),
       ),
