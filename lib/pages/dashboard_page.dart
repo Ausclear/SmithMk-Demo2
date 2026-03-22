@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:animated_emoji/animated_emoji.dart';
+
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../theme/smithmk_theme.dart';
 

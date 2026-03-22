@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:animated_emoji/animated_emoji.dart';
+
 import '../theme/smithmk_theme.dart';
 
 class HomePage extends StatefulWidget {
@@ -26,7 +26,9 @@ class _HomePageState extends State<HomePage> {
     _HomeTile('Energy', '⚡'),
     _HomeTile('Media', '🎵'),
     _HomeTile('Rooms', '🚪'),
-    _HomeTile('Settings', '🔧'),
+    _HomeTile('Power', '🔌'),
+    _HomeTile('Irrigation', '🌿'),
+    _HomeTile('Settings', '⚙️'),
   ];
 
   @override
@@ -52,10 +54,8 @@ class _HomePageState extends State<HomePage> {
     return '${days[_now.weekday - 1]} ${_now.day} ${months[_now.month - 1]}';
   }
 
-  Widget _buildEmoji(String emoji, double size) {
-    final animated = AnimatedEmojis.fromEmojiString(emoji);
+  Widget _buildEmoji(String emoji, double size) { return Text(emoji, style: TextStyle(fontSize: size * 0.85)); }
     if (animated != null) {
-      return AnimatedEmoji(animated, size: size, repeat: true);
     }
     return Text(emoji, style: TextStyle(fontSize: size * 0.8));
   }
