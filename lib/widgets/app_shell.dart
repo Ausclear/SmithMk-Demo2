@@ -5,6 +5,7 @@ import '../pages/home_page.dart';
 import '../pages/dashboard_page.dart';
 import '../pages/lighting_page.dart';
 import '../pages/placeholder_page.dart';
+import '../pages/rooms_page.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 class AppShell extends StatefulWidget {
@@ -34,7 +35,7 @@ class _AppShellState extends State<AppShell> {
 
   List<Widget> get _pageWidgets => [
     const DashboardPage(),
-    PlaceholderPage(title: 'Rooms', icon: PhosphorIcons.door(PhosphorIconsStyle.light)),
+    const RoomsPage(),
     const LightingPage(),
     PlaceholderPage(title: 'Power', icon: PhosphorIcons.plug(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Blinds', icon: PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.light)),
