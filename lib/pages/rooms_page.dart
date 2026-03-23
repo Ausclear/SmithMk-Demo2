@@ -1219,13 +1219,13 @@ class _Room {
 class _RoomDevice {
   final String entityId, name;
   final _DType type;
-  double brightness;
-  double blindPos;
-  double climateTarget;
-  bool climateOn;
-  bool powerOn;
-  double mediaVol;
-  bool mediaPlaying;
+  double brightness = 0;
+  double blindPos = 0;
+  double climateTarget = 22;
+  bool climateOn = false;
+  bool powerOn = false;
+  double mediaVol = 0.3;
+  bool mediaPlaying = false;
 
   _RoomDevice({required this.entityId, required this.name, required this.type,
     this.brightness = 0, this.blindPos = 0, this.climateTarget = 22, this.climateOn = false,
