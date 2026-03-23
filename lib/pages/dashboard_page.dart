@@ -115,25 +115,70 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
   Widget _buildNarrowGrid() => _buildReorderableGrid(false);
 
   Widget _buildReorderableGrid(bool wide) {
+    if (!wide) {
+      // Single column — straightforward reorderable list
+      return ReorderableListView(
+        shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+        proxyDecorator: (child, i, a) => Material(color: Colors.transparent, elevation: 0,
+          child: ScaleTransition(scale: Tween(begin: 1.0, end: 1.03).animate(a), child: child)),
+        onReorder: (o, n) {
+          HapticFeedback.mediumImpact();
+          setState(() { if (n > o) n--; final item = _sections.removeAt(o); _sections.insert(n, item); });
+        },
+        children: [
+          for (int i = 0; i < _sections.length; i++)
+            Padding(
+              key: ValueKey(_sections[i]),
+              padding: const EdgeInsets.only(bottom: 16),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.0, end: 1.0),
+                duration: Duration(milliseconds: 350 + i * 60),
+                curve: Curves.easeOutCubic,
+                builder: (_, v, child) => Transform.translate(offset: Offset(0, 20 * (1 - v)), child: Opacity(opacity: v, child: child)),
+                child: _buildSection(_sections[i]),
+              ),
+            ),
+        ],
+      );
+    }
+
+    // Wide — two column reorderable. Each row is a pair of cards.
+    // We pair sections into rows of 2 for the reorderable list.
+    final rowCount = (_sections.length / 2).ceil();
     return ReorderableListView(
       shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
       proxyDecorator: (child, i, a) => Material(color: Colors.transparent, elevation: 0,
         child: ScaleTransition(scale: Tween(begin: 1.0, end: 1.03).animate(a), child: child)),
       onReorder: (o, n) {
         HapticFeedback.mediumImpact();
-        setState(() { if (n > o) n--; final item = _sections.removeAt(o); _sections.insert(n, item); });
+        setState(() {
+          if (n > o) n--;
+          // Reorder pairs — swap the two sections that make up each row
+          final oStart = o * 2;
+          final nStart = n * 2;
+          final pair = _sections.sublist(oStart, min(oStart + 2, _sections.length));
+          // Remove old pair
+          for (var i = 0; i < pair.length; i++) _sections.removeAt(oStart);
+          // Insert at new position
+          final insertAt = nStart > oStart ? nStart - pair.length : nStart;
+          for (var i = pair.length - 1; i >= 0; i--) _sections.insert(insertAt, pair[i]);
+        });
       },
       children: [
-        for (int i = 0; i < _sections.length; i++)
+        for (int r = 0; r < rowCount; r++)
           Padding(
-            key: ValueKey(_sections[i]),
+            key: ValueKey('row_${_sections[r * 2]}'),
             padding: const EdgeInsets.only(bottom: 16),
             child: TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
-              duration: Duration(milliseconds: 350 + i * 60),
+              duration: Duration(milliseconds: 350 + r * 80),
               curve: Curves.easeOutCubic,
               builder: (_, v, child) => Transform.translate(offset: Offset(0, 20 * (1 - v)), child: Opacity(opacity: v, child: child)),
-              child: _buildSection(_sections[i]),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Expanded(child: _buildSection(_sections[r * 2])),
+                const SizedBox(width: 16),
+                Expanded(child: r * 2 + 1 < _sections.length ? _buildSection(_sections[r * 2 + 1]) : const SizedBox.shrink()),
+              ]),
             ),
           ),
       ],
