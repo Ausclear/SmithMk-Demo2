@@ -19,6 +19,7 @@ class _MusicPageState extends State<MusicPage> {
   SpotifyResults? _results;
   bool _searching = false;
   String? _error;
+  String? _playingUri; // Currently loading/playing track URI
 
   // Echo devices from HA
   List<_EchoDevice> _echos = [];
@@ -141,17 +142,18 @@ class _MusicPageState extends State<MusicPage> {
   Future<void> _playTrack(SpotifyTrack track) async {
     if (_selectedEcho == null) return;
     HapticFeedback.mediumImpact();
+    setState(() => _playingUri = track.uri);
     try {
-      // Get the friendly name of the selected echo for Spotify Connect source
       final echo = _echos.firstWhere((e) => e.entityId == _selectedEcho);
       await HAService.playSpotify(track.uri, echo.name);
-      // Poll immediately to update now playing
       await Future.delayed(const Duration(seconds: 2));
       _pollNowPlaying();
+      _loadEchoDevices();
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to play: $e'), backgroundColor: SmithMkColors.error));
     }
+    if (mounted) setState(() => _playingUri = null);
   }
 
   @override
@@ -467,10 +469,10 @@ class _MusicPageState extends State<MusicPage> {
       child: Icon(playing ? PhosphorIcons.pause(PhosphorIconsStyle.fill) : PhosphorIcons.play(PhosphorIconsStyle.fill),
         size: 22, color: SmithMkColors.accent)));
 
-  Widget _trackRow(SpotifyTrack track) => GestureDetector(onTap: () => _playTrack(track),
-    child: Container(margin: const EdgeInsets.only(bottom: 6), padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.015), borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(2, 2))]),
+  Widget _trackRow(SpotifyTrack track) {
+    final isLoading = _playingUri == track.uri;
+    return _PressableRow(
+      onTap: () => _playTrack(track),
       child: Row(children: [
         Container(width: 44, height: 44, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: const Color(0xFF1A1A1A)),
           clipBehavior: Clip.antiAlias,
@@ -483,11 +485,15 @@ class _MusicPageState extends State<MusicPage> {
         ])),
         if (track.durationStr.isNotEmpty) Text(track.durationStr, style: const TextStyle(fontSize: 10, color: SmithMkColors.textTertiary, fontFeatures: [FontFeature.tabularFigures()])),
         const SizedBox(width: 8),
-        Container(width: 28, height: 28, decoration: BoxDecoration(shape: BoxShape.circle,
-          gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF222222), Color(0xFF181818)]),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 6, offset: const Offset(2, 2))]),
-          child: Icon(PhosphorIcons.play(PhosphorIconsStyle.fill), size: 12, color: SmithMkColors.accent)),
-      ])));
+        Container(width: 30, height: 30, decoration: BoxDecoration(shape: BoxShape.circle,
+          color: isLoading ? const Color(0x381DB954) : const Color(0x1F1DB954),
+          border: Border.all(color: isLoading ? const Color(0x801DB954) : const Color(0x4D1DB954))),
+          child: isLoading
+            ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1DB954)))
+            : const Icon(PhosphorIconsFill.play, size: 12, color: Color(0xFF1DB954))),
+      ]),
+    );
+  }
 
   Widget _albumCard(SpotifyAlbum album) => GestureDetector(
     onTap: () {}, // TODO: drill into album
@@ -543,4 +549,43 @@ class _NowPlaying {
   _NowPlaying copyWith({double? volume}) => _NowPlaying(
     title: title, artist: artist, album: album, artUrl: artUrl, state: state,
     volume: volume ?? this.volume, duration: duration, position: position, source: source);
+}
+
+/// Pressable row with scale + colour feedback on tap
+class _PressableRow extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  const _PressableRow({required this.child, required this.onTap});
+  @override
+  State<_PressableRow> createState() => _PressableRowState();
+}
+
+class _PressableRowState extends State<_PressableRow> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) { setState(() => _pressed = false); widget.onTap(); },
+      onTapCancel: () => setState(() => _pressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 80),
+        curve: Curves.easeOut,
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        transform: Matrix4.identity()..scale(_pressed ? 0.97 : 1.0),
+        transformAlignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: _pressed ? Colors.white.withValues(alpha: 0.06) : Colors.white.withValues(alpha: 0.03),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _pressed ? const Color(0x1AFFC107) : const Color(0x0FFFFFFF)),
+          boxShadow: _pressed
+            ? [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 4, offset: const Offset(1, 1))]
+            : [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(2, 2))],
+        ),
+        child: widget.child,
+      ),
+    );
+  }
 }
