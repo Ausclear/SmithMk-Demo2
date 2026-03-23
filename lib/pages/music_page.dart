@@ -140,11 +140,17 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   Future<void> _playTrack(SpotifyTrack track) async {
-    if (_selectedEcho == null) return;
+    if (_selectedEcho == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No device selected'), backgroundColor: Color(0xFF1E1E26)));
+      return;
+    }
     HapticFeedback.mediumImpact();
     setState(() => _playingUri = track.uri);
     try {
       final echo = _echos.firstWhere((e) => e.entityId == _selectedEcho);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('▶ ${track.name} → ${echo.name}'), backgroundColor: const Color(0xFF1E1E26), duration: const Duration(seconds: 2)));
       await HAService.playSpotify(track.uri, echo.name);
       await Future.delayed(const Duration(seconds: 2));
       _pollNowPlaying();
