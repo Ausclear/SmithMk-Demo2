@@ -190,86 +190,23 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
 
   Widget _sLabel(String t) => Text(t, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: SmithMkColors.textTertiary, letterSpacing: 1.5));
 
-  // ─── WIDE LAYOUT — two columns with reorder ───
+  // ─── WIDE LAYOUT ───
   Widget _buildWideGrid(bool landscape) {
-    // Reorderable in wide view: cards in two columns
-    final ordered = List<String>.from(_sections);
+    final left = _sections.where((k) => ['weather', 'climate', 'status', 'energy'].contains(k)).toList();
+    final right = _sections.where((k) => !['weather', 'climate', 'status', 'energy'].contains(k)).toList();
+    // Landscape: swap scenes first
     if (landscape) {
-      final si = ordered.indexOf('scenes');
-      if (si > 0) { ordered.removeAt(si); ordered.insert(0, 'scenes'); }
-    }
-    // Split into two columns
-    final left = <String>[];
-    final right = <String>[];
-    for (int i = 0; i < ordered.length; i++) {
-      (i.isEven ? left : right).add(ordered[i]);
+      final si = right.indexOf('scenes');
+      if (si > 0) { right.removeAt(si); right.insert(0, 'scenes'); }
     }
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Expanded(child: _reorderableCol(left, 0)),
+      Expanded(child: _buildCol(landscape ? right : left)),
       const SizedBox(width: 14),
-      Expanded(child: _reorderableCol(right, left.length)),
+      Expanded(child: _buildCol(landscape ? left : right)),
     ]);
   }
 
-  Widget _buildNarrowGrid() => _reorderableCol(_sections, 0);
-
-  Widget _reorderableCol(List<String> keys, int offset) {
-    return ReorderableListView(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      proxyDecorator: (child, index, animation) {
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (ctx, child) => Material(
-            color: Colors.transparent,
-            elevation: 0,
-            child: Transform.scale(scale: 1.02, child: child),
-          ),
-          child: child,
-        );
-      },
-      onReorder: (oldIdx, newIdx) {
-        HapticFeedback.mediumImpact();
-        setState(() {
-          if (newIdx > oldIdx) newIdx--;
-          // Map back to _sections
-          final sectionKeys = keys.toList();
-          final item = sectionKeys.removeAt(oldIdx);
-          sectionKeys.insert(newIdx, item);
-          // Rebuild _sections from both columns
-          final otherKeys = _sections.where((k) => !keys.contains(k)).toList();
-          _sections.clear();
-          if (offset == 0) {
-            // This is the left column
-            for (int i = 0; i < max(sectionKeys.length, otherKeys.length); i++) {
-              if (i < sectionKeys.length) _sections.add(sectionKeys[i]);
-              if (i < otherKeys.length) _sections.add(otherKeys[i]);
-            }
-          } else {
-            // This is the right column
-            for (int i = 0; i < max(otherKeys.length, sectionKeys.length); i++) {
-              if (i < otherKeys.length) _sections.add(otherKeys[i]);
-              if (i < sectionKeys.length) _sections.add(sectionKeys[i]);
-            }
-          }
-        });
-      },
-      children: [
-        for (int i = 0; i < keys.length; i++)
-          Padding(
-            key: ValueKey(keys[i]),
-            padding: const EdgeInsets.only(bottom: 14),
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: Duration(milliseconds: 350 + i * 60),
-              curve: Curves.easeOutCubic,
-              builder: (_, v, child) => Transform.translate(offset: Offset(0, 16 * (1 - v)), child: Opacity(opacity: v, child: child)),
-              child: _buildSection(keys[i]),
-            ),
-          ),
-      ],
-    );
-  }
+  Widget _buildNarrowGrid() => _buildCol(_sections);
 
   Widget _buildCol(List<String> keys) {
     return Column(children: keys.asMap().entries.map((e) {
@@ -452,9 +389,9 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
 
   // ─── STATUS CARDS ───
   Widget _statusCards() {
-    return _glass(padding: const EdgeInsets.all(10), child: GridView.count(
+    return _glass(padding: EdgeInsets.zero, child: GridView.count(
       crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-      childAspectRatio: 1.15, mainAxisSpacing: 10, crossAxisSpacing: 10,
+      childAspectRatio: 1.3, mainAxisSpacing: 1, crossAxisSpacing: 1,
       children: [
         _statCell('SECURITY', PhosphorIcons.shieldCheck(PhosphorIconsStyle.light), 'Disarmed', '1 open · 10 zones', SmithMkColors.success, 0),
         _statCell('LIGHTS', PhosphorIcons.lightbulb(PhosphorIconsStyle.light), '0/4', '0 rooms active', SmithMkColors.textPrimary, 2),
@@ -469,12 +406,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
       onTap: pageIdx >= 0 ? () { HapticFeedback.lightImpact(); _navigateToPage(pageIdx); } : null,
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(begin: Alignment(-0.5, -0.5), end: Alignment(0.5, 0.5), colors: [Color(0x0AFFFFFF), Color(0x04FFFFFF)]),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 12, offset: const Offset(0, 4))],
-        ),
+        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.02), border: Border.all(color: Colors.white.withValues(alpha: 0.03))),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Row(children: [_sLabel(title), const Spacer(), Icon(icon, size: 22, color: SmithMkColors.textTertiary)]),
           const Spacer(),
@@ -482,7 +414,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
           const SizedBox(height: 2),
           Row(children: [
             Expanded(child: Text(sub, style: const TextStyle(fontSize: 9, color: SmithMkColors.textTertiary))),
-            if (pageIdx >= 0) Icon(PhosphorIcons.arrowRight(PhosphorIconsStyle.light), size: 12, color: SmithMkColors.textTertiary),
+            if (pageIdx >= 0) const Text('→', style: TextStyle(fontSize: 12, color: SmithMkColors.textTertiary)),
           ]),
         ]),
       ),
@@ -509,21 +441,14 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
   }
 
   Widget _eGauge(String label, double val, double max, Color col) {
-    return SizedBox(width: 100, height: 116, child: Column(children: [
-      SizedBox(width: 100, height: 100, child: Stack(alignment: Alignment.center, children: [
-        // Glass inner ring
-        Container(width: 84, height: 84, decoration: BoxDecoration(shape: BoxShape.circle,
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 6, offset: const Offset(0, 2)),
-            BoxShadow(color: Colors.white.withValues(alpha: 0.02), blurRadius: 1, offset: const Offset(0, -1))])),
-        SfRadialGauge(axes: [
-          RadialAxis(minimum: 0, maximum: max, startAngle: 135, endAngle: 45, showLabels: false, showTicks: false,
-            axisLineStyle: AxisLineStyle(thickness: 8, color: col.withValues(alpha: 0.06), cornerStyle: CornerStyle.bothCurve),
-            pointers: [RangePointer(value: val, width: 8, color: col, cornerStyle: CornerStyle.bothCurve)],
-            annotations: [GaugeAnnotation(widget: Text('${val.round()}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: col)), angle: 90, positionFactor: 0)]),
-        ]),
+    return SizedBox(width: 90, height: 100, child: Column(children: [
+      SizedBox(width: 80, height: 80, child: SfRadialGauge(axes: [
+        RadialAxis(minimum: 0, maximum: max, startAngle: 135, endAngle: 45, showLabels: false, showTicks: false,
+          axisLineStyle: AxisLineStyle(thickness: 7, color: col.withValues(alpha: 0.08), cornerStyle: CornerStyle.bothCurve),
+          pointers: [RangePointer(value: val, width: 7, color: col, cornerStyle: CornerStyle.bothCurve)],
+          annotations: [GaugeAnnotation(widget: Text('${val.round()}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: col)), angle: 90, positionFactor: 0)]),
       ])),
-      const SizedBox(height: 2),
-      Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: SmithMkColors.textTertiary)),
+      Text(label, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: SmithMkColors.textTertiary)),
     ]));
   }
 
