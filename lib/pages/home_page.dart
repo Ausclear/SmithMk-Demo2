@@ -241,10 +241,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               color: const Color(0xFFFFB84D), boxShadow: [BoxShadow(color: const Color(0xFFFFB84D).withValues(alpha: 0.6), blurRadius: 8)])))),
           // Icon + label
           Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Image.network(tile.iconUrl, width: 40, height: 40, fit: BoxFit.contain,
+            Image.network(tile.iconUrl, width: 44, height: 44, fit: BoxFit.contain,
+              filterQuality: FilterQuality.high,
               color: isActive ? null : const Color(0x99FFFFFF),
               colorBlendMode: isActive ? null : BlendMode.modulate,
-              errorBuilder: (_, __, ___) => Icon(Icons.home, size: 40, color: isActive ? const Color(0xFFFFB84D) : const Color(0x73FFFFFF))),
+              errorBuilder: (_, __, ___) => Icon(Icons.home, size: 44, color: isActive ? const Color(0xFFFFB84D) : const Color(0x73FFFFFF))),
             const SizedBox(height: 6),
             Text(tile.label.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, letterSpacing: 1,
               color: isActive ? const Color(0xFFFFB84D) : const Color(0x47FFFFFF))),
