@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>SmithMk Home</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:#0a0a0a;color:#f0f0f0;height:100dvh;overflow:hidden;
+display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+
+@keyframes shimmer{0%{left:-100%}100%{left:200%}}
+@keyframes breathe{0%,100%{opacity:0.5}50%{opacity:1}}
+@keyframes goldShimmer{0%{background-position:0% center}100%{background-position:200% center}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 20px 0;flex-shrink:0}
+.brand{font-size:11px;font-weight:800;letter-spacing:3px;
+background:linear-gradient(90deg,#8a6a2a,#c4a96b,#f0d080,#c4a96b,#8a6a2a);
+background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+background-clip:text;animation:goldShimmer 3s linear infinite}
+.hdr-date{font-size:9px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,0.3);margin-top:2px}
+.hdr-time{font-size:36px;font-weight:100;color:rgba(255,255,255,0.92);letter-spacing:-1px;text-align:right}
+.hdr-weather{font-size:11px;color:rgba(255,255,255,0.45);text-align:right;margin-top:2px}
+
+.pills{display:flex;gap:6px;padding:10px 20px 0;flex-shrink:0}
+.pill{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,0.04);font-size:8px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.4)}
+.pill .d{width:5px;height:5px;border-radius:50%}
+.pill .d.g{background:#4CAF50;box-shadow:0 0 6px #4CAF50}
+.pill .d.r{background:#ef4444;box-shadow:0 0 6px #ef4444;animation:pulse 1.5s ease-in-out infinite}
+
+.carousel-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+.track{position:relative;width:100%;height:140px;touch-action:pan-y;cursor:grab;user-select:none;-webkit-user-select:none}
+
+.tile-wrap{position:absolute;left:50%;transition:none;transform-origin:center center}
+.tile{
+background:linear-gradient(135deg,rgba(255,255,255,0.10) 0%,rgba(255,255,255,0.03) 50%,rgba(255,255,255,0.07) 100%);
+backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+border-radius:12px;border:1px solid rgba(255,255,255,0.10);
+box-shadow:0 2px 0 rgba(255,255,255,0.15) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 20px 40px rgba(0,0,0,0.6),0 4px 8px rgba(0,0,0,0.4);
+padding:14px 8px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;
+position:relative;overflow:hidden;width:100px;height:100px;cursor:pointer}
+.tile::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:rgba(255,255,255,0.22)}
+.tile::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(0,0,0,0.4)}
+.tile.active{border-color:rgba(255,184,77,0.38);box-shadow:0 2px 0 rgba(255,255,255,0.15) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 20px 40px rgba(0,0,0,0.6),0 4px 8px rgba(0,0,0,0.4),0 0 30px rgba(255,184,77,0.3)}
+.tile .shimmer{position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(196,169,107,0.09),transparent);animation:shimmer 5s ease-in-out infinite;pointer-events:none}
+.tile .glow{position:absolute;inset:0;border-radius:12px;pointer-events:none;opacity:0}
+.tile.active .glow{background:radial-gradient(ellipse at 50% 0%,rgba(255,184,77,0.16) 0%,transparent 70%);animation:breathe 2.5s ease-in-out infinite}
+.tile .indicator{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);width:20px;height:2px;border-radius:1px;background:#FFB84D;box-shadow:0 0 8px #FFB84D;opacity:0}
+.tile.active .indicator{opacity:1}
+.tile img{width:40px;height:40px;object-fit:contain;pointer-events:none;filter:brightness(0.6) saturate(0.5)}
+.tile.active img{filter:drop-shadow(0 0 8px rgba(255,184,77,0.8))}
+.tile .lbl{font-size:12px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,0.28);pointer-events:none}
+.tile.active .lbl{color:#FFB84D}
+
+.active-info{display:flex;flex-direction:column;align-items:center;gap:6px}
+.active-label{display:flex;align-items:center;gap:8px}
+.active-label .bar{width:3px;height:14px;border-radius:2px;background:#FFB84D}
+.active-label span{font-size:13px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,0.6)}
+.active-summary{font-size:12px;font-weight:600;color:#FFB84D;letter-spacing:0.5px}
+.active-tap{font-size:10px;color:rgba(255,255,255,0.15);letter-spacing:1px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+<div>
+<div class="brand">SMITHMK HOME</div>
+<div class="hdr-date" id="dateEl"></div>
+</div>
+<div>
+<div class="hdr-time" id="timeEl"></div>
+<div class="hdr-weather">☀️ 19°C Clear</div>
+</div>
+</div>
+
+<div class="pills">
+<div class="pill"><div class="d r"></div>HA</div>
+<div class="pill"><div class="d g"></div>SUPABASE</div>
+<div class="pill"><div class="d r"></div>SOLAR</div>
+</div>
+
+<div class="carousel-area">
+<div class="track" id="track"></div>
+<div class="active-info">
+<div class="active-label"><div class="bar"></div><span id="activeLbl">DASHBOARD</span><div class="bar"></div></div>
+<div class="active-summary" id="activeSummary">Overview</div>
+<div class="active-tap">TAP TO OPEN</div>
+</div>
+</div>
+
+<script>
+var SECTIONS=[
+{id:'media',label:'MEDIA',icon:'https://smarthome-eight-livid.vercel.app/icons/media.png',summary:'Not playing'},
+{id:'rooms',label:'ROOMS',icon:'https://smarthome-eight-livid.vercel.app/icons/rooms.png',summary:'Loading…'},
+{id:'energy',label:'ENERGY',icon:'https://smarthome-eight-livid.vercel.app/icons/energy.png',summary:'Loading…'},
+{id:'dashboard',label:'DASHBOARD',icon:'https://smarthome-eight-livid.vercel.app/icons/dashboard.png',summary:'Overview'},
+{id:'lights',label:'LIGHTS',icon:'https://smarthome-eight-livid.vercel.app/icons/lighting.png',summary:'Loading…'},
+{id:'security',label:'SECURITY',icon:'https://smarthome-eight-livid.vercel.app/icons/security.png',summary:'Loading…'},
+{id:'blinds',label:'BLINDS',icon:'https://smarthome-eight-livid.vercel.app/icons/blinds.png',summary:'Loading…'},
+{id:'solar',label:'SOLAR',icon:'https://smarthome-eight-livid.vercel.app/icons/energy_solar.png',summary:'Loading…'},
+{id:'climate',label:'CLIMATE',icon:'https://smarthome-eight-livid.vercel.app/icons/climate.png',summary:'Loading…'}
+];
+var COUNT=SECTIONS.length,TILE_W=110,GAP=12,STEP=TILE_W+GAP;
+var offset=0,activeIdx=0,dragging=false,startX=0,startOff=0,lastX=0,lastT=0,vel=0,didDrag=false,rafId=0;
+
+// Clock
+function tickClock(){var n=new Date();document.getElementById('timeEl').textContent=n.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});var ds=['SUN','MON','TUE','WED','THU','FRI','SAT'];var ms=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];document.getElementById('dateEl').textContent=ds[n.getDay()]+' '+n.getDate()+' '+ms[n.getMonth()]}
+tickClock();setInterval(tickClock,10000);
+
+// Render
+function render(){
+var track=document.getElementById('track');track.innerHTML='';
+var centreIdx=Math.round(offset/STEP),range=5;
+for(var i=centreIdx-range;i<=centreIdx+range;i++){
+var realIdx=((i%COUNT)+COUNT)%COUNT;var sec=SECTIONS[realIdx];
+var dist=i-centreIdx;var tileOff=i*STEP-offset;
+var scale=Math.max(0.62,1-Math.abs(dist)*0.12);
+var opacity=Math.max(0.2,1-Math.abs(dist)*0.22);
+var isActive=dist===0;
+var w=document.createElement('div');w.className='tile-wrap';
+w.style.transform='translateX(calc(-50% + '+tileOff+'px)) scale('+scale+')';
+w.style.opacity=opacity;w.style.zIndex=isActive?10:5;w.style.width=TILE_W+'px';
+if(!dragging)w.style.transition='transform 0.05s,opacity 0.05s';
+var t=document.createElement('div');t.className='tile'+(isActive?' active':'');
+t.innerHTML='<div class="shimmer"></div><div class="glow"></div><div class="indicator"></div><img src="'+sec.icon+'" alt="'+sec.label+'"><span class="lbl">'+sec.label+'</span>';
+w.appendChild(t);track.appendChild(w)}
+document.getElementById('activeLbl').textContent=SECTIONS[activeIdx].label;
+document.getElementById('activeSummary').textContent=SECTIONS[activeIdx].summary}
+
+function snapTo(cur,v){cancelAnimationFrame(rafId);var proj=cur+v*80;var nearest=Math.round(proj/STEP)*STEP;var start=cur,diff=nearest-start,t0=performance.now();
+function anim(now){var p=Math.min(1,(now-t0)/300);var ease=1-Math.pow(1-p,3);offset=start+diff*ease;render();if(p<1)rafId=requestAnimationFrame(anim);else{offset=nearest;activeIdx=((Math.round(nearest/STEP)%COUNT)+COUNT)%COUNT;render()}}
+rafId=requestAnimationFrame(anim)}
+
+var track=document.getElementById('track');
+track.addEventListener('pointerdown',function(e){cancelAnimationFrame(rafId);dragging=true;didDrag=false;startX=e.clientX;startOff=offset;lastX=e.clientX;lastT=performance.now();vel=0;track.setPointerCapture(e.pointerId)});
+track.addEventListener('pointermove',function(e){if(!dragging)return;var dx=e.clientX-startX;if(Math.abs(dx)>4)didDrag=true;offset=startOff-dx;render();var now=performance.now(),dt=now-lastT;if(dt>0)vel=(lastX-e.clientX)/dt;lastX=e.clientX;lastT=now});
+track.addEventListener('pointerup',function(e){if(!dragging)return;dragging=false;if(!didDrag){var idx=((Math.round(offset/STEP)%COUNT)+COUNT)%COUNT;alert('Navigate to: '+SECTIONS[idx].label);return}snapTo(offset,vel)});
+track.addEventListener('pointercancel',function(){if(dragging){dragging=false;snapTo(offset,vel)}});
+
+render();
+</script>
+</body>
+</html>
