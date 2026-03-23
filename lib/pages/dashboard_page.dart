@@ -290,7 +290,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
 
   Widget _statusCards() => _nCard(padding: const EdgeInsets.all(12), child: GridView.count(
     crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-    childAspectRatio: 1.6, mainAxisSpacing: 10, crossAxisSpacing: 10, children: [
+    childAspectRatio: 1.25, mainAxisSpacing: 10, crossAxisSpacing: 10, children: [
       _statCell('SECURITY', PhosphorIcons.shieldCheck(PhosphorIconsStyle.light), 'Disarmed', '1 open · 10 zones', SmithMkColors.success),
       _statCell('LIGHTS', PhosphorIcons.lightbulb(PhosphorIconsStyle.light), '0/4', '0 rooms active', SmithMkColors.textPrimary),
       _statCell('EV', PhosphorIcons.car(PhosphorIconsStyle.light), 'Disconnected', 'No EV plugged in', SmithMkColors.textPrimary),
@@ -305,7 +305,7 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
         BoxShadow(color: Colors.white.withValues(alpha: 0.02), blurRadius: 8, offset: const Offset(-3, -3))]),
     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Row(children: [_sLabel(title), const Spacer(), Icon(icon, size: 22, color: SmithMkColors.textTertiary)]),
-      const Spacer(), Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: vCol)), const SizedBox(height: 2),
+      const Spacer(), Text(value, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: vCol), overflow: TextOverflow.ellipsis), const SizedBox(height: 2),
       Row(children: [Expanded(child: Text(sub, style: const TextStyle(fontSize: 9, color: SmithMkColors.textTertiary))),
         Icon(PhosphorIcons.arrowRight(PhosphorIconsStyle.light), size: 12, color: SmithMkColors.textTertiary)])]));
 
