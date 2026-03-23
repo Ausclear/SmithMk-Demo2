@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>SmithMk — Heating</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'DM Sans',sans-serif;background:#0a0a0d;color:#f0f0f0;min-height:100vh;overflow-x:hidden;
+background-image:radial-gradient(ellipse 700px 500px at 85% 8%,rgba(255,179,0,0.035),transparent),
+radial-gradient(ellipse 500px 500px at 10% 80%,rgba(72,202,228,0.025),transparent)}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 20px 80px}
+.page-hdr{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.page-hdr h1{font-size:22px;font-weight:600;color:#c4a96b;letter-spacing:-0.3px}
+.sl{font-size:10px;font-weight:700;color:#555;letter-spacing:1.5px;margin-bottom:12px;margin-top:24px}
+.card{background:linear-gradient(145deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:20px;position:relative;overflow:visible;box-shadow:0 8px 32px rgba(0,0,0,0.3),0 1px 0 rgba(255,255,255,0.04) inset}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);pointer-events:none}
+.card::after{content:'';position:absolute;top:1px;left:1px;right:1px;height:40%;background:linear-gradient(180deg,rgba(255,255,255,0.03),transparent);pointer-events:none;border-radius:19px 19px 0 0}
+.system-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:500px){.system-row{grid-template-columns:1fr}}
+.ch{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+
+/* Nest */
+.thermo-wrap{display:flex;flex-direction:column;align-items:center}
+.thermo-ring{width:200px;height:200px;position:relative;margin:4px 0 8px}
+.thermo-ring canvas{width:200px;height:200px;touch-action:none;cursor:pointer}
+.thermo-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.thv{font-size:40px;font-weight:200;line-height:1}.ths{font-size:9px;font-weight:700;letter-spacing:2px;margin-top:4px}
+.thcur{font-size:10px;color:#555;margin-top:2px}
+.tbtns{display:flex;gap:16px;align-items:center;margin-top:6px}
+.btn3d{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;background:linear-gradient(145deg,#222,#1a1a1a);border:1px solid rgba(255,255,255,0.06);box-shadow:0 4px 10px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.04) inset;color:#888;font-size:16px;font-weight:600;transition:all 0.15s}
+.btn3d:active{transform:scale(0.88);box-shadow:0 2px 4px rgba(0,0,0,0.3)}
+.pwr3d{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:linear-gradient(145deg,#252525,#1a1a1a);border:2px solid rgba(255,255,255,0.06);box-shadow:0 6px 16px rgba(0,0,0,0.5),0 1px 0 rgba(255,255,255,0.05) inset;transition:all 0.2s}
+.pwr3d:active{transform:scale(0.9)}
+.pwr3d.on{background:linear-gradient(145deg,#3a2010,#2a1508);border-color:rgba(255,107,53,0.35);box-shadow:0 6px 20px rgba(255,107,53,0.15),0 1px 0 rgba(255,255,255,0.05) inset}
+.pwr-icon{width:18px;height:18px;border:2.5px solid #555;border-radius:50%;border-top-color:transparent;position:relative}
+.pwr-icon::after{content:'';position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:2.5px;height:10px;background:#555;border-radius:1px}
+.pwr3d.on .pwr-icon{border-color:#FF6B35;border-top-color:transparent}
+.pwr3d.on .pwr-icon::after{background:#FF6B35}
+
+/* WarmLink */
+.hp-target-wrap{text-align:center;margin-bottom:14px}
+.hp-flow{font-size:48px;font-weight:200;color:#FFB300;line-height:1}
+.hp-flow-unit{font-size:16px;color:#555;font-weight:400}
+.hp-label{font-size:9px;font-weight:700;color:#555;letter-spacing:1.5px;margin-top:4px}
+.hp-adjust{display:flex;gap:12px;margin-top:8px;justify-content:center}
+.hp-sensors{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.hp-sensor{padding:8px 6px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);text-align:center;
+box-shadow:0 2px 6px rgba(0,0,0,0.15),inset 0 1px 0 rgba(255,255,255,0.03)}
+.hp-sensor-label{font-size:8px;font-weight:700;color:#555;letter-spacing:0.5px;text-transform:uppercase;margin-top:2px}
+.hp-sensor-val{font-size:15px;font-weight:600;color:#888}
+.hp-at-row{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);margin-top:8px}
+.hp-at-left{display:flex;align-items:center;gap:8px}
+.hp-at-label{font-size:10px;font-weight:600;color:#888}
+.hp-at-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(74,222,128,0.1);color:#4ADE80;border:1px solid rgba(74,222,128,0.2)}
+.hp-at-vals{font-size:10px;color:#555}.hp-at-vals span{color:#888;font-weight:600}
+.hp-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.hp-status{display:flex;align-items:center;gap:6px}
+.hp-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;box-shadow:0 0 5px rgba(74,222,128,0.5)}
+.hp-status-text{font-size:9px;font-weight:700;color:#555;letter-spacing:1px}
+.hp-modes{display:flex;gap:6px}
+.hp-mode-btn{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s}
+.hp-mode-btn.active{background:rgba(255,179,0,0.1);border-color:rgba(255,179,0,0.25)}
+.hp-mode-btn svg{width:16px;height:16px;stroke:#555;fill:none;stroke-width:1.5}
+.hp-mode-btn.active svg{stroke:#FFB300}
+
+/* Radiator Grid */
+.rad-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:600px){.rad-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.rad-grid{grid-template-columns:repeat(4,1fr)}}
+
+.rad-card{background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 0 rgba(255,255,255,0.03) inset,inset 0 -2px 6px rgba(0,0,0,0.2);cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.rad-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);pointer-events:none}
+.rad-card::after{content:'';position:absolute;top:1px;left:1px;right:1px;height:35%;background:linear-gradient(180deg,rgba(255,255,255,0.04),transparent);pointer-events:none;border-radius:15px 15px 0 0}
+.rad-card:active{transform:scale(0.97)}
+.rad-card.heating{border-color:rgba(255,179,0,0.25);box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 0 rgba(255,255,255,0.03) inset,inset 0 -2px 6px rgba(0,0,0,0.2),0 0 25px rgba(255,179,0,0.06),0 0 60px rgba(255,179,0,0.03)}
+.rad-card.selected{border-color:rgba(255,179,0,0.45);box-shadow:0 8px 28px rgba(0,0,0,0.4),0 2px 0 rgba(255,255,255,0.03) inset,0 0 35px rgba(255,179,0,0.1)}
+
+.rad-name{font-size:11px;font-weight:600;color:#c4a96b;letter-spacing:0.3px;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rad-visual{display:flex;align-items:flex-end;justify-content:center;margin-bottom:6px;height:52px;position:relative}
+.rad-glow{position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:60px;height:20px;border-radius:50%;background:rgba(255,179,0,0.15);filter:blur(10px);opacity:0;transition:opacity 0.3s}
+.rad-card.heating .rad-glow{opacity:1}
+.rad-summary{display:flex;align-items:baseline;justify-content:space-between}
+.rad-cur{font-size:24px;font-weight:600;color:#888;line-height:1;transition:color 0.2s}
+.rad-card.heating .rad-cur{color:#f0f0f0}
+.rad-cur-unit{font-size:12px;color:#555;font-weight:400}
+.rad-tgt{font-size:11px;color:#555}.rad-tgt span{color:#888;font-weight:600}
+.rad-status{font-size:9px;font-weight:700;letter-spacing:1px;color:#555;margin-top:5px;text-transform:uppercase}
+.rad-card.heating .rad-status{color:#FFB300}
+
+/* Bottom Sheet */
+.sheet-overlay{position:fixed;inset:0;z-index:50;pointer-events:none;transition:background 0.3s}
+.sheet-overlay.open{pointer-events:auto;background:rgba(0,0,0,0.5)}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:51;
+background:linear-gradient(180deg,rgba(28,28,34,0.99) 0%,rgba(18,18,22,0.99) 30%,rgba(12,12,16,0.99) 100%);
+border-top:1px solid rgba(255,255,255,0.1);
+border-radius:24px 24px 0 0;
+padding:0 24px 32px;
+transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+box-shadow:0 -20px 80px rgba(0,0,0,0.6),0 -1px 0 rgba(255,255,255,0.06),inset 0 1px 0 rgba(255,255,255,0.05);
+max-height:55vh;
+backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px)}
+.sheet-overlay.open .sheet{transform:translateY(0)}
+.sheet-handle-area{display:flex;justify-content:center;padding:12px 0 8px;cursor:grab;touch-action:none}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.sheet-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.sheet-room{font-size:18px;font-weight:600;color:#c4a96b}
+.sheet-status-pill{font-size:9px;font-weight:700;padding:4px 10px;border-radius:6px;letter-spacing:0.5px;text-transform:uppercase}
+.sheet-status-pill.heating{background:rgba(255,179,0,0.12);color:#FFB300;border:1px solid rgba(255,179,0,0.25);box-shadow:0 0 12px rgba(255,179,0,0.15)}
+.sheet-status-pill.idle{background:rgba(255,255,255,0.04);color:#555;border:1px solid rgba(255,255,255,0.06)}
+.sheet-status-pill.off{background:rgba(255,255,255,0.03);color:#444;border:1px solid rgba(255,255,255,0.04)}
+
+.sheet-body{display:flex;align-items:center;gap:24px}
+.sheet-rad-visual{flex-shrink:0}
+.sheet-controls{flex:1}
+
+.sheet-cur-row{display:flex;align-items:baseline;gap:8px;margin-bottom:16px}
+.sheet-cur-label{font-size:9px;font-weight:700;color:#555;letter-spacing:1px;text-transform:uppercase}
+.sheet-cur-val{font-size:16px;font-weight:500;color:#888}
+
+.sheet-tgt-row{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+.sheet-tgt-label{font-size:9px;font-weight:700;color:#555;letter-spacing:1px;text-transform:uppercase;min-width:50px}
+.sheet-adj-btn{width:44px;height:44px;border-radius:14px;border:1px solid rgba(255,255,255,0.1);background:linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));color:#888;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;transition:all 0.15s;
+box-shadow:0 6px 16px rgba(0,0,0,0.4),0 1px 0 rgba(255,255,255,0.06) inset,inset 0 -1px 3px rgba(0,0,0,0.2)}
+.sheet-adj-btn:active{background:rgba(255,179,0,0.15);color:#FFB300;border-color:rgba(255,179,0,0.3);transform:scale(0.92);box-shadow:0 2px 6px rgba(0,0,0,0.3),inset 0 1px 3px rgba(0,0,0,0.2)}
+.sheet-tgt-val{font-size:44px;font-weight:200;color:#FFB300;min-width:70px;text-align:center;line-height:1}
+.sheet-tgt-unit{font-size:18px;color:#555;font-weight:400}
+
+.sheet-modes{display:flex;gap:8px}
+.sheet-mode{flex:1;padding:12px 0;text-align:center;border-radius:12px;border:1px solid rgba(255,255,255,0.08);
+background:linear-gradient(145deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01));
+color:#555;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.15s;text-transform:uppercase;letter-spacing:0.5px;
+box-shadow:0 4px 12px rgba(0,0,0,0.25),0 1px 0 rgba(255,255,255,0.04) inset}
+.sheet-mode.active{background:linear-gradient(145deg,rgba(255,179,0,0.15),rgba(255,179,0,0.06));color:#FFB300;border-color:rgba(255,179,0,0.3);box-shadow:0 4px 16px rgba(255,179,0,0.1),0 1px 0 rgba(255,255,255,0.06) inset,0 0 20px rgba(255,179,0,0.05)}
+.sheet-mode:active{transform:scale(0.95)}
+
+/* Side Rail */
+.side-rail{position:fixed;left:0;top:0;bottom:0;width:68px;z-index:15;background:linear-gradient(180deg,rgba(18,18,22,0.98),rgba(12,12,15,0.98));border-right:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:2px;backdrop-filter:blur(16px);overflow-y:auto;scrollbar-width:none}
+.side-rail::-webkit-scrollbar{display:none}
+.rail-logo{font-size:24px;margin-bottom:12px;padding:6px}
+.rail-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:12px;cursor:pointer;width:58px;transition:all 0.2s;position:relative}
+.rail-item svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.5;color:#555}
+.rail-item span{font-size:8px;font-weight:600;color:#555;letter-spacing:0.3px;text-align:center}
+.rail-item:hover{background:rgba(255,255,255,0.04)}
+.rail-item.active{background:rgba(255,179,0,0.08)}
+.rail-item.active::before{content:'';position:absolute;left:0;top:25%;bottom:25%;width:3px;border-radius:0 3px 3px 0;background:#FFB300}
+.rail-item.active span{color:#FFB300}.rail-item.active svg{color:#FFB300}
+@media(max-width:600px) and (orientation:portrait){.side-rail{display:none}.wrap{margin-left:0}}
+@media(min-width:601px),(orientation:landscape){.wrap{margin-left:68px}}
+
+/* Landscape fixes */
+@media(orientation:landscape){
+  .system-row{grid-template-columns:1fr 1fr;gap:14px}
+  .thermo-ring{width:160px;height:160px}
+  .thermo-ring canvas{width:160px;height:160px}
+  .thv{font-size:32px}
+  .thcur{font-size:9px}
+  .ths{font-size:8px}
+  .tbtns{margin-top:4px;gap:12px}
+  .btn3d{width:32px;height:32px;font-size:14px}
+  .pwr3d{width:36px;height:36px}
+  .pwr-icon{width:16px;height:16px}
+  .hp-flow{font-size:40px}
+  .hp-sensors{gap:4px}
+  .hp-sensor{padding:6px 4px}
+  .hp-sensor-val{font-size:13px}
+  .hp-sensor-label{font-size:7px}
+  .hp-at-row{padding:6px 8px;margin-top:6px}
+  .hp-at-label{font-size:9px}
+  .hp-at-vals{font-size:9px}
+  .hp-bottom{margin-top:6px}
+  .rad-grid{grid-template-columns:repeat(4,1fr);gap:10px}
+  .rad-card{padding:10px}
+  .rad-name{font-size:10px;margin-bottom:6px}
+  .rad-visual{height:44px;margin-bottom:4px}
+  .rad-cur{font-size:20px}
+  .rad-tgt{font-size:10px}
+  .rad-status{font-size:8px;margin-top:4px}
+  .sl{margin-top:16px;margin-bottom:8px}
+  .page-hdr{margin-bottom:12px}
+  .page-hdr h1{font-size:18px}
+  /* Sheet in landscape - compact horizontal, constrained width */
+  .sheet{max-height:45vh;padding:0 24px 20px;width:560px;max-width:calc(100vw - 68px - 40px);
+  left:calc(50% + 34px);right:auto;
+  transform:translateX(-50%) translateY(100%);border-radius:24px 24px 0 0}
+  .sheet-overlay.open .sheet{transform:translateX(-50%) translateY(0)}
+  .sheet-handle-area{padding:8px 0 4px}
+  .sheet-hdr{margin-bottom:12px}
+  .sheet-body{flex-direction:row;align-items:center;gap:20px}
+  .sheet-cur-row{margin-bottom:10px}
+  .sheet-tgt-row{margin-bottom:12px;gap:12px}
+  .sheet-tgt-val{font-size:36px;min-width:60px}
+  .sheet-adj-btn{width:38px;height:38px;font-size:18px}
+  .sheet-modes{gap:6px}
+  .sheet-mode{padding:10px 0;font-size:10px}
+}
+
+/* Small landscape phones */
+@media(orientation:landscape) and (max-height:500px){
+  .side-rail{width:58px;padding:8px 0;gap:0}
+  .rail-item{padding:5px 2px;width:50px}
+  .rail-item svg{width:20px;height:20px}
+  .rail-item span{font-size:7px}
+  .rail-logo{font-size:18px;margin-bottom:6px}
+  .wrap{margin-left:58px;padding:12px 16px 60px}
+  .thermo-ring{width:140px;height:140px}
+  .thermo-ring canvas{width:140px;height:140px}
+  .thv{font-size:28px}
+  .tbtns{gap:10px;margin-top:2px}
+  .btn3d{width:28px;height:28px;font-size:12px}
+  .pwr3d{width:32px;height:32px}
+  .pwr-icon{width:14px;height:14px}
+  .hp-flow{font-size:34px}
+  .card{padding:14px;border-radius:16px}
+  .sheet{max-height:50vh;padding:0 20px 16px}
+  .sheet-room{font-size:16px}
+  .sheet-tgt-val{font-size:32px}
+  .sheet-adj-btn{width:34px;height:34px;border-radius:10px}
+  .sheet-mode{padding:8px 0;font-size:9px;border-radius:8px}
+}
+
+/* Phone portrait */
+@media(max-width:480px) and (orientation:portrait){
+  .system-row{grid-template-columns:1fr}
+  .rad-grid{grid-template-columns:repeat(2,1fr)}
+  .sheet-body{flex-direction:column;align-items:stretch;gap:16px}
+  .sheet-rad-visual{display:flex;justify-content:center}
+}
+</style>
+</head>
+<body>
+<nav class="side-rail">
+<div class="rail-logo">🏠</div>
+<div class="rail-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Dashboard</span></div>
+<div class="rail-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg><span>Rooms</span></div>
+<div class="rail-item"><svg viewBox="0 0 24 24"><path d="M9 21h6M12 3a6 6 0 00-4 10.5V17h8v-3.5A6 6 0 0012 3z"/></svg><span>Lights</span></div>
+<div class="rail-item active"><svg viewBox="0 0 24 24"><path d="M12 2c0 4-6 6-6 11a6 6 0 1012 0c0-5-6-7-6-11z"/></svg><span>Heating</span></div>
+<div class="rail-item"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="4" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="3" y1="14" x2="21" y2="14"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span>Blinds</span></div>
+<div class="rail-item"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg><span>Energy</span></div>
+<div class="rail-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z"/></svg><span>Media</span></div>
+</nav>
+
+<div class="wrap">
+<div class="page-hdr">
+<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#c4a96b" stroke-width="1.5"><path d="M12 2c0 4-6 6-6 11a6 6 0 1012 0c0-5-6-7-6-11z"/></svg>
+<h1>Heating</h1>
+</div>
+
+<div class="sl">SYSTEMS</div>
+<div class="system-row">
+
+<!-- Nest -->
+<div class="card">
+<div class="ch"><div class="sl" style="margin:0">NEST THERMOSTAT</div></div>
+<div class="thermo-wrap">
+<div class="thermo-ring"><canvas id="tc" width="400" height="400"></canvas>
+<div class="thermo-center"><div class="thv" id="tv">22.0°</div><div class="ths" id="tst" style="color:#FF6B35">HEATING</div><div class="thcur">Currently 19°</div></div>
+</div>
+<div class="tbtns"><div class="btn3d" id="tdn">−</div><div class="pwr3d on" id="pbtn"><div class="pwr-icon"></div></div><div class="btn3d" id="tup">+</div></div>
+</div>
+</div>
+
+<!-- WarmLink -->
+<div class="card">
+<div class="ch"><div class="sl" style="margin:0">WARMLINK HEAT PUMP</div></div>
+<div class="hp-target-wrap">
+  <div class="hp-flow" id="hp-flow">40.0<span class="hp-flow-unit">°C</span></div>
+  <div class="hp-label">TARGET TEMP</div>
+  <div class="hp-adjust"><div class="btn3d" onclick="adjustHP(-0.5)">−</div><div class="btn3d" onclick="adjustHP(0.5)">+</div></div>
+</div>
+<div class="hp-sensors">
+  <div class="hp-sensor"><div class="hp-sensor-val">0.0</div><div class="hp-sensor-label">m³/h</div></div>
+  <div class="hp-sensor"><div class="hp-sensor-val">22.5°</div><div class="hp-sensor-label">Inlet</div></div>
+  <div class="hp-sensor"><div class="hp-sensor-val">23.5°</div><div class="hp-sensor-label">Outlet</div></div>
+  <div class="hp-sensor"><div class="hp-sensor-val">21.3°</div><div class="hp-sensor-label">Return</div></div>
+</div>
+<div class="hp-at-row">
+  <div class="hp-at-left"><div class="hp-at-label">AT Compensation</div><div class="hp-at-badge">ON</div></div>
+  <div class="hp-at-vals">Slope <span>0.4</span> · Offset <span>48</span></div>
+</div>
+<div class="hp-bottom">
+  <div class="hp-status"><div class="hp-dot"></div><span class="hp-status-text">ONLINE</span></div>
+  <div class="hp-modes">
+    <div class="hp-mode-btn active" title="Power"><svg viewBox="0 0 24 24"><path d="M12 3v9M18.36 6.64A9 9 0 115.64 6.64"/></svg></div>
+    <div class="hp-mode-btn" title="Mode"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg></div>
+    <div class="hp-mode-btn" title="Silent"><svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg></div>
+  </div>
+</div>
+</div>
+
+</div>
+
+<!-- Radiators -->
+<div class="sl">TADO X — 11 ZONES</div>
+<div class="rad-grid" id="radGrid"></div>
+</div>
+
+<!-- Bottom Sheet -->
+<div class="sheet-overlay" id="sheetOverlay">
+<div class="sheet" id="sheet">
+  <div class="sheet-handle-area" id="sheetHandle"><div class="sheet-handle"></div></div>
+  <div class="sheet-hdr">
+    <div class="sheet-room" id="sRoom">Room</div>
+    <div class="sheet-status-pill" id="sStatus">HEATING</div>
+  </div>
+  <div class="sheet-body">
+    <div class="sheet-rad-visual" id="sRadVis"></div>
+    <div class="sheet-controls">
+      <div class="sheet-cur-row">
+        <div class="sheet-cur-label">Current</div>
+        <div class="sheet-cur-val" id="sCur">19.5°C</div>
+      </div>
+      <div class="sheet-tgt-row">
+        <div class="sheet-tgt-label">Target</div>
+        <div class="sheet-adj-btn" id="sDn">−</div>
+        <div class="sheet-tgt-val" id="sTgt">21<span class="sheet-tgt-unit">°</span></div>
+        <div class="sheet-adj-btn" id="sUp">+</div>
+      </div>
+      <div class="sheet-modes" id="sModes">
+        <div class="sheet-mode" data-m="auto">Auto</div>
+        <div class="sheet-mode" data-m="manual">Manual</div>
+        <div class="sheet-mode" data-m="off">Off</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function radSVG(w,h,heating,fins){
+fins=fins||6;var fw=(w-8)/fins;
+var s='<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'" xmlns="http://www.w3.org/2000/svg">';
+// Defs for gradients
+s+='<defs>';
+// Fin gradient - heating
+s+='<linearGradient id="finH'+w+'" x1="0" y1="0" x2="1" y2="0">';
+s+='<stop offset="0%" stop-color="#CC8800"/><stop offset="30%" stop-color="#FFB300"/><stop offset="70%" stop-color="#FFCA40"/><stop offset="100%" stop-color="#CC8800"/>';
+s+='</linearGradient>';
+// Fin gradient - cold
+s+='<linearGradient id="finC'+w+'" x1="0" y1="0" x2="1" y2="0">';
+s+='<stop offset="0%" stop-color="#333"/><stop offset="30%" stop-color="#4a4a4a"/><stop offset="70%" stop-color="#555"/><stop offset="100%" stop-color="#333"/>';
+s+='</linearGradient>';
+// Rail gradient
+s+='<linearGradient id="railH'+w+'" x1="0" y1="0" x2="0" y2="1">';
+s+='<stop offset="0%" stop-color="'+(heating?'#E0A020':'#555')+'"/><stop offset="50%" stop-color="'+(heating?'#996600':'#3a3a3a')+'"/><stop offset="100%" stop-color="'+(heating?'#7A5000':'#2a2a2a')+'"/>';
+s+='</linearGradient>';
+// Pipe gradient
+s+='<radialGradient id="pipeG'+w+'"><stop offset="0%" stop-color="'+(heating?'#FF8C40':'#666')+'"/><stop offset="100%" stop-color="'+(heating?'#CC5500':'#3a3a3a')+'"/></radialGradient>';
+// Floor shadow
+s+='<linearGradient id="floorS" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="rgba(0,0,0,0.4)"/><stop offset="100%" stop-color="rgba(0,0,0,0)"/></linearGradient>';
+s+='</defs>';
+// Floor shadow
+s+='<ellipse cx="'+(w/2)+'" cy="'+(h-1)+'" rx="'+(w*0.4)+'" ry="3" fill="url(#floorS)"/>';
+// Feet - 3D with highlight
+s+='<rect x="8" y="'+(h-5)+'" width="7" height="5" rx="1.5" fill="#2a2a2a"/>';
+s+='<rect x="8" y="'+(h-5)+'" width="7" height="2" rx="1" fill="#444"/>';
+s+='<rect x="'+(w-15)+'" y="'+(h-5)+'" width="7" height="5" rx="1.5" fill="#2a2a2a"/>';
+s+='<rect x="'+(w-15)+'" y="'+(h-5)+'" width="7" height="2" rx="1" fill="#444"/>';
+// Bottom rail - 3D rounded
+s+='<rect x="2" y="'+(h-10)+'" width="'+(w-4)+'" height="6" rx="3" fill="url(#railH'+w+')"/>';
+s+='<rect x="3" y="'+(h-10)+'" width="'+(w-6)+'" height="2" rx="1" fill="rgba(255,255,255,'+(heating?'0.15':'0.06')+')"/>';
+// Vertical fins with 3D gradient
+var finH=h-20;
+for(var i=0;i<fins;i++){var x=4+i*fw,fW=fw-2;
+s+='<rect x="'+x+'" y="8" width="'+fW+'" height="'+finH+'" rx="2" fill="url(#'+(heating?'finH':'finC')+w+')"/>';
+// Left edge shadow
+s+='<rect x="'+x+'" y="8" width="2" height="'+finH+'" rx="1" fill="rgba(0,0,0,0.25)"/>';
+// Right highlight
+s+='<rect x="'+(x+fW-2)+'" y="8" width="1.5" height="'+finH+'" rx="0.75" fill="rgba(255,255,255,'+(heating?'0.12':'0.04')+')"/>';
+// Center highlight
+s+='<rect x="'+(x+fW*0.35)+'" y="10" width="'+(fW*0.15)+'" height="'+(finH-4)+'" rx="1" fill="rgba(255,255,255,'+(heating?'0.18':'0.06')+')"/>';
+// Gap shadow between fins
+if(i>0)s+='<rect x="'+(x-1)+'" y="9" width="1" height="'+(finH-2)+'" fill="rgba(0,0,0,0.35)"/>';}
+// Top rail - 3D rounded (on top of fins)
+s+='<rect x="2" y="3" width="'+(w-4)+'" height="6" rx="3" fill="url(#railH'+w+')"/>';
+s+='<rect x="3" y="3" width="'+(w-6)+'" height="2.5" rx="1.25" fill="rgba(255,255,255,'+(heating?'0.2':'0.08')+')"/>';
+// Pipe connections - 3D spheres
+s+='<circle cx="6" cy="'+(h-7)+'" r="3.5" fill="url(#pipeG'+w+')"/>';
+s+='<circle cx="5" cy="'+(h-8)+'" r="1" fill="rgba(255,255,255,'+(heating?'0.3':'0.1')+')"/>';
+s+='<circle cx="'+(w-6)+'" cy="'+(h-7)+'" r="3.5" fill="url(#pipeG'+w+')"/>';
+s+='<circle cx="'+(w-7)+'" cy="'+(h-8)+'" r="1" fill="rgba(255,255,255,'+(heating?'0.3':'0.1')+')"/>';
+// Heat shimmer when heating
+if(heating){var cx=w/2;
+s+='<path d="M'+(cx-10)+' 3 Q'+(cx-8)+' -6 '+(cx-6)+' 3" stroke="rgba(255,179,0,0.35)" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+s+='<path d="M'+(cx-1)+' 3 Q'+(cx+1)+' -8 '+(cx+3)+' 3" stroke="rgba(255,140,0,0.3)" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+s+='<path d="M'+(cx+7)+' 3 Q'+(cx+9)+' -5 '+(cx+11)+' 3" stroke="rgba(255,179,0,0.25)" stroke-width="1.5" fill="none" stroke-linecap="round"/>';}
+s+='</svg>';return s;}
+
+var rads=[
+{id:'dining',name:'Dining Room',cur:20.5,tgt:21,heating:true,mode:'auto'},
+{id:'lounge',name:'Lounge',cur:21.0,tgt:21,heating:false,mode:'auto'},
+{id:'lounge-hall',name:'Lounge Hallway',cur:18.5,tgt:20,heating:true,mode:'auto'},
+{id:'master',name:'Master Bedroom',cur:19.0,tgt:20,heating:true,mode:'auto'},
+{id:'children',name:"Children's Wing",cur:20.0,tgt:20,heating:false,mode:'auto'},
+{id:'cerise',name:"Cerise's Bedroom",cur:19.5,tgt:20,heating:true,mode:'auto'},
+{id:'guest',name:'Guest Bedroom',cur:17.0,tgt:18,heating:true,mode:'manual'},
+{id:'xendan',name:"Xendan's Bedroom",cur:20.0,tgt:20,heating:false,mode:'auto'},
+{id:'office',name:'Office',cur:21.5,tgt:22,heating:true,mode:'auto'},
+{id:'office-pass',name:'Office Passageway',cur:18.0,tgt:19,heating:true,mode:'auto'},
+{id:'family',name:'Family Lounge',cur:20.5,tgt:21,heating:true,mode:'auto'}];
+
+var activeRad=null, hpTemp=40.0, nestTarget=22, nestOn=true;
+
+function renderRads(){
+var g=document.getElementById('radGrid');
+g.innerHTML=rads.map(function(r,i){
+return '<div class="rad-card '+(r.heating?'heating':'')+(activeRad===i?' selected':'')+'" onclick="openSheet('+i+')">'+
+'<div class="rad-name">'+r.name+'</div>'+
+'<div class="rad-visual"><div class="rad-glow"></div>'+radSVG(80,48,r.heating)+'</div>'+
+'<div class="rad-summary"><div class="rad-cur">'+r.cur+'<span class="rad-cur-unit">°</span></div>'+
+'<div class="rad-tgt">Set <span>'+r.tgt+'°</span></div></div>'+
+'<div class="rad-status">'+(r.heating?'● Heating':r.mode==='off'?'○ Off':'○ Idle')+'</div></div>';}).join('');}
+
+// Bottom Sheet
+function openSheet(i){
+activeRad=i;var r=rads[i];
+document.getElementById('sRoom').textContent=r.name;
+document.getElementById('sRadVis').innerHTML=radSVG(100,60,r.heating,7);
+document.getElementById('sCur').textContent=r.cur+'°C';
+document.getElementById('sTgt').innerHTML=r.tgt+'<span class="sheet-tgt-unit">°</span>';
+var sp=document.getElementById('sStatus');
+if(r.mode==='off'){sp.textContent='OFF';sp.className='sheet-status-pill off';}
+else if(r.heating){sp.textContent='HEATING';sp.className='sheet-status-pill heating';}
+else{sp.textContent='IDLE';sp.className='sheet-status-pill idle';}
+document.querySelectorAll('.sheet-mode').forEach(function(c){c.classList.toggle('active',c.dataset.m===r.mode);});
+document.getElementById('sheetOverlay').classList.add('open');
+renderRads();}
+
+function closeSheet(){
+document.getElementById('sheetOverlay').classList.remove('open');
+var s=document.getElementById('sheet');s.style.transition='';s.style.transform='';
+activeRad=null;renderRads();}
+
+function updateSheet(){
+if(activeRad===null)return;var r=rads[activeRad];
+document.getElementById('sTgt').innerHTML=r.tgt+'<span class="sheet-tgt-unit">°</span>';
+document.getElementById('sCur').textContent=r.cur+'°C';
+document.getElementById('sRadVis').innerHTML=radSVG(100,60,r.heating,7);
+var sp=document.getElementById('sStatus');
+if(r.mode==='off'){sp.textContent='OFF';sp.className='sheet-status-pill off';}
+else if(r.heating){sp.textContent='HEATING';sp.className='sheet-status-pill heating';}
+else{sp.textContent='IDLE';sp.className='sheet-status-pill idle';}
+renderRads();}
+
+document.getElementById('sheetOverlay').onclick=function(e){if(e.target===this)closeSheet();};
+document.getElementById('sDn').onclick=function(){if(activeRad===null)return;rads[activeRad].tgt=Math.max(5,rads[activeRad].tgt-0.5);rads[activeRad].heating=rads[activeRad].cur<rads[activeRad].tgt&&rads[activeRad].mode!=='off';updateSheet();};
+document.getElementById('sUp').onclick=function(){if(activeRad===null)return;rads[activeRad].tgt=Math.min(30,rads[activeRad].tgt+0.5);rads[activeRad].heating=rads[activeRad].cur<rads[activeRad].tgt&&rads[activeRad].mode!=='off';updateSheet();};
+document.querySelectorAll('.sheet-mode').forEach(function(c){c.onclick=function(){if(activeRad===null)return;rads[activeRad].mode=c.dataset.m;if(c.dataset.m==='off')rads[activeRad].heating=false;else rads[activeRad].heating=rads[activeRad].cur<rads[activeRad].tgt;document.querySelectorAll('.sheet-mode').forEach(function(x){x.classList.remove('active');});c.classList.add('active');updateSheet();};});
+
+// Swipe down to dismiss
+var sheetEl=document.getElementById('sheet'),startY=0,curY=0,sheetDrag=false;
+var handleEl=document.getElementById('sheetHandle');
+handleEl.addEventListener('pointerdown',function(e){
+handleEl.setPointerCapture(e.pointerId);sheetEl.style.transition='none';startY=e.clientY;curY=0;sheetDrag=true;e.preventDefault();});
+handleEl.addEventListener('pointermove',function(e){
+if(!sheetDrag)return;e.preventDefault();});
+handleEl.addEventListener('pointerup',function(e){
+if(!sheetDrag)return;sheetDrag=false;sheetEl.style.transition='transform 0.35s cubic-bezier(0.32,0.72,0,1)';
+if(curY>60){closeSheet();}else{sheetEl.style.transform='';}});
+handleEl.addEventListener('pointercancel',function(){
+sheetDrag=false;sheetEl.style.transition='';sheetEl.style.transform='';});
+
+function isLandscape(){return window.matchMedia('(orientation:landscape)').matches;}
+var origMove=handleEl.onpointermove;
+handleEl.addEventListener('pointermove',function(e){
+if(!sheetDrag)return;curY=Math.max(0,e.clientY-startY);
+if(isLandscape()){sheetEl.style.transform='translateX(-50%) translateY('+curY+'px)';}
+else{sheetEl.style.transform='translateY('+curY+'px)';}
+e.preventDefault();},true);
+
+// HP
+function adjustHP(d){hpTemp=Math.max(25,Math.min(65,+(hpTemp+d).toFixed(1)));document.getElementById('hp-flow').innerHTML=hpTemp.toFixed(1)+'<span class="hp-flow-unit">°C</span>';}
+document.querySelectorAll('.hp-mode-btn').forEach(function(b){b.onclick=function(){b.classList.toggle('active');}});
+
+// Nest thermostat canvas
+function drawThermo(){var c=document.getElementById('tc');if(!c)return;var ctx=c.getContext('2d'),W=200,dpr=2;c.width=W*dpr;c.height=W*dpr;ctx.scale(dpr,dpr);var CX=W/2,CY=W/2,R=82,SA=135*Math.PI/180,TS=270*Math.PI/180,on=nestOn;ctx.clearRect(0,0,W,W);
+ctx.save();ctx.filter='blur(8px)';ctx.beginPath();ctx.arc(CX,CY+4,R+6,0,Math.PI*2);ctx.fillStyle=on?'rgba(0,0,0,0.35)':'rgba(0,0,0,0.25)';ctx.fill();ctx.restore();
+var bz=ctx.createLinearGradient(CX-R,CY-R,CX+R,CY+R);bz.addColorStop(0,on?'#2c2c2c':'#1e1e1e');bz.addColorStop(0.3,on?'#1e1e1e':'#161616');bz.addColorStop(1,on?'#0e0e0e':'#0a0a0a');ctx.beginPath();ctx.arc(CX,CY,R+4,0,Math.PI*2);ctx.fillStyle=bz;ctx.fill();
+ctx.beginPath();ctx.arc(CX,CY,R+4.5,-2.5,-0.5);ctx.strokeStyle=on?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.04)';ctx.lineWidth=0.8;ctx.stroke();
+var fc=ctx.createRadialGradient(CX-15,CY-20,5,CX,CY,R-8);fc.addColorStop(0,'#1a1a1a');fc.addColorStop(1,'#0c0c0c');ctx.beginPath();ctx.arc(CX,CY,R-8,0,Math.PI*2);ctx.fillStyle=fc;ctx.fill();
+ctx.beginPath();ctx.arc(CX,CY,R-18,SA,SA+TS);ctx.strokeStyle=on?'rgba(255,255,255,0.035)':'rgba(255,255,255,0.02)';ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke();
+var frac=Math.max(0,(nestTarget-12)/18),ta=SA+frac*TS;
+if(frac>0&&on){for(var i=0;i<60;i++){var f=i/60,a0=SA+f*(ta-SA),a1=SA+(f+1/60)*(ta-SA);var rr=Math.round(72+(255-72)*Math.min(f*2,1));var gg=Math.round(202+(140-202)*Math.min(f*2,1));var bb=Math.round(228-228*Math.min(f*1.5,1));ctx.beginPath();ctx.arc(CX,CY,R-18,a0,a1+0.02);ctx.strokeStyle='rgb('+rr+','+gg+','+bb+')';ctx.lineWidth=6;ctx.lineCap='round';ctx.stroke();}
+ctx.beginPath();ctx.arc(CX,CY,R-18,SA,ta);ctx.strokeStyle=frac<0.5?'rgba(72,202,228,0.05)':'rgba(255,179,0,0.05)';ctx.lineWidth=18;ctx.lineCap='round';ctx.stroke();
+var tx=CX+(R-18)*Math.cos(ta),ty=CY+(R-18)*Math.sin(ta);ctx.save();ctx.filter='blur(4px)';ctx.beginPath();ctx.arc(tx,ty,10,0,Math.PI*2);ctx.fillStyle=frac<0.4?'rgba(72,202,228,0.3)':frac<0.7?'rgba(255,179,0,0.3)':'rgba(255,87,34,0.3)';ctx.fill();ctx.restore();ctx.beginPath();ctx.arc(tx,ty,7,0,Math.PI*2);ctx.fillStyle=frac<0.4?'#48CAE4':frac<0.7?'#FFB300':'#FF5722';ctx.fill();ctx.beginPath();ctx.arc(tx,ty,3,0,Math.PI*2);ctx.fillStyle='#f0f0f0';ctx.fill();}
+for(var j=0;j<=18;j++){var a=SA+(j/18)*TS,maj=j%3===0;ctx.beginPath();ctx.moveTo(CX+(R-(maj?2:4))*Math.cos(a),CY+(R-(maj?2:4))*Math.sin(a));ctx.lineTo(CX+(R+(maj?5:2))*Math.cos(a),CY+(R+(maj?5:2))*Math.sin(a));ctx.strokeStyle=maj?(on?'rgba(255,255,255,0.1)':'rgba(255,255,255,0.04)'):(on?'rgba(255,255,255,0.03)':'rgba(255,255,255,0.015)');ctx.lineWidth=maj?1:0.5;ctx.stroke();}}
+function updateNest(){document.getElementById('tv').textContent=nestTarget.toFixed(1)+'°';document.getElementById('tv').style.color=nestOn?'#f0f0f0':'#444';document.getElementById('tst').style.opacity=nestOn?'1':'0.3';document.querySelector('.thcur').style.opacity=nestOn?'1':'0.3';drawThermo();}
+var cv=document.getElementById('tc'),drag=false;
+cv.addEventListener('pointerdown',function(e){cv.setPointerCapture(e.pointerId);drag=true;thermoP(e);e.preventDefault();});
+cv.addEventListener('pointermove',function(e){if(drag){thermoP(e);e.preventDefault();}});
+cv.addEventListener('pointerup',function(){drag=false;});
+cv.addEventListener('pointercancel',function(){drag=false;});
+function thermoP(e){var rect=cv.getBoundingClientRect(),W=200;var mx=(e.clientX-rect.left)/rect.width*W,my=(e.clientY-rect.top)/rect.height*W;var deg=Math.atan2(my-W/2,mx-W/2)*180/Math.PI;if(deg<0)deg+=360;var arc=deg-135;if(arc<0)arc+=360;if(arc>270){arc=arc>315?0:270;}nestTarget=Math.round((12+arc/270*18)*2)/2;nestTarget=Math.max(12,Math.min(30,nestTarget));updateNest();}
+document.getElementById('tdn').onclick=function(){nestTarget=Math.max(12,nestTarget-0.5);updateNest();};
+document.getElementById('tup').onclick=function(){nestTarget=Math.min(30,nestTarget+0.5);updateNest();};
+document.getElementById('pbtn').onclick=function(){nestOn=!nestOn;this.className='pwr3d '+(nestOn?'on':'');updateNest();};
+
+drawThermo();
+renderRads();
+</script>
+</body>
+</html>
