@@ -111,29 +111,34 @@ class _DashboardPageState extends State<DashboardPage> with TickerProviderStateM
 
   Widget _sLabel(String t) => Text(t, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: SmithMkColors.textTertiary, letterSpacing: 1.5));
 
-  Widget _buildWideGrid(bool landscape) {
-    final left = _sections.where((k) => ['weather','climate','status','energy'].contains(k)).toList();
-    final right = _sections.where((k) => !['weather','climate','status','energy'].contains(k)).toList();
-    if (landscape) { final si = right.indexOf('scenes'); if (si > 0) { right.removeAt(si); right.insert(0, 'scenes'); } }
-    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Expanded(child: _buildCol(landscape ? right : left)), const SizedBox(width: 16),
-      Expanded(child: _buildCol(landscape ? left : right)),
-    ]);
+  Widget _buildWideGrid(bool landscape) => _buildReorderableGrid(true);
+  Widget _buildNarrowGrid() => _buildReorderableGrid(false);
+
+  Widget _buildReorderableGrid(bool wide) {
+    return ReorderableListView(
+      shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
+      proxyDecorator: (child, i, a) => Material(color: Colors.transparent, elevation: 0,
+        child: ScaleTransition(scale: Tween(begin: 1.0, end: 1.03).animate(a), child: child)),
+      onReorder: (o, n) {
+        HapticFeedback.mediumImpact();
+        setState(() { if (n > o) n--; final item = _sections.removeAt(o); _sections.insert(n, item); });
+      },
+      children: [
+        for (int i = 0; i < _sections.length; i++)
+          Padding(
+            key: ValueKey(_sections[i]),
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: Duration(milliseconds: 350 + i * 60),
+              curve: Curves.easeOutCubic,
+              builder: (_, v, child) => Transform.translate(offset: Offset(0, 20 * (1 - v)), child: Opacity(opacity: v, child: child)),
+              child: _buildSection(_sections[i]),
+            ),
+          ),
+      ],
+    );
   }
-
-  Widget _buildNarrowGrid() => ReorderableListView(
-    shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
-    proxyDecorator: (child, i, a) => Material(color: Colors.transparent, elevation: 0, child: ScaleTransition(scale: Tween(begin: 1.0, end: 1.03).animate(a), child: child)),
-    onReorder: (o, n) { HapticFeedback.mediumImpact(); setState(() { if (n > o) n--; final item = _sections.removeAt(o); _sections.insert(n, item); }); },
-    children: [for (int i = 0; i < _sections.length; i++) Padding(key: ValueKey(_sections[i]), padding: const EdgeInsets.only(bottom: 16),
-      child: TweenAnimationBuilder<double>(tween: Tween(begin: 0.0, end: 1.0), duration: Duration(milliseconds: 350 + i * 60), curve: Curves.easeOutCubic,
-        builder: (_, v, child) => Transform.translate(offset: Offset(0, 20 * (1 - v)), child: Opacity(opacity: v, child: child)), child: _buildSection(_sections[i])))],
-  );
-
-  Widget _buildCol(List<String> keys) => Column(children: keys.asMap().entries.map((e) =>
-    TweenAnimationBuilder<double>(tween: Tween(begin: 0.0, end: 1.0), duration: Duration(milliseconds: 350 + e.key * 60), curve: Curves.easeOutCubic,
-      builder: (_, v, child) => Transform.translate(offset: Offset(0, 20 * (1 - v)), child: Opacity(opacity: v, child: child)),
-      child: Padding(padding: const EdgeInsets.only(bottom: 16), child: _buildSection(e.value)))).toList());
 
   Widget _buildSection(String key) { switch (key) {
     case 'weather': return _weatherCard(); case 'scenes': return _scenesCard(); case 'climate': return _climateCard();
