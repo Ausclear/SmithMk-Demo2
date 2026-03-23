@@ -271,7 +271,7 @@ class _MusicPageState extends State<MusicPage> {
             boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(4, 4))]),
             clipBehavior: Clip.antiAlias,
             child: np?.artUrl != null
-              ? Image.network(np!.artUrl!.startsWith('http') ? np.artUrl! : '${HAService.haUrl}${np.artUrl}',
+              ? Image.network(np!.artUrl!.startsWith('http') ? np.artUrl! : '${HAService.haExternal}${np.artUrl}',
                   fit: BoxFit.cover, filterQuality: FilterQuality.high,
                   errorBuilder: (_, __, ___) => _artPlaceholder())
               : _artPlaceholder()),

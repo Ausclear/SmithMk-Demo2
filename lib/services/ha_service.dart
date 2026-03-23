@@ -9,9 +9,11 @@ class HAService {
   // PWA proxy base — used for Vercel-hosted API routes
   static const pwaBase = 'https://smarthome-eight-livid.vercel.app';
 
-  // Direct HA — used when on local network
-  static const haUrl = 'http://202.62.130.27:8123';
+  // Direct HA — try internal first (local network), fall back to external
+  static const haInternal = 'http://192.168.1.101:8123';
+  static const haExternal = 'http://202.62.130.27:8123';
   static const _haToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwOWI5OTlmY2JmMWY0OWQwYTFiYzBiMmM1M2NiZTgyMiIsImlhdCI6MTc3MzExOTk5OSwiZXhwIjoyMDg4NDc5OTk5fQ.0HfaVvG4_Ld5xuxzejS5sWxi5jRGREkNrPXN3s-uM0k';
+  static String? _resolvedUrl;
 
   // Supabase for config lookup
   static const _sbUrl = 'https://qraxdkzmteogkbfatvir.supabase.co';
@@ -21,12 +23,28 @@ class HAService {
   static String? _cachedHaToken;
   static DateTime? _cacheTime;
 
-  /// Get HA URL and token — tries Supabase first, falls back to constants
+  /// Get HA URL — tries internal first, falls back to external
+  static Future<String> get haUrl async {
+    if (_resolvedUrl != null) return _resolvedUrl!;
+    // Try internal first
+    try {
+      final r = await http.get(Uri.parse('$haInternal/api/'), headers: {'Authorization': 'Bearer $_haToken'})
+        .timeout(const Duration(seconds: 3));
+      if (r.statusCode == 200 || r.statusCode == 201) { _resolvedUrl = haInternal; return haInternal; }
+    } catch (_) {}
+    // Fall back to external
+    _resolvedUrl = haExternal;
+    return haExternal;
+  }
+
+  /// Get HA URL and token — tries Supabase for overrides, falls back to constants
   static Future<({String url, String token})> getConfig() async {
     if (_cachedHaUrl != null && _cachedHaToken != null && _cacheTime != null &&
         DateTime.now().difference(_cacheTime!).inSeconds < 30) {
       return (url: _cachedHaUrl!, token: _cachedHaToken!);
     }
+
+    final baseUrl = await haUrl;
 
     try {
       final resp = await http.get(
@@ -38,14 +56,14 @@ class HAService {
         final List rows = json.decode(resp.body);
         final urlRow = rows.firstWhere((r) => r['id'] == 'system:ha_url', orElse: () => null);
         final tokenRow = rows.firstWhere((r) => r['id'] == 'system:ha_token', orElse: () => null);
-        _cachedHaUrl = (urlRow?['label'] as String?)?.isNotEmpty == true ? urlRow['label'] : haUrl;
+        _cachedHaUrl = (urlRow?['label'] as String?)?.isNotEmpty == true ? urlRow['label'] : baseUrl;
         _cachedHaToken = (tokenRow?['label'] as String?)?.isNotEmpty == true ? tokenRow['label'] : _haToken;
       } else {
-        _cachedHaUrl = haUrl;
+        _cachedHaUrl = baseUrl;
         _cachedHaToken = _haToken;
       }
     } catch (_) {
-      _cachedHaUrl = haUrl;
+      _cachedHaUrl = baseUrl;
       _cachedHaToken = _haToken;
     }
     _cacheTime = DateTime.now();
