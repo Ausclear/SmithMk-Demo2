@@ -178,7 +178,18 @@ class _MusicPageState extends State<MusicPage> {
   }
   void _next() { HAService.mediaNext('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _pollSpotify); }
   void _prev() { HAService.mediaPrev('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _pollSpotify); }
-  void _vol(double v) { HAService.mediaVolume(_selectedEcho, v); }
+  void _vol(double v) {
+    // Optimistic UI update immediately
+    setState(() {
+      _deviceAttrs[_selectedEcho] = {..._deviceAttrs[_selectedEcho] ?? {}, 'volume_level': v};
+      _deviceAttrs['media_player.spotify_smithmk'] = {..._deviceAttrs['media_player.spotify_smithmk'] ?? {}, 'volume_level': v};
+    });
+    // Send to both echo and spotify
+    HAService.mediaVolume(_selectedEcho, v);
+    if (_spotifyState == 'playing' || _spotifyState == 'paused') {
+      HAService.mediaVolume('media_player.spotify_smithmk', v);
+    }
+  }
 
   String get _selState => _deviceStates[_selectedEcho] ?? 'idle';
   Map<String, dynamic> get _selAttrs => _deviceAttrs[_selectedEcho] ?? {};
