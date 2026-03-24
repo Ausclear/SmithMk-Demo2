@@ -64,6 +64,8 @@ class _MusicPageState extends State<MusicPage> {
     super.initState();
     _loadInitialState();
     _connectSSE();
+    // Poll spotify entity every 3s — SSE filters it out
+    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _pollSpotify());
   }
 
   @override
@@ -80,6 +82,19 @@ class _MusicPageState extends State<MusicPage> {
         attrs[id] = (e['attributes'] as Map<String, dynamic>?) ?? {};
       }
       if (mounted) setState(() { _deviceStates = states; _deviceAttrs = attrs; });
+    } catch (_) {}
+  }
+
+  Future<void> _pollSpotify() async {
+    try {
+      final entities = await HAService.getEntities('media_player');
+      final spot = entities.firstWhere((e) => e['entity_id'] == 'media_player.spotify_smithmk', orElse: () => <String, dynamic>{});
+      if (spot.isNotEmpty && mounted) {
+        setState(() {
+          _deviceStates['media_player.spotify_smithmk'] = spot['state'] as String? ?? 'idle';
+          _deviceAttrs['media_player.spotify_smithmk'] = (spot['attributes'] as Map<String, dynamic>?) ?? {};
+        });
+      }
     } catch (_) {}
   }
 
@@ -149,16 +164,20 @@ class _MusicPageState extends State<MusicPage> {
 
   // Shortcuts for selected device
   void _play() {
-    // Toggle play/pause on BOTH the selected Echo AND the Spotify entity
-    HAService.mediaPlayPause(_selectedEcho);
+    // When Spotify is active, control ONLY the spotify entity — not the Echo
     if (_spotifyState == 'playing' || _spotifyState == 'paused') {
       HAService.mediaPlayPause('media_player.spotify_smithmk');
+    } else {
+      HAService.mediaPlayPause(_selectedEcho);
     }
-    Future.delayed(const Duration(seconds: 1), _loadInitialState);
+    Future.delayed(const Duration(seconds: 1), _pollSpotify);
   }
-  void _stop() { HAService.mediaStop(_selectedEcho); HAService.mediaStop('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _loadInitialState); }
-  void _next() { HAService.mediaNext('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _loadInitialState); }
-  void _prev() { HAService.mediaPrev('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _loadInitialState); }
+  void _stop() {
+    HAService.mediaStop('media_player.spotify_smithmk');
+    Future.delayed(const Duration(seconds: 1), _pollSpotify);
+  }
+  void _next() { HAService.mediaNext('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _pollSpotify); }
+  void _prev() { HAService.mediaPrev('media_player.spotify_smithmk'); Future.delayed(const Duration(seconds: 1), _pollSpotify); }
   void _vol(double v) { HAService.mediaVolume(_selectedEcho, v); }
 
   String get _selState => _deviceStates[_selectedEcho] ?? 'idle';
