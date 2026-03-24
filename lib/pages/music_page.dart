@@ -56,7 +56,6 @@ class _MusicPageState extends State<MusicPage> {
   String _selectedEcho = _ECHOS[0].$1;
   Map<String, String> _deviceStates = {}; // entity_id -> state
   Map<String, Map<String, dynamic>> _deviceAttrs = {}; // entity_id -> attributes
-  Timer? _pollTimer;
   Timer? _tickTimer;
   int _livePosition = 0;
   StreamSubscription? _sseSubscription;
@@ -66,14 +65,12 @@ class _MusicPageState extends State<MusicPage> {
     super.initState();
     _loadInitialState();
     _connectSSE();
-    // Poll spotify entity every 3s — SSE filters it out
-    _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) => _pollSpotify());
-    // Tick progress bar every second
+    // Tick progress bar every second — NO polling
     _tickTimer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
   }
 
   @override
-  void dispose() { _searchCtrl.dispose(); _debounce?.cancel(); _pollTimer?.cancel(); _tickTimer?.cancel(); _sseSubscription?.cancel(); super.dispose(); }
+  void dispose() { _searchCtrl.dispose(); _debounce?.cancel(); _tickTimer?.cancel(); _sseSubscription?.cancel(); super.dispose(); }
 
   Future<void> _loadInitialState() async {
     try {
@@ -87,21 +84,6 @@ class _MusicPageState extends State<MusicPage> {
       }
       if (mounted) setState(() { _deviceStates = states; _deviceAttrs = attrs; });
       _syncLivePosition();
-    } catch (_) {}
-  }
-
-  Future<void> _pollSpotify() async {
-    try {
-      final entities = await HAService.getEntities('media_player');
-      final spot = entities.firstWhere((e) => e['entity_id'] == 'media_player.spotify_smithmk', orElse: () => <String, dynamic>{});
-      if (spot.isNotEmpty && mounted) {
-        final attrs = (spot['attributes'] as Map<String, dynamic>?) ?? {};
-        setState(() {
-          _deviceStates['media_player.spotify_smithmk'] = spot['state'] as String? ?? 'idle';
-          _deviceAttrs['media_player.spotify_smithmk'] = attrs;
-        });
-        _syncLivePosition();
-      }
     } catch (_) {}
   }
 
@@ -152,18 +134,18 @@ class _MusicPageState extends State<MusicPage> {
       if (mounted) {
         setState(() {
           _deviceStates[entityId] = data['state'] as String? ?? 'idle';
-          _deviceAttrs[entityId] = (data['attributes'] as Map<String, dynamic>?) ?? {};
+          if (data['attributes'] != null) _deviceAttrs[entityId] = Map<String, dynamic>.from(data['attributes']);
         });
+        // Sync position when spotify entity updates
+        if (entityId == 'media_player.spotify_smithmk') _syncLivePosition();
       }
     }, onError: (_) {
-      // Reconnect after 5 seconds on error
       Future.delayed(const Duration(seconds: 5), () { if (mounted) _connectSSE(); });
     }, onDone: () {
       Future.delayed(const Duration(seconds: 5), () { if (mounted) _connectSSE(); });
     });
   }
 
-  Future<void> _pollDevices() => _loadInitialState();
 
   void _onSearch(String query) {
     _debounce?.cancel();
@@ -204,48 +186,40 @@ class _MusicPageState extends State<MusicPage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('▶ ${track.name} → $echoName'), backgroundColor: const Color(0xFF1C1C1E), duration: const Duration(seconds: 2)));
       setState(() => _playingUri = null);
-      Future.delayed(const Duration(seconds: 2), () => _pollDevices());
+      _loadInitialState();
     }
   }
 
-  // Shortcuts for selected device
+  // Shortcuts — match PWA exactly: target the ECHO entity, not spotify
   void _play() {
     final willPlay = !_isPlaying;
     setState(() {
-      if (_spotifyOnSelected || _nowTitle != null) {
-        _deviceStates['media_player.spotify_smithmk'] = willPlay ? 'playing' : 'paused';
-      } else {
-        _deviceStates[_selectedEcho] = willPlay ? 'playing' : 'paused';
-      }
+      _deviceStates[_selectedEcho] = willPlay ? 'playing' : 'paused';
+      if (_spotifyOnSelected) _deviceStates['media_player.spotify_smithmk'] = willPlay ? 'playing' : 'paused';
     });
-    if (_spotifyOnSelected || _nowTitle != null) {
-      HAService.mediaPlayPause('media_player.spotify_smithmk');
-    } else {
-      HAService.mediaPlayPause(_selectedEcho);
-    }
-    Future.delayed(const Duration(seconds: 1), _pollSpotify);
+    HAService.mediaPlayPause(_selectedEcho);
   }
   void _stop() {
     setState(() {
+      _deviceStates[_selectedEcho] = 'idle';
       _deviceStates['media_player.spotify_smithmk'] = 'idle';
       _livePosition = 0;
     });
-    // media_pause first then media_stop — Spotify doesn't always respond to stop alone
-    HAService.callService('media_player', 'media_pause', {'entity_id': 'media_player.spotify_smithmk'});
-    Future.delayed(const Duration(milliseconds: 500), () {
-      HAService.mediaStop('media_player.spotify_smithmk');
-    });
-    Future.delayed(const Duration(seconds: 1), _pollSpotify);
+    HAService.mediaStop(_selectedEcho);
   }
   void _next() {
     setState(() => _livePosition = 0);
-    HAService.mediaNext('media_player.spotify_smithmk');
-    Future.delayed(const Duration(seconds: 1), _pollSpotify);
+    HAService.mediaNext(_selectedEcho);
   }
   void _prev() {
-    setState(() => _livePosition = 0);
-    HAService.mediaPrev('media_player.spotify_smithmk');
-    Future.delayed(const Duration(seconds: 1), _pollSpotify);
+    // PWA logic: if >3 seconds in, seek to 0 (restart). Otherwise previous track.
+    if (_livePosition > 3) {
+      setState(() => _livePosition = 0);
+      HAService.callService('media_player', 'media_seek', {'entity_id': _selectedEcho, 'seek_position': 0});
+    } else {
+      setState(() => _livePosition = 0);
+      HAService.mediaPrev(_selectedEcho);
+    }
   }
   void _vol(double v) {
     // Optimistic UI update immediately
