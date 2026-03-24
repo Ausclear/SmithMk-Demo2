@@ -105,21 +105,33 @@ class _MusicPageState extends State<MusicPage> {
     } catch (_) {}
   }
 
+  String? _lastSyncTrack;
+
   /// Calculate the real position from the correct entity
   void _syncLivePosition() {
     final attrs = _spotifyOnSelected ? _spotifyAttrs : _selAttrs;
     final isPlaying = _spotifyOnSelected ? (_spotifyState == 'playing') : (_selState == 'playing');
     final pos = (attrs['media_position'] as num?)?.toInt() ?? 0;
     final updatedAt = attrs['media_position_updated_at']?.toString();
+    final currentTrack = attrs['media_title']?.toString();
+
+    int newPos = pos;
     if (updatedAt != null && isPlaying) {
       final updatedTime = DateTime.tryParse(updatedAt);
       if (updatedTime != null) {
         final elapsed = DateTime.now().difference(updatedTime).inSeconds;
-        _livePosition = (pos + elapsed).clamp(0, (_nowDuration ?? 9999));
-        return;
+        newPos = (pos + elapsed).clamp(0, (_nowDuration ?? 9999));
       }
     }
-    _livePosition = pos;
+
+    // Only allow backwards jump if track changed
+    if (currentTrack != _lastSyncTrack) {
+      _livePosition = newPos;
+      _lastSyncTrack = currentTrack;
+    } else if (newPos >= _livePosition || (_livePosition - newPos).abs() > 5) {
+      // Accept forward movement, or resync if more than 5s drift
+      _livePosition = newPos;
+    }
   }
 
   /// Tick every second — increment live position if playing
@@ -439,9 +451,15 @@ class _MusicPageState extends State<MusicPage> {
   Widget _progressBar(int pos, int dur) {
     final frac = dur > 0 ? (pos / dur).clamp(0.0, 1.0) : 0.0;
     return Column(children: [
-      Container(height: 6, decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: const Color(0x14FFFFFF)),
-        child: FractionallySizedBox(alignment: Alignment.centerLeft, widthFactor: frac,
-          child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: const Color(0xFFFF9900))))),
+      SizedBox(height: 6, child: LayoutBuilder(builder: (ctx, constraints) {
+        final w = constraints.maxWidth * frac;
+        return Stack(children: [
+          // Background track
+          Container(height: 6, decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: const Color(0x14FFFFFF))),
+          // Fill — left aligned, width based on fraction
+          Container(height: 6, width: w, decoration: BoxDecoration(borderRadius: BorderRadius.circular(3), color: const Color(0xFFFF9900))),
+        ]);
+      })),
       const SizedBox(height: 4),
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(_fmt(pos), style: const TextStyle(fontSize: 10, color: Color(0x33FFFFFF), fontFeatures: [FontFeature.tabularFigures()])),
