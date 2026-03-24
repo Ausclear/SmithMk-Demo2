@@ -265,22 +265,57 @@ class _MusicPageState extends State<MusicPage> {
   Map<String, dynamic> get _spotifyAttrs => _deviceAttrs['media_player.spotify_smithmk'] ?? {};
   String get _spotifyState => _deviceStates['media_player.spotify_smithmk'] ?? 'idle';
 
-  // Is the selected Echo the active Spotify Connect target?
+  // Is Spotify playing/paused AND its source matches the selected Echo?
   bool get _spotifyOnSelected {
+    final spState = _spotifyState;
+    if (spState != 'playing' && spState != 'paused') return false;
     final src = _spotifyAttrs['source']?.toString() ?? '';
-    final echoName = _ECHOS.firstWhere((e) => e.$1 == _selectedEcho, orElse: () => ('', '')).$2;
-    return (_spotifyState == 'playing' || _spotifyState == 'paused') && src == echoName;
+    final echoName = _SPOTIFY_SOURCES[_selectedEcho] ?? '';
+    return src == echoName;
   }
 
-  // Show spotify info ONLY when spotify is playing on the selected Echo, otherwise show the Echo's own info
+  // For now playing: use Spotify data if Spotify was last playing on this Echo
+  // This means even when paused, the track info persists
   bool get _isPlaying => _spotifyOnSelected ? (_spotifyState == 'playing') : (_selState == 'playing');
-  String? get _nowTitle => _spotifyOnSelected ? _spotifyAttrs['media_title']?.toString() : _selAttrs['media_title']?.toString();
-  String? get _nowArtist => _spotifyOnSelected ? _spotifyAttrs['media_artist']?.toString() : _selAttrs['media_artist']?.toString();
-  String? get _nowArt => _spotifyOnSelected ? _spotifyAttrs['entity_picture']?.toString() : _selAttrs['entity_picture']?.toString();
+
+  String? get _nowTitle {
+    if (_spotifyOnSelected) return _spotifyAttrs['media_title']?.toString();
+    final t = _selAttrs['media_title']?.toString();
+    if (t != null) return t;
+    // If Echo is idle but Spotify source was this Echo, show spotify's last track
+    final src = _spotifyAttrs['source']?.toString() ?? '';
+    final echoName = _SPOTIFY_SOURCES[_selectedEcho] ?? '';
+    if (src == echoName && _spotifyAttrs['media_title'] != null) return _spotifyAttrs['media_title'].toString();
+    return null;
+  }
+  String? get _nowArtist {
+    if (_spotifyOnSelected) return _spotifyAttrs['media_artist']?.toString();
+    final a = _selAttrs['media_artist']?.toString();
+    if (a != null) return a;
+    final src = _spotifyAttrs['source']?.toString() ?? '';
+    final echoName = _SPOTIFY_SOURCES[_selectedEcho] ?? '';
+    if (src == echoName && _spotifyAttrs['media_artist'] != null) return _spotifyAttrs['media_artist'].toString();
+    return null;
+  }
+  String? get _nowArt {
+    if (_spotifyOnSelected) return _spotifyAttrs['entity_picture']?.toString();
+    final a = _selAttrs['entity_picture']?.toString();
+    if (a != null) return a;
+    final src = _spotifyAttrs['source']?.toString() ?? '';
+    final echoName = _SPOTIFY_SOURCES[_selectedEcho] ?? '';
+    if (src == echoName && _spotifyAttrs['entity_picture'] != null) return _spotifyAttrs['entity_picture'].toString();
+    return null;
+  }
   double get _nowVol => (_selAttrs['volume_level'] as num?)?.toDouble() ?? 0.3;
-  int? get _nowDuration => _spotifyOnSelected
-    ? (_spotifyAttrs['media_duration'] as num?)?.toInt()
-    : (_selAttrs['media_duration'] as num?)?.toInt();
+  int? get _nowDuration {
+    if (_spotifyOnSelected) return (_spotifyAttrs['media_duration'] as num?)?.toInt();
+    final d = (_selAttrs['media_duration'] as num?)?.toInt();
+    if (d != null) return d;
+    final src = _spotifyAttrs['source']?.toString() ?? '';
+    final echoName = _SPOTIFY_SOURCES[_selectedEcho] ?? '';
+    if (src == echoName) return (_spotifyAttrs['media_duration'] as num?)?.toInt();
+    return null;
+  }
   int get _nowPosition => _livePosition;
 
   @override
