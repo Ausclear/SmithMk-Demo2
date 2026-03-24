@@ -105,16 +105,17 @@ class _MusicPageState extends State<MusicPage> {
     } catch (_) {}
   }
 
-  /// Calculate the real position based on media_position + time elapsed since media_position_updated_at
+  /// Calculate the real position from the correct entity
   void _syncLivePosition() {
-    final attrs = _spotifyAttrs;
+    final attrs = _spotifyOnSelected ? _spotifyAttrs : _selAttrs;
+    final isPlaying = _spotifyOnSelected ? (_spotifyState == 'playing') : (_selState == 'playing');
     final pos = (attrs['media_position'] as num?)?.toInt() ?? 0;
     final updatedAt = attrs['media_position_updated_at']?.toString();
-    if (updatedAt != null && _spotifyState == 'playing') {
+    if (updatedAt != null && isPlaying) {
       final updatedTime = DateTime.tryParse(updatedAt);
       if (updatedTime != null) {
         final elapsed = DateTime.now().difference(updatedTime).inSeconds;
-        _livePosition = pos + elapsed;
+        _livePosition = (pos + elapsed).clamp(0, (_nowDuration ?? 9999));
         return;
       }
     }
@@ -123,8 +124,11 @@ class _MusicPageState extends State<MusicPage> {
 
   /// Tick every second — increment live position if playing
   void _tick() {
-    if (_spotifyState == 'playing') {
-      setState(() => _livePosition++);
+    if (_isPlaying && _nowDuration != null) {
+      final newPos = _livePosition + 1;
+      if (newPos <= _nowDuration!) {
+        setState(() => _livePosition = newPos);
+      }
     }
   }
 
@@ -194,13 +198,15 @@ class _MusicPageState extends State<MusicPage> {
 
   // Shortcuts for selected device
   void _play() {
-    // Optimistic UI
     final willPlay = !_isPlaying;
     setState(() {
-      _deviceStates['media_player.spotify_smithmk'] = willPlay ? 'playing' : 'paused';
+      if (_spotifyOnSelected || _nowTitle != null) {
+        _deviceStates['media_player.spotify_smithmk'] = willPlay ? 'playing' : 'paused';
+      } else {
+        _deviceStates[_selectedEcho] = willPlay ? 'playing' : 'paused';
+      }
     });
-    // When Spotify is active, control ONLY the spotify entity
-    if (_spotifyState == 'playing' || _spotifyState == 'paused' || _nowTitle != null) {
+    if (_spotifyOnSelected || _nowTitle != null) {
       HAService.mediaPlayPause('media_player.spotify_smithmk');
     } else {
       HAService.mediaPlayPause(_selectedEcho);
@@ -244,15 +250,25 @@ class _MusicPageState extends State<MusicPage> {
 
   String get _selState => _deviceStates[_selectedEcho] ?? 'idle';
   Map<String, dynamic> get _selAttrs => _deviceAttrs[_selectedEcho] ?? {};
-  // Now playing reads from Spotify entity if it's playing, otherwise from selected Echo
   Map<String, dynamic> get _spotifyAttrs => _deviceAttrs['media_player.spotify_smithmk'] ?? {};
   String get _spotifyState => _deviceStates['media_player.spotify_smithmk'] ?? 'idle';
-  bool get _isPlaying => _spotifyState == 'playing' || _selState == 'playing';
-  String? get _nowTitle => _spotifyAttrs['media_title']?.toString() ?? _selAttrs['media_title']?.toString();
-  String? get _nowArtist => _spotifyAttrs['media_artist']?.toString() ?? _selAttrs['media_artist']?.toString();
-  String? get _nowArt => _spotifyAttrs['entity_picture']?.toString() ?? _selAttrs['entity_picture']?.toString();
+
+  // Is the selected Echo the active Spotify Connect target?
+  bool get _spotifyOnSelected {
+    final src = _spotifyAttrs['source']?.toString() ?? '';
+    final echoName = _ECHOS.firstWhere((e) => e.$1 == _selectedEcho, orElse: () => ('', '')).$2;
+    return (_spotifyState == 'playing' || _spotifyState == 'paused') && src == echoName;
+  }
+
+  // Show spotify info ONLY when spotify is playing on the selected Echo, otherwise show the Echo's own info
+  bool get _isPlaying => _spotifyOnSelected ? (_spotifyState == 'playing') : (_selState == 'playing');
+  String? get _nowTitle => _spotifyOnSelected ? _spotifyAttrs['media_title']?.toString() : _selAttrs['media_title']?.toString();
+  String? get _nowArtist => _spotifyOnSelected ? _spotifyAttrs['media_artist']?.toString() : _selAttrs['media_artist']?.toString();
+  String? get _nowArt => _spotifyOnSelected ? _spotifyAttrs['entity_picture']?.toString() : _selAttrs['entity_picture']?.toString();
   double get _nowVol => (_selAttrs['volume_level'] as num?)?.toDouble() ?? 0.3;
-  int? get _nowDuration => (_spotifyAttrs['media_duration'] as num?)?.toInt() ?? (_selAttrs['media_duration'] as num?)?.toInt();
+  int? get _nowDuration => _spotifyOnSelected
+    ? (_spotifyAttrs['media_duration'] as num?)?.toInt()
+    : (_selAttrs['media_duration'] as num?)?.toInt();
   int get _nowPosition => _livePosition;
 
   @override
@@ -404,7 +420,7 @@ class _MusicPageState extends State<MusicPage> {
     final online = state != 'unavailable';
     final playing = state == 'playing';
     return GestureDetector(
-      onTap: () { HapticFeedback.lightImpact(); setState(() => _selectedEcho = entityId); },
+      onTap: () { HapticFeedback.lightImpact(); setState(() { _selectedEcho = entityId; _livePosition = 0; }); _syncLivePosition(); },
       child: AnimatedContainer(duration: const Duration(milliseconds: 100),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),
