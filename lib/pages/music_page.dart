@@ -117,17 +117,17 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   void _syncPosition() {
-    final attrs = _spotifyAttrs;
+    final attrs = _spotifyMatchesSelected ? _spotifyAttrs : (_deviceAttrs[_selectedEcho] ?? {});
     final pos = (attrs['media_position'] as num?)?.toInt() ?? 0;
     final updatedAt = attrs['media_position_updated_at']?.toString();
     final track = attrs['media_title']?.toString();
+    final playing = _spotifyMatchesSelected ? _isPlaying : (_deviceStates[_selectedEcho] == 'playing');
 
     int newPos = pos;
-    if (updatedAt != null && _spotifyState == 'playing') {
+    if (updatedAt != null && playing) {
       final t = DateTime.tryParse(updatedAt);
       if (t != null) newPos = (pos + DateTime.now().difference(t).inSeconds).clamp(0, _nowDuration ?? 99999);
     }
-    // Reset on track change, otherwise only accept forward or >5s drift
     if (track != _lastTrack) {
       _livePosition = newPos;
       _lastTrack = track;
@@ -137,7 +137,8 @@ class _MusicPageState extends State<MusicPage> {
   }
 
   void _tick() {
-    if (_isPlaying && _nowDuration != null && _livePosition < _nowDuration!) {
+    final playing = _spotifyMatchesSelected ? _isPlaying : (_deviceStates[_selectedEcho] == 'playing');
+    if (playing && _nowDuration != null && _livePosition < _nowDuration!) {
       setState(() => _livePosition++);
     }
   }
@@ -149,11 +150,28 @@ class _MusicPageState extends State<MusicPage> {
   bool get _isPlaying => _spotifyState == 'playing';
   bool get _isPaused => _spotifyState == 'paused';
 
-  // Now playing — always from Spotify entity (it has the track info)
-  String? get _nowTitle => _spotifyAttrs['media_title']?.toString();
-  String? get _nowArtist => _spotifyAttrs['media_artist']?.toString();
-  String? get _nowArt => _spotifyAttrs['entity_picture']?.toString();
-  int? get _nowDuration => (_spotifyAttrs['media_duration'] as num?)?.toInt();
+  // Does the Spotify entity's source match the selected Echo?
+  String get _selectedEchoName => _SPOTIFY_SOURCES[_selectedEcho] ?? _ECHOS.firstWhere((e) => e.$1 == _selectedEcho, orElse: () => ('', '')).$2;
+  bool get _spotifyMatchesSelected => _spotifySource == _selectedEchoName;
+
+  // Now playing — show Spotify info ONLY if source matches selected Echo
+  // This way switching Echo shows the correct track (or "Not Playing" if Spotify wasn't last on that Echo)
+  String? get _nowTitle {
+    if (_spotifyMatchesSelected) return _spotifyAttrs['media_title']?.toString();
+    return _deviceAttrs[_selectedEcho]?['media_title']?.toString();
+  }
+  String? get _nowArtist {
+    if (_spotifyMatchesSelected) return _spotifyAttrs['media_artist']?.toString();
+    return _deviceAttrs[_selectedEcho]?['media_artist']?.toString();
+  }
+  String? get _nowArt {
+    if (_spotifyMatchesSelected) return _spotifyAttrs['entity_picture']?.toString();
+    return _deviceAttrs[_selectedEcho]?['entity_picture']?.toString();
+  }
+  int? get _nowDuration {
+    if (_spotifyMatchesSelected) return (_spotifyAttrs['media_duration'] as num?)?.toInt();
+    return (_deviceAttrs[_selectedEcho]?['media_duration'] as num?)?.toInt();
+  }
   double get _nowVol => (_isPlaying || _isPaused)
     ? ((_spotifyAttrs['volume_level'] as num?)?.toDouble() ?? 0.3)
     : ((_deviceAttrs[_selectedEcho]?['volume_level'] as num?)?.toDouble() ?? 0.3);
