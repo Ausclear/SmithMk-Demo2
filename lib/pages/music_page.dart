@@ -197,9 +197,41 @@ class _MusicPageState extends State<MusicPage> {
     });
   }
 
-  // ─── Play track — uses play-spotify endpoint like PWA ───
+  // ─── Play track — with confirmation if switching devices ───
   Future<void> _playTrack(SpotifyTrack track) async {
     if (_sel == null) return;
+    final selName = _ECHOS.firstWhere((e) => e.$1 == _sel, orElse: () => ('', 'Unknown')).$2;
+
+    // Check if Spotify is currently playing on a DIFFERENT device
+    final spState = _rawStates[HAService.spotifyEntity] ?? 'idle';
+    final sp = _rawAttrs[HAService.spotifyEntity] ?? {};
+    final spSource = sp['source']?.toString();
+    final spPlaying = spState == 'playing' || spState == 'paused';
+    final currentSource = _SPOTIFY_SOURCES[_sel!];
+
+    if (spPlaying && spSource != null && spSource != currentSource) {
+      // Another device is playing — ask for confirmation
+      final confirmed = await showDialog<bool>(context: context, builder: (ctx) => Dialog(
+        backgroundColor: const Color(0xFF1E1E1E), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(PhosphorIcons.shuffle(PhosphorIconsStyle.bold), size: 32, color: _amber),
+          const SizedBox(height: 14),
+          const Text('Switch Device?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xF2FFFFFF))),
+          const SizedBox(height: 10),
+          Text('Spotify is currently playing on $spSource. Playing on $selName will disconnect $spSource.',
+            textAlign: TextAlign.center, style: const TextStyle(fontSize: 13, color: Color(0x80FFFFFF), height: 1.4)),
+          const SizedBox(height: 20),
+          Row(children: [
+            Expanded(child: _NeuBtn(h: 44, onTap: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0x80FFFFFF))))),
+            const SizedBox(width: 10),
+            Expanded(child: _NeuBtn(h: 44, amber: true, onTap: () => Navigator.pop(ctx, true),
+              child: Text('Play on $selName', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _amber)))),
+          ]),
+        ]))));
+      if (confirmed != true) return;
+    }
+
     HapticFeedback.mediumImpact();
     setState(() { _playingUri = track.uri; _optPlay[_sel!] = true; _livePos = 0; });
     final src = _SPOTIFY_SOURCES[_sel!];
