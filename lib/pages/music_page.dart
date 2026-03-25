@@ -107,8 +107,8 @@ class _MusicPageState extends State<MusicPage> {
     setState(() {
       _deviceStates[entityId] = data['state'] as String? ?? 'idle';
       final newAttrs = Map<String, dynamic>.from(data['attributes'] ?? {});
-      // Anti-bounce: ALWAYS use committed volume during lockout — ignore ALL remote volume
-      if (_volLocked && _committedVol != null && entityId == HAService.spotifyEntity) {
+      // Anti-bounce: ALWAYS use committed volume during lockout
+      if (_volLocked && _committedVol != null && (entityId == HAService.spotifyEntity || entityId == _selectedEcho)) {
         newAttrs['volume_level'] = _committedVol;
       }
       _deviceAttrs[entityId] = newAttrs;
@@ -214,35 +214,36 @@ class _MusicPageState extends State<MusicPage> {
     if (mounted) setState(() => _playingUri = null);
   }
 
-  // ─── Controls — Spotify entity when active, Echo entity when idle ───
-  String get _controlTarget => (_isPlaying || _isPaused) ? HAService.spotifyEntity : _selectedEcho;
+  // ─── Controls — ALWAYS target the selected Echo entity ───
+  // This is how the PWA does it. The Echo forwards to Spotify/Amazon/etc internally.
+  // Only use Spotify entity for seek (which Echo doesn't support) and play_media (initial playback).
 
   void _play() {
     setState(() {
-      if (_isPlaying || _isPaused) {
+      _deviceStates[_selectedEcho] = (_deviceStates[_selectedEcho] == 'playing') ? 'paused' : 'playing';
+      if (_spotifyMatchesSelected) {
         _deviceStates[HAService.spotifyEntity] = _isPlaying ? 'paused' : 'playing';
-      } else {
-        _deviceStates[_selectedEcho] = 'playing';
       }
     });
-    HAService.callService('media_player', 'media_play_pause', {'entity_id': _controlTarget});
+    // Always target the Echo — HA handles routing to Spotify internally
+    HAService.callService('media_player', 'media_play_pause', {'entity_id': _selectedEcho});
   }
   void _stop() {
-    setState(() { _deviceStates[HAService.spotifyEntity] = 'idle'; _deviceStates[_selectedEcho] = 'idle'; _livePosition = 0; });
-    HAService.callService('media_player', 'media_stop', {'entity_id': _controlTarget});
+    setState(() { _deviceStates[_selectedEcho] = 'idle'; _deviceStates[HAService.spotifyEntity] = 'idle'; _livePosition = 0; });
+    HAService.callService('media_player', 'media_stop', {'entity_id': _selectedEcho});
   }
   void _next() {
     setState(() => _livePosition = 0);
-    HAService.callService('media_player', 'media_next_track', {'entity_id': _controlTarget});
+    HAService.callService('media_player', 'media_next_track', {'entity_id': _selectedEcho});
   }
   void _prev() {
     final wasPos = _livePosition;
     setState(() => _livePosition = 0);
-    if ((_isPlaying || _isPaused) && wasPos > 3) {
-      // Seek to beginning on Spotify entity — Echo doesn't support seek but Spotify does
+    if (_spotifyMatchesSelected && wasPos > 3) {
+      // Seek to beginning — only works on Spotify entity, not Echo
       HAService.callService('media_player', 'media_seek', {'entity_id': HAService.spotifyEntity, 'seek_position': 0});
     } else {
-      HAService.callService('media_player', 'media_previous_track', {'entity_id': _controlTarget});
+      HAService.callService('media_player', 'media_previous_track', {'entity_id': _selectedEcho});
     }
   }
 
@@ -252,10 +253,10 @@ class _MusicPageState extends State<MusicPage> {
   }
   void _volCommit(double v) {
     setState(() { _localVol = null; _committedVol = v; _volLocked = true; });
-    _deviceAttrs[HAService.spotifyEntity] = {..._spotifyAttrs, 'volume_level': v};
     _deviceAttrs[_selectedEcho] = {...(_deviceAttrs[_selectedEcho] ?? {}), 'volume_level': v};
-    // Target whichever entity is active
-    HAService.callService('media_player', 'volume_set', {'entity_id': _controlTarget, 'volume_level': v});
+    if (_spotifyMatchesSelected) _deviceAttrs[HAService.spotifyEntity] = {..._spotifyAttrs, 'volume_level': v};
+    // Target the Echo entity — same as PWA
+    HAService.callService('media_player', 'volume_set', {'entity_id': _selectedEcho, 'volume_level': v});
     _volLockTimer?.cancel();
     _volLockTimer = Timer(const Duration(seconds: 5), () {
       if (mounted) setState(() { _volLocked = false; _committedVol = null; });
