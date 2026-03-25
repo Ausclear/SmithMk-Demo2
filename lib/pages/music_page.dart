@@ -76,6 +76,7 @@ class _MusicPageState extends State<MusicPage> {
   int _livePos = 0;
   String? _lastTrack;
   StreamSubscription? _wsSub;
+  bool _devsExpanded = false;
 
   _Dev? get _active {
     if (_devs.isEmpty) return null;
@@ -315,11 +316,10 @@ class _MusicPageState extends State<MusicPage> {
         if (isLandscape) Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Expanded(flex: 12, child: _buildNowPlaying(a, isPlaying, durSecs, displayVol)),
           const SizedBox(width: 14),
-          Expanded(flex: 10, child: Column(children: [_buildDevices(), _buildSearch()])),
+          Expanded(flex: 10, child: _buildDevicesAndSearch()),
         ]) else ...[
           _buildNowPlaying(a, isPlaying, durSecs, displayVol),
-          _buildDevices(),
-          _buildSearch(),
+          _buildDevicesAndSearch(),
         ],
       ])),
 
@@ -397,20 +397,41 @@ class _MusicPageState extends State<MusicPage> {
     ]));
   }
 
-  // ─── DEVICES CARD ───
-  Widget _buildDevices() {
-    return _NeuCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('DEVICES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.8, color: _gold)),
-      const SizedBox(height: 14),
-      ..._devs.map((d) => _buildDeviceRow(d)),
-    ]));
+  // ─── DEVICES + SEARCH — devices is a collapsible dropdown over search ───
+  Widget _buildDevicesAndSearch() {
+    final selDev = _devs.firstWhere((d) => d.entity == _sel, orElse: () => _Dev(entity: '', name: 'No device', state: 'idle'));
+    final selPlaying = _getEffPlaying(selDev.entity);
+
+    return Column(children: [
+      // Devices header — always visible, tap to expand/collapse
+      _NeuCard(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        GestureDetector(onTap: () { HapticFeedback.lightImpact(); setState(() => _devsExpanded = !_devsExpanded); },
+          child: Row(children: [
+            Text('DEVICES', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.8, color: _gold)),
+            const Spacer(),
+            // Show selected device name
+            Text(selDev.name, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _amber.withOpacity(0.7))),
+            const SizedBox(width: 8),
+            AnimatedRotation(turns: _devsExpanded ? 0.5 : 0, duration: const Duration(milliseconds: 200),
+              child: Icon(PhosphorIcons.caretDown(PhosphorIconsStyle.bold), size: 14, color: _gold.withOpacity(0.6))),
+          ])),
+        // Device list — animated expand/collapse
+        AnimatedCrossFade(
+          firstChild: const SizedBox(width: double.infinity, height: 0),
+          secondChild: Padding(padding: const EdgeInsets.only(top: 14), child: Column(children: _devs.map((d) => _buildDeviceRow(d)).toList())),
+          crossFadeState: _devsExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+          duration: const Duration(milliseconds: 200)),
+      ])),
+      // Search — always visible below
+      _buildSearch(),
+    ]);
   }
 
   Widget _buildDeviceRow(_Dev d) {
     final isSel = d.entity == _sel;
     final isPlaying = _getEffPlaying(d.entity);
     return GestureDetector(
-      onTap: () { HapticFeedback.lightImpact(); setState(() { _sel = d.entity; _localVol = null; _volLocked = false; _livePos = 0; }); _syncPosition(); },
+      onTap: () { HapticFeedback.lightImpact(); setState(() { _sel = d.entity; _localVol = null; _volLocked = false; _livePos = 0; _devsExpanded = false; }); _syncPosition(); },
       child: Container(margin: const EdgeInsets.only(bottom: 8), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(14), color: _card,
           border: Border.all(color: isSel ? _amber.withOpacity(0.15) : Colors.white.withOpacity(0.04)),
