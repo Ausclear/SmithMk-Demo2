@@ -218,8 +218,14 @@ class _MusicPageState extends State<MusicPage> {
     HAService.callService('media_player', 'media_next_track', {'entity_id': _controlTarget});
   }
   void _prev() {
+    final wasPos = _livePosition;
     setState(() => _livePosition = 0);
-    HAService.callService('media_player', 'media_previous_track', {'entity_id': _controlTarget});
+    if ((_isPlaying || _isPaused) && wasPos > 3) {
+      // Seek to beginning on Spotify entity — Echo doesn't support seek but Spotify does
+      HAService.callService('media_player', 'media_seek', {'entity_id': HAService.spotifyEntity, 'seek_position': 0});
+    } else {
+      HAService.callService('media_player', 'media_previous_track', {'entity_id': _controlTarget});
+    }
   }
 
   // ─── Volume — anti-bounce pattern ───
