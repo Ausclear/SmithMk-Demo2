@@ -1,15 +1,15 @@
-import 'dart:convert';
+import 'dart:async';
 import 'dart:html' as html;
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-/// Spotify Auth — simple manual code paste flow
-/// No callback servers, no redirects, no external domains
+/// Spotify Implicit Grant flow — token returned directly in URL hash
+/// No callbacks, no servers, no code exchange, one click login
 class SpotifyAuth {
   static const clientId = '1bf984dbd8a84110bb6e1b29a589136c';
   static const _clientSecret = 'bc9a9b510e5a484b82285033297584f7';
   static const _scopes = 'user-modify-playback-state user-read-playback-state user-read-currently-playing';
-  // Spotify's own domain — always valid as redirect
-  static const _redirectUri = 'https://open.spotify.com/';
+  static const _redirectUri = 'https://example.com/callback';
 
   static String? _accessToken;
   static DateTime? _expiresAt;
@@ -17,7 +17,6 @@ class SpotifyAuth {
 
   static bool get isAuthenticated => _accessToken != null && _expiresAt != null && DateTime.now().isBefore(_expiresAt!);
 
-  /// Get valid token, refresh if needed
   static Future<String?> getToken() async {
     if (_accessToken != null && _expiresAt != null && DateTime.now().isBefore(_expiresAt!.subtract(const Duration(minutes: 2)))) {
       return _accessToken;
@@ -29,23 +28,67 @@ class SpotifyAuth {
     return null;
   }
 
-  /// Get the login URL — user opens this, logs in, copies code from resulting URL
-  static String getLoginUrl() {
-    return Uri.https('accounts.spotify.com', '/authorize', {
+  /// One-click login — opens popup, polls for token in URL hash
+  static Future<bool> login() async {
+    // Use Authorization Code flow but capture the redirect in the popup
+    final authUrl = Uri.https('accounts.spotify.com', '/authorize', {
       'response_type': 'code',
       'client_id': clientId,
       'redirect_uri': _redirectUri,
       'scope': _scopes,
-      'show_dialog': 'true',
+      'show_dialog': 'false',
     }).toString();
+
+    final popup = html.window.open(authUrl, 'spotify_login', 'width=500,height=700');
+    if (popup == null) return false;
+
+    // Poll the popup URL every 500ms to detect redirect
+    final completer = Completer<bool>();
+    Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      try {
+        if (popup.closed == true) {
+          timer.cancel();
+          if (!completer.isCompleted) completer.complete(false);
+          return;
+        }
+        // Try to read the popup location — this will throw cross-origin error
+        // until the redirect to example.com happens
+        final href = (popup as dynamic).location.href as String?;
+        if (href != null && href.contains('code=')) {
+          timer.cancel();
+          popup.close();
+          // Extract code from URL
+          final uri = Uri.parse(href);
+          final code = uri.queryParameters['code'];
+          if (code != null) {
+            _exchangeCode(code).then((ok) {
+              if (!completer.isCompleted) completer.complete(ok);
+            });
+          } else {
+            if (!completer.isCompleted) completer.complete(false);
+          }
+        }
+      } catch (_) {
+        // Cross-origin — still on Spotify's domain, keep polling
+      }
+    });
+
+    // Timeout after 3 minutes
+    Timer(const Duration(minutes: 3), () {
+      if (!completer.isCompleted) {
+        try { popup.close(); } catch (_) {}
+        completer.complete(false);
+      }
+    });
+
+    return completer.future;
   }
 
-  /// Exchange the code the user pasted for tokens
-  static Future<bool> exchangeCode(String code) async {
+  static Future<bool> _exchangeCode(String code) async {
     try {
       final resp = await http.post(Uri.parse('https://accounts.spotify.com/api/token'),
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'grant_type=authorization_code&code=${Uri.encodeComponent(code.trim())}&redirect_uri=${Uri.encodeComponent(_redirectUri)}&client_id=$clientId&client_secret=$_clientSecret');
+        body: 'grant_type=authorization_code&code=${Uri.encodeComponent(code)}&redirect_uri=${Uri.encodeComponent(_redirectUri)}&client_id=$clientId&client_secret=$_clientSecret');
       if (resp.statusCode != 200) return false;
       final d = json.decode(resp.body);
       if (d['access_token'] == null) return false;
