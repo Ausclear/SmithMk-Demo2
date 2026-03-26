@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../services/hue_service.dart';
+import '../services/tapo_service.dart';
 
 // Crestron-inspired colour system (approved demo)
 class _C {
@@ -65,12 +66,49 @@ class _LightingPageState extends State<LightingPage> {
   String? _activeScene;
   StreamSubscription<HueEvent>? _sseSub;
   Map<String, String> _v2ToV1 = {};
+  StreamSubscription<Map<String, TapoDevice>>? _tapoSub;
 
   @override
-  void initState() { super.initState(); _loadLights(); _startSSE(); }
+  void initState() { super.initState(); _loadLights(); _startSSE(); _startTapo(); }
 
   @override
-  void dispose() { _sseSub?.cancel(); HueService.stopEventStream(); super.dispose(); }
+  void dispose() { _sseSub?.cancel(); _tapoSub?.cancel(); HueService.stopEventStream(); TapoService.stopPolling(); super.dispose(); }
+
+  void _startTapo() {
+    TapoService.startPolling();
+    _tapoSub = TapoService.stateStream.listen((tapoDevices) {
+      if (!mounted) return;
+      setState(() {
+        // Update existing Tapo lights
+        for (final l in _lights.where((x) => x.source == 'tapo_plug' || x.source == 'tapo_strip')) {
+          final td = tapoDevices.values.firstWhere(
+            (t) => t.nickname == l.name || t.alias == l.id.replaceFirst('tapo:', ''),
+            orElse: () => TapoDevice(alias:'',nickname:'',ip:'',mac:'',type:'',model:'',isPlug:true),
+          );
+          if (td.ip.isNotEmpty) {
+            l.on = td.on;
+            l.brightness = td.brightness;
+            l.tapoIp = td.ip;
+          }
+        }
+        // Add any new Tapo devices not yet in the list
+        for (final td in tapoDevices.values) {
+          if (td.ip.isEmpty) continue;
+          final exists = _lights.any((l) => l.tapoIp == td.ip || l.name == td.nickname);
+          if (!exists) {
+            _lights.add(LightDevice(
+              id: 'tapo:${td.alias}',
+              name: td.nickname,
+              source: td.isPlug ? 'tapo_plug' : 'tapo_strip',
+              on: td.on,
+              brightness: td.brightness,
+              tapoIp: td.ip,
+            ));
+          }
+        }
+      });
+    });
+  }
 
   void _startSSE() async {
     // Build V2→V1 ID mapping
@@ -111,13 +149,30 @@ class _LightingPageState extends State<LightingPage> {
       hueLights.forEach((id, hl) {
         lights.add(LightDevice(id: 'hue:$id', name: hl.name, source: 'hue', on: hl.on, brightness: hl.brightness));
       });
-      lights.addAll([
-        LightDevice(id: 'tapo:ucl1', name: 'Kitchen UCL 1', source: 'tapo_plug', on: false),
-        LightDevice(id: 'tapo:ucl2', name: 'Kitchen UCL 2', source: 'tapo_plug', on: false),
-        LightDevice(id: 'tapo:picture', name: 'Lounge Picture', source: 'tapo_plug', on: false),
-        LightDevice(id: 'tapo:strip1', name: 'Cerise Lightstrip', source: 'tapo_strip', on: false),
-        LightDevice(id: 'tapo:strip2', name: 'Cerise Lightstrip 2', source: 'tapo_strip', on: false),
-      ]);
+      // Load Tapo devices from proxy
+      try {
+        final tapoDevices = await TapoService.fetchDevices();
+        for (final td in tapoDevices.values) {
+          if (td.ip.isEmpty) continue;
+          lights.add(LightDevice(
+            id: 'tapo:\${td.alias}',
+            name: td.nickname,
+            source: td.isPlug ? 'tapo_plug' : 'tapo_strip',
+            on: td.on,
+            brightness: td.brightness,
+            tapoIp: td.ip,
+          ));
+        }
+      } catch (_) {
+        // Proxy not running — add known devices as offline placeholders
+        lights.addAll([
+          LightDevice(id: 'tapo:ucl1', name: 'Kitchen UCL 1', source: 'tapo_plug'),
+          LightDevice(id: 'tapo:ucl2', name: 'Kitchen UCL 2', source: 'tapo_plug'),
+          LightDevice(id: 'tapo:picture', name: 'Lounge Picture', source: 'tapo_plug'),
+          LightDevice(id: 'tapo:strip1', name: 'Cerise Lightstrip', source: 'tapo_strip'),
+          LightDevice(id: 'tapo:strip2', name: 'Cerise Lightstrip 2', source: 'tapo_strip'),
+        ]);
+      }
       setState(() { _lights = lights; _loading = false; });
     } catch (e) {
       setState(() {
@@ -156,6 +211,8 @@ class _LightingPageState extends State<LightingPage> {
     if (l.source == 'hue') {
       final hid = l.id.replaceFirst('hue:', '');
       try { pct > 0 ? await HueService.setBrightness(hid, pct) : await HueService.turnOff(hid); } catch (_) {}
+    } else if (l.source == 'tapo_strip' && l.tapoIp != null && l.tapoIp!.isNotEmpty) {
+      try { pct > 0 ? await TapoService.setBrightness(l.tapoIp!, pct) : await TapoService.turnOff(l.tapoIp!); } catch (_) {}
     }
   }
 
