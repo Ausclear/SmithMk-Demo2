@@ -15,7 +15,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 # TP-Link cloud creds — used to seed KLAP handshake (comms stay local)
-EMAIL = "smithmk@aussiebb.com.au"
+EMAIL = "Smithmk@aussiebb.com.au"
 PASSWORD = "MkS.9272103"
 
 # Skip these IPs during scan
