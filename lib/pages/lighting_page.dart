@@ -155,7 +155,7 @@ class _LightingPageState extends State<LightingPage> {
         for (final td in tapoDevices.values) {
           if (td.ip.isEmpty) continue;
           lights.add(LightDevice(
-            id: 'tapo:\${td.alias}',
+            id: 'tapo:${td.alias}',
             name: td.nickname,
             source: td.isPlug ? 'tapo_plug' : 'tapo_strip',
             on: td.on,
@@ -203,6 +203,15 @@ class _LightingPageState extends State<LightingPage> {
     if (l.source == 'hue') {
       final hid = l.id.replaceFirst('hue:', '');
       try { l.on ? await HueService.setBrightness(hid, l.brightness) : await HueService.turnOff(hid); } catch (_) {}
+    } else if ((l.source == 'tapo_plug' || l.source == 'tapo_strip') && l.tapoIp != null && l.tapoIp!.isNotEmpty) {
+      try {
+        if (l.on) {
+          if (l.source == 'tapo_strip') { await TapoService.setBrightness(l.tapoIp!, 100); }
+          else { await TapoService.turnOn(l.tapoIp!); }
+        } else {
+          await TapoService.turnOff(l.tapoIp!);
+        }
+      } catch (_) {}
     }
   }
 
@@ -228,6 +237,15 @@ class _LightingPageState extends State<LightingPage> {
     for (final l in _lights.where((x) => x.source == 'hue')) {
       final hid = l.id.replaceFirst('hue:', '');
       l.on ? HueService.setBrightness(hid, l.brightness).catchError((_){}) : HueService.turnOff(hid).catchError((_){});
+    }
+    for (final l in _lights.where((x) => x.source == 'tapo_plug' || x.source == 'tapo_strip')) {
+      if (l.tapoIp == null || l.tapoIp!.isEmpty) continue;
+      if (l.on) {
+        if (l.source == 'tapo_strip') { TapoService.setBrightness(l.tapoIp!, s.brightness > 0 ? s.brightness : 100).catchError((_){}); }
+        else { TapoService.turnOn(l.tapoIp!).catchError((_){}); }
+      } else {
+        TapoService.turnOff(l.tapoIp!).catchError((_){});
+      }
     }
   }
 
@@ -328,6 +346,17 @@ class _LightingPageState extends State<LightingPage> {
         _AmberToggle(value: anyOn, onChanged: (_) {
           HapticFeedback.lightImpact();
           setState(() { for (final l in gl) { if (anyOn) { l.on = false; if (!l.isPlug) l.brightness = 0; } else { l.on = true; if (!l.isPlug) l.brightness = 100; } } });
+          for (final l in gl) {
+            if (l.source == 'hue') {
+              final hid = l.id.replaceFirst('hue:', '');
+              l.on ? HueService.setBrightness(hid, l.brightness).catchError((_){}) : HueService.turnOff(hid).catchError((_){});
+            } else if ((l.source == 'tapo_plug' || l.source == 'tapo_strip') && l.tapoIp != null && l.tapoIp!.isNotEmpty) {
+              if (l.on) {
+                if (l.source == 'tapo_strip') { TapoService.setBrightness(l.tapoIp!, 100).catchError((_){}); }
+                else { TapoService.turnOn(l.tapoIp!).catchError((_){}); }
+              } else { TapoService.turnOff(l.tapoIp!).catchError((_){}); }
+            }
+          }
         }),
       ])));
 
