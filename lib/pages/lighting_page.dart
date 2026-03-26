@@ -107,7 +107,7 @@ class _LightingPageState extends State<LightingPage> {
     HapticFeedback.lightImpact();
     setState(() {
       if (l.isPlug) { l.on = !l.on; }
-      else { if (l.on) { l.on = false; l.brightness = 0; } else { l.on = true; l.brightness = 75; } }
+      else { if (l.on) { l.on = false; l.brightness = 0; } else { l.on = true; l.brightness = 100; } }
     });
     if (l.source == 'hue') {
       final hid = l.id.replaceFirst('hue:', '');
@@ -234,7 +234,7 @@ class _LightingPageState extends State<LightingPage> {
         const SizedBox(width: 6),
         _AmberToggle(value: anyOn, onChanged: (_) {
           HapticFeedback.lightImpact();
-          setState(() { for (final l in gl) { if (anyOn) { l.on = false; if (!l.isPlug) l.brightness = 0; } else { l.on = true; if (!l.isPlug) l.brightness = 75; } } });
+          setState(() { for (final l in gl) { if (anyOn) { l.on = false; if (!l.isPlug) l.brightness = 0; } else { l.on = true; if (!l.isPlug) l.brightness = 100; } } });
         }),
       ])));
 
