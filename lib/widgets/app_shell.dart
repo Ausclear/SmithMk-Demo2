@@ -25,7 +25,6 @@ class _AppShellState extends State<AppShell> {
     _NavPage('Dashboard', PhosphorIcons.squaresFour(PhosphorIconsStyle.light), PhosphorIcons.squaresFour(PhosphorIconsStyle.fill)),
     _NavPage('Rooms', PhosphorIcons.door(PhosphorIconsStyle.light), PhosphorIcons.door(PhosphorIconsStyle.fill)),
     _NavPage('Lights', PhosphorIcons.lightbulb(PhosphorIconsStyle.light), PhosphorIcons.lightbulb(PhosphorIconsStyle.fill)),
-    _NavPage('Power', PhosphorIcons.plug(PhosphorIconsStyle.light), PhosphorIcons.plug(PhosphorIconsStyle.fill)),
     _NavPage('Blinds', PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.light), PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.fill)),
     _NavPage('Climate', PhosphorIcons.thermometerSimple(PhosphorIconsStyle.light), PhosphorIcons.thermometerSimple(PhosphorIconsStyle.fill)),
     _NavPage('Security', PhosphorIcons.shieldCheck(PhosphorIconsStyle.light), PhosphorIcons.shieldCheck(PhosphorIconsStyle.fill)),
@@ -39,7 +38,6 @@ class _AppShellState extends State<AppShell> {
     const DashboardPage(),
     const RoomsPage(),
     const LightingPage(),
-    PlaceholderPage(title: 'Power', icon: PhosphorIcons.plug(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Blinds', icon: PhosphorIcons.slidersHorizontal(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Climate', icon: PhosphorIcons.thermometerSimple(PhosphorIconsStyle.light)),
     PlaceholderPage(title: 'Security', icon: PhosphorIcons.shieldCheck(PhosphorIconsStyle.light)),
@@ -61,9 +59,9 @@ class _AppShellState extends State<AppShell> {
 
   void navigateToTile(String tileName) {
     final map = {
-      'Dashboard': 0, 'Rooms': 1, 'Lights': 2, 'Power': 3,
-      'Blinds': 4, 'Climate': 5, 'Security': 6, 'Energy': 7,
-      'Media': 8, 'Irrigation': 9, 'Settings': 10,
+      'Dashboard': 0, 'Rooms': 1, 'Lights': 2,
+      'Blinds': 3, 'Climate': 4, 'Security': 5, 'Energy': 6,
+      'Media': 7, 'Irrigation': 8, 'Settings': 9,
     };
     final idx = map[tileName];
     if (idx != null) _goToPage(idx);
@@ -203,8 +201,8 @@ class _AppShellState extends State<AppShell> {
       _pages[0], // Home
       _pages[1], // Dashboard
       _pages[3], // Lights
-      _pages[9], // Media
-      _pages[11], // Settings
+      _pages[8], // Media
+      _pages[10], // Settings
     ];
 
     return Scaffold(
@@ -226,16 +224,16 @@ class _AppShellState extends State<AppShell> {
                 final isActive = (i == 0 && _currentPage == null) ||
                     (i == 1 && _currentPage == 0) ||
                     (i == 2 && _currentPage == 2) ||
-                    (i == 3 && _currentPage == 8) ||
-                    (i == 4 && _currentPage == 10);
+                    (i == 3 && _currentPage == 7) ||
+                    (i == 4 && _currentPage == 9);
 
                 return GestureDetector(
                   onTap: () {
                     if (i == 0) _goHome();
                     else if (i == 1) _goToPage(0);
                     else if (i == 2) _goToPage(2);
-                    else if (i == 3) _goToPage(8);
-                    else if (i == 4) _goToPage(10);
+                    else if (i == 3) _goToPage(7);
+                    else if (i == 4) _goToPage(9);
                   },
                   behavior: HitTestBehavior.opaque,
                   child: SizedBox(
