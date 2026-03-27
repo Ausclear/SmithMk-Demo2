@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../services/hue_service.dart';
 import '../services/tapo_service.dart';
+import '../services/supabase_service.dart';
+import '../services/supabase_service.dart';
 
 // Crestron-inspired colour system (approved demo)
 class _C {
@@ -22,11 +24,14 @@ class _C {
 }
 
 class LightDevice {
-  final String id, name, source;
+  final String id, source;
+  final String originalName;
+  String name;
   bool on;
   int brightness;
   String? tapoIp;
-  LightDevice({required this.id, required this.name, required this.source, this.on = false, this.brightness = 0, this.tapoIp});
+  LightDevice({required this.id, required this.name, required this.source, this.on = false, this.brightness = 0, this.tapoIp, String? originalName})
+    : originalName = originalName ?? name;
   bool get isPlug => source == 'tapo_plug';
   bool get isDimmable => source != 'tapo_plug';
 }
@@ -178,6 +183,8 @@ class _LightingPageState extends State<LightingPage> {
         ]);
       }
       setState(() { _lights = lights; _loading = false; });
+      // Apply custom names from Supabase
+      _applyCustomNames();
     } catch (e) {
       setState(() {
         _lights = [
@@ -256,6 +263,51 @@ class _LightingPageState extends State<LightingPage> {
   void _adjustAll(int delta) {
     HapticFeedback.selectionClick();
     setState(() { for (final l in _lights) { if (!l.isPlug && l.on) { l.brightness = (l.brightness + delta).clamp(0, 100); if (l.brightness == 0) l.on = false; } } });
+  }
+
+  Future<void> _applyCustomNames() async {
+    final names = await SupabaseService.loadLightNames();
+    if (!mounted || names.isEmpty) return;
+    setState(() {
+      for (final l in _lights) {
+        final custom = names[l.id];
+        if (custom != null) l.name = custom;
+      }
+    });
+  }
+
+  void _showRenameDialog(LightDevice l) {
+    final nc = TextEditingController(text: l.name);
+    showDialog(context: context, builder: (ctx) => Dialog(
+      backgroundColor: const Color(0xFF141310), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(padding: const EdgeInsets.all(22), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('Rename Light', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _C.t1)),
+        const SizedBox(height: 4),
+        Text(l.id, style: const TextStyle(fontSize: 10, color: _C.t3)),
+        const SizedBox(height: 14),
+        TextField(controller: nc, autofocus: true, style: const TextStyle(fontSize: 13, color: Colors.white),
+          decoration: InputDecoration(hintText: 'Custom name', hintStyle: const TextStyle(color: _C.t3), filled: true, fillColor: _C.bg,
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: _C.border)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: _C.border)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11))),
+        const SizedBox(height: 14),
+        Row(children: [
+          Expanded(child: TextButton(onPressed: () async {
+            await SupabaseService.removeLightName(l.id);
+            if (mounted) { Navigator.pop(ctx); _loadLights(); }
+          }, child: const Text('Reset', style: TextStyle(color: _C.t3)))),
+          const SizedBox(width: 8),
+          Expanded(child: TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: _C.t3)))),
+          const SizedBox(width: 8),
+          Expanded(child: ElevatedButton(onPressed: () async {
+            final n = nc.text.trim(); if (n.isEmpty) return;
+            await SupabaseService.setLightName(l.id, n);
+            setState(() => l.name = n);
+            Navigator.pop(ctx);
+          }, style: ElevatedButton.styleFrom(backgroundColor: _C.amber, foregroundColor: Colors.black, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+              child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w700)))),
+        ]),
+      ]))));
   }
 
   @override
@@ -394,7 +446,9 @@ class _LightingPageState extends State<LightingPage> {
 
   Widget _lightCard(LightDevice l) {
     final on = l.on;
-    return Container(
+    return GestureDetector(
+      onLongPress: () { HapticFeedback.mediumImpact(); _showRenameDialog(l); },
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: _C.card, borderRadius: BorderRadius.circular(12),
@@ -418,7 +472,7 @@ class _LightingPageState extends State<LightingPage> {
           _BrightnessBar(value: l.brightness / 100, isOn: on, onChanged: (v) => _setBri(l, (v * 100).round())),
         ],
       ]),
-    );
+    ));
   }
 
   Widget _sceneChip(String label, LightScene? s, bool active, {required VoidCallback onTap, VoidCallback? onLongPress}) {
