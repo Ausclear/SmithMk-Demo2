@@ -4,196 +4,214 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>SmithMk — Rooms</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-:root{
-  --bg:#121212;--card:rgba(255,255,255,0.05);--card-solid:#1A1A1A;
-  --amber:#FFB300;--gold:#c4a96b;
-  --t1:#EEEEEE;--t2:#B0B0B0;--t3:#707070;--t4:#444;
-  --border:rgba(255,255,255,0.06);--border-a:rgba(255,179,0,0.15);
-  --r:14px;
-}
+:root{--bg:#0e0e0e;--s1:#161616;--s2:#1c1c1c;--amber:#FFB300;--gold:#c4a96b;--t1:#eee;--t2:#aaa;--t3:#666;--t4:#3a3a3a;--r:16px;--brd:rgba(255,255,255,0.05)}
 html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;overflow:hidden}
-button{font-family:inherit;cursor:pointer;border:none;background:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
-/* ═══ LAYOUT ═══ */
-#app{height:100%;display:flex;flex-direction:column}
+/* ═══ SHELL — sidebar rooms list on wide, full page on mobile ═══ */
+.shell{display:flex;height:100%}
+
+/* Rooms sidebar — desktop/tablet only */
+.sidebar{width:220px;background:var(--s1);border-right:1px solid var(--brd);display:none;flex-direction:column;flex-shrink:0}
+@media(min-width:768px){.sidebar{display:flex}}
+.sb-head{padding:20px 16px 12px;border-bottom:1px solid var(--brd)}
+.sb-title{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
+.sb-list{flex:1;overflow-y:auto;padding:8px}
+.sb-room{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.15s;margin-bottom:2px}
+.sb-room:hover{background:rgba(255,255,255,0.03)}
+.sb-room.on{background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.1)}
+.sb-room:not(.on){border:1px solid transparent}
+.sb-emo{font-size:18px;width:24px;text-align:center}
+.sb-rn{font-size:13px;font-weight:600;color:var(--t3);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-room.on .sb-rn{color:var(--t1)}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);opacity:0;transition:.2s}
+.sb-room.on .sb-dot{opacity:1}
+.sb-add{display:flex;align-items:center;gap:8px;padding:10px 12px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;border-radius:10px;margin:4px 8px}
+.sb-add:hover{background:rgba(255,179,0,0.04)}
+
+/* Main content area */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
+.content{max-width:900px;width:100%;margin:0 auto;padding:0 16px 120px;flex:1}
+
+/* ═══ MOBILE ROOM SWITCHER — horizontal pills ═══ */
+.mob-rooms{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scrollbar-width:none}
+.mob-rooms::-webkit-scrollbar{display:none}
+@media(min-width:768px){.mob-rooms{display:none}}
+.mr-pill{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--s2);border:1px solid var(--brd);white-space:nowrap;flex-shrink:0;font-size:12px;font-weight:600;color:var(--t3);transition:.15s}
+.mr-pill.on{background:rgba(255,179,0,0.08);border-color:rgba(255,179,0,0.15);color:var(--t1)}
+.mr-pill.add{color:var(--gold);border-color:rgba(255,179,0,0.1)}
 
 /* ═══ EMPTY STATE ═══ */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;opacity:0;animation:fu .4s ease .1s forwards}
-.empty-ring{width:88px;height:88px;border-radius:50%;border:2px solid var(--border-a);display:flex;align-items:center;justify-content:center}
-.empty-ring-inner{width:64px;height:64px;border-radius:50%;background:rgba(255,179,0,0.04);display:flex;align-items:center;justify-content:center;font-size:28px}
-.empty h2{font-size:18px;font-weight:700;letter-spacing:-0.3px}
-.empty p{font-size:12px;color:var(--t3);max-width:220px;text-align:center;line-height:1.5}
-.btn-primary{height:44px;padding:0 28px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px;letter-spacing:0.3px;transition:.15s}
-.btn-primary:active{transform:scale(0.96);opacity:0.9}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;padding:40px;opacity:0;animation:fu .4s ease .1s forwards}
+.empty-icon{width:80px;height:80px;border-radius:24px;background:rgba(255,179,0,0.04);border:1px solid rgba(255,179,0,0.1);display:flex;align-items:center;justify-content:center;font-size:32px}
+.empty h2{font-size:18px;font-weight:700}
+.empty p{font-size:12px;color:var(--t3);text-align:center;line-height:1.6;max-width:240px}
+.btn-p{height:44px;padding:0 28px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px;transition:.12s}
+.btn-p:active{transform:scale(0.96)}
 
 /* ═══ ROOM HEADER ═══ */
-.rh{padding:16px 20px 12px;display:flex;align-items:center;gap:14px;flex-shrink:0}
-.rh-emoji{width:44px;height:44px;border-radius:14px;background:rgba(255,179,0,0.06);border:1px solid var(--border-a);display:flex;align-items:center;justify-content:center;font-size:22px}
+.rh{display:flex;align-items:center;gap:14px;padding:20px 0 4px}
+.rh-emo{width:48px;height:48px;border-radius:16px;background:rgba(255,179,0,0.05);border:1px solid rgba(255,179,0,0.1);display:flex;align-items:center;justify-content:center;font-size:24px}
 .rh-info{flex:1}
-.rh-name{font-size:18px;font-weight:700;letter-spacing:-0.3px}
-.rh-sub{font-size:11px;color:var(--t3);margin-top:1px}
-.rh-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:13px;transition:.15s}
-.rh-btn:hover{border-color:var(--border-a);color:var(--amber)}
+.rh-name{font-size:20px;font-weight:800;letter-spacing:-0.3px}
+.rh-sub{font-size:11px;color:var(--t3);margin-top:2px;font-weight:500}
+.rh-acts{display:flex;gap:6px}
+.rh-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:13px;transition:.15s}
+.rh-btn:hover{border-color:rgba(255,179,0,0.15);color:var(--amber)}
 
-/* ═══ CAROUSEL ═══ */
-.carousel-w{flex:1;overflow:hidden;position:relative}
-.carousel{display:flex;height:100%;transition:transform .3s cubic-bezier(0.25,0.1,0.25,1)}
-.page{min-width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 120px}
+/* ═══ SECTION ═══ */
+.sec{margin-top:20px}
+.sec-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px}
 
-/* Dots */
-.dots{display:flex;justify-content:center;gap:6px;padding:10px 0 14px;flex-shrink:0}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--t4);transition:.2s}
-.dot.on{width:20px;border-radius:3px;background:var(--amber)}
+/* ═══ DEVICE TILES — square-ish, chunky, Savant-inspired ═══ */
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:500px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:768px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1000px){.tiles{grid-template-columns:repeat(4,1fr)}}
 
-/* ═══ DEVICE TILES — compact 2-col grid ═══ */
-.sec{margin-top:14px}
-.sec-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;padding:0 4px;margin-bottom:8px}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-@media(min-width:700px){.tiles{grid-template-columns:1fr 1fr 1fr}}
-@media(min-width:1100px){.tiles{grid-template-columns:1fr 1fr 1fr 1fr}}
-
-.tile{background:var(--card-solid);border-radius:var(--r);padding:14px;border:1px solid var(--border);position:relative;transition:.15s;overflow:hidden;cursor:pointer}
-.tile:active{transform:scale(0.98)}
-.tile.on{border-color:var(--border-a)}
-.tile.on::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0.5}
-.tile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.tile-icon{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--t3)}
-.tile.on .tile-icon{background:rgba(255,179,0,0.08);color:var(--amber)}
-.tog{width:40px;height:22px;border-radius:11px;background:var(--t4);position:relative;transition:.2s;flex-shrink:0}
+.tile{aspect-ratio:1.15;background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--brd);display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.tile:active{transform:scale(0.97)}
+.tile.on{border-color:rgba(255,179,0,0.12)}
+.tile.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:var(--amber);opacity:0.3}
+.tile-icon{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:17px}
+.tile.on .tile-icon{background:rgba(255,179,0,0.1)}
+.tile-top{display:flex;align-items:flex-start;justify-content:space-between}
+.tog{width:38px;height:20px;border-radius:10px;background:var(--t4);position:relative;transition:.2s;flex-shrink:0}
 .tog.on{background:var(--amber)}
-.tog-k{width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
-.tog.on .tog-k{left:21px}
-.tile-name{font-size:12px;font-weight:600;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tog::after{content:'';width:14px;height:14px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,0.3)}
+.tog.on::after{left:21px}
+.tile-bot{display:flex;flex-direction:column;gap:2px}
+.tile-name{font-size:12px;font-weight:600;color:var(--t3)}
 .tile.on .tile-name{color:var(--t1)}
-.tile-val{font-size:10px;color:var(--t4);margin-top:2px;font-weight:500}
+.tile-val{font-size:10px;color:var(--t4);font-weight:500}
 .tile.on .tile-val{color:var(--gold)}
+/* Mini bar */
+.mbar{height:3px;border-radius:2px;background:rgba(255,255,255,0.05);margin-top:4px;overflow:hidden}
+.mfill{height:100%;border-radius:2px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070)}
 
-/* Mini brightness bar in tile */
-.mini-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);margin-top:8px;overflow:hidden;cursor:pointer}
-.mini-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070);transition:width .1s}
+/* ═══ BOTTOM SHEET (shared) ═══ */
+.sh-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(3px)}
+.sh-bg.open{opacity:1;pointer-events:auto}
+.sh{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:var(--s1);border-radius:20px 20px 0 0;z-index:101;transform:translateY(100%);transition:.28s cubic-bezier(0.25,0.1,0.25,1);display:flex;flex-direction:column;overflow:hidden}
+.sh.open{transform:translateY(0)}
+@media(min-width:600px){.sh{left:50%;right:auto;width:400px;transform:translate(-50%,100%);border-radius:20px;bottom:16px;max-height:80vh}.sh.open{transform:translate(-50%,0)}}
+.sh-bar{width:32px;height:4px;border-radius:2px;background:var(--t4);margin:8px auto 0;flex-shrink:0}
+.sh-hd{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.sh-hd h3{flex:1;font-size:15px;font-weight:700}
+.sh-x{width:28px;height:28px;border-radius:8px;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:11px}
+.sh-body{flex:1;overflow-y:auto;padding:0 18px 18px;-webkit-overflow-scrolling:touch}
+.sh-foot{padding:10px 18px;border-top:1px solid var(--brd);display:flex;gap:8px;align-items:center;flex-shrink:0}
 
-/* ═══ FAB ═══ */
-.fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:14px;background:var(--amber);color:#000;font-size:22px;font-weight:700;display:none;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,179,0,0.3);z-index:50;transition:.15s}
-.fab:active{transform:scale(0.93)}
-
-/* ═══ BOTTOM SHEET ═══ */
-.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;opacity:0;pointer-events:none;transition:.25s;backdrop-filter:blur(2px)}
-.sheet-bg.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:#1A1A1A;border-radius:20px 20px 0 0;z-index:101;transform:translateY(100%);transition:.3s cubic-bezier(0.25,0.1,0.25,1);display:flex;flex-direction:column;overflow:hidden}
-.sheet.open{transform:translateY(0)}
-@media(min-width:600px){.sheet{left:50%;right:auto;width:420px;transform:translate(-50%,100%);border-radius:20px;bottom:20px;max-height:80vh}.sheet.open{transform:translate(-50%,0)}}
-
-.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--t4);margin:10px auto 0;flex-shrink:0}
-.sheet-head{padding:16px 20px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.sheet-head h3{flex:1;font-size:15px;font-weight:700}
-.sheet-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:12px}
-.sheet-body{flex:1;overflow-y:auto;padding:0 20px 20px;-webkit-overflow-scrolling:touch}
-
-/* Picker items */
-.pi{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer}
+/* ═══ PICKER ITEMS ═══ */
+.pi{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.025);cursor:pointer}
 .pi:last-child{border:none}
-.pi-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--t4);display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
-.pi.on .pi-check{background:var(--amber);border-color:var(--amber)}
-.pi.on .pi-check::after{content:'✓';color:#000;font-size:11px;font-weight:700}
-.pi-name{font-size:13px;color:var(--t2);flex:1}
-.pi.on .pi-name{color:var(--t1)}
-.pi-badge{font-size:9px;color:var(--t4);background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:4px}
-
-/* Sheet footer */
-.sheet-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-shrink:0}
-.emoji-btn{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);font-size:20px;display:flex;align-items:center;justify-content:center}
-.sheet-foot input{flex:1;height:44px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--t1);padding:0 14px;font-size:13px;font-family:inherit}
-.sheet-foot input::placeholder{color:var(--t4)}
-.sheet-save{height:44px;padding:0 20px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px}
+.pi-ck{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--t4);display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0}
+.pi.on .pi-ck{background:var(--amber);border-color:var(--amber)}
+.pi.on .pi-ck::after{content:'✓';color:#000;font-size:11px;font-weight:700}
+.pi-n{font-size:13px;color:var(--t2);flex:1}
+.pi.on .pi-n{color:var(--t1)}
+.pi-t{font-size:9px;color:var(--t4)}
+.emo-b{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--brd);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sh-foot input{flex:1;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--brd);color:var(--t1);padding:0 14px;font-size:13px;font-family:inherit}
+.sh-foot input::placeholder{color:var(--t4)}
+.sh-save{height:42px;padding:0 18px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px;flex-shrink:0}
 
 /* Emoji dropdown */
-.emo-drop{position:absolute;bottom:56px;left:12px;background:#222;border:1px solid var(--border);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:4px;z-index:110;box-shadow:0 8px 24px rgba(0,0,0,0.6)}
-.emo-drop.open{display:grid}
-.emo-o{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:8px;cursor:pointer}
-.emo-o:hover{background:rgba(255,179,0,0.1)}
+.emo-dd{position:absolute;bottom:52px;left:10px;background:#222;border:1px solid var(--brd);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:3px;z-index:110;box-shadow:0 8px 24px rgba(0,0,0,0.6)}
+.emo-dd.open{display:grid}
+.emo-o{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:7px;cursor:pointer}
+.emo-o:hover{background:rgba(255,179,0,0.08)}
 
-/* ═══ DIMMER SHEET ═══ */
-.dim-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 0 8px;gap:16px}
-.dim-pct{font-size:42px;font-weight:700;color:var(--amber);letter-spacing:-1px}
-.dim-track{width:56px;height:200px;border-radius:28px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
-.dim-fill{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 28px 28px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 16px rgba(255,179,0,0.25);transition:height 50ms}
-.dim-thumb{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,0.7);position:absolute;left:6px;box-shadow:0 0 6px rgba(255,255,255,0.2);transition:bottom 50ms}
-.dim-presets{display:flex;gap:6px}
-.dim-pre{width:44px;height:34px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--t2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
-.dim-pre.on{border-color:var(--border-a);color:var(--amber);background:rgba(255,179,0,0.06)}
-.dim-name{font-size:12px;color:var(--t3)}
+/* ═══ DIMMER ═══ */
+.dim-w{display:flex;flex-direction:column;align-items:center;padding:16px 0 4px;gap:14px}
+.dim-pct{font-size:44px;font-weight:800;color:var(--amber);letter-spacing:-2px}
+.dim-trk{width:54px;height:190px;border-radius:27px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
+.dim-fl{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 27px 27px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 14px rgba(255,179,0,0.2);transition:height 40ms}
+.dim-th{width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,0.7);position:absolute;left:7px;transition:bottom 40ms}
+.dim-pre{display:flex;gap:6px}
+.dim-p{width:42px;height:32px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--brd);color:var(--t2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.dim-p.on{border-color:rgba(255,179,0,0.15);color:var(--amber);background:rgba(255,179,0,0.05)}
 
 /* ═══ DELETE ═══ */
 .del-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
 .del-bg.open{display:flex}
-.del-box{background:#1E1E1E;border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:320px;text-align:center}
+.del-box{background:var(--s2);border:1px solid var(--brd);border-radius:16px;padding:24px;width:90%;max-width:300px;text-align:center}
 .del-box h3{font-size:15px;font-weight:700;margin-bottom:6px}
-.del-box p{font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5}
+.del-box p{font-size:12px;color:var(--t3);margin-bottom:16px;line-height:1.5}
 .del-btns{display:flex;gap:8px}
-.del-btns button{flex:1;height:40px;border-radius:10px;font-weight:700;font-size:12px}
-.del-c{background:rgba(255,255,255,0.06);color:var(--t2);border:1px solid var(--border)}
-.del-d{background:#C03030;color:#fff}
+.del-btns button{flex:1;height:38px;border-radius:10px;font-weight:700;font-size:12px}
+.d-c{background:rgba(255,255,255,0.06);color:var(--t2);border:1px solid var(--brd)}
+.d-d{background:#C03030;color:#fff}
 
-@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<button class="fab" id="fab" onclick="openPicker(-1)">+</button>
 
-<!-- PICKER SHEET -->
-<div class="sheet-bg" id="pkBg"></div>
-<div class="sheet" id="pkSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-head"><h3 id="pkTitle">Add Room</h3><button class="sheet-x" id="pkX">✕</button></div>
-  <div class="sheet-body" id="pkBody"></div>
-  <div style="position:relative"><div class="emo-drop" id="emoDrop"></div></div>
-  <div class="sheet-foot">
-    <button class="emoji-btn" id="emoBtn">🛋️</button>
-    <input id="rnInput" placeholder="Room name">
-    <button class="sheet-save" id="pkSave">Save</button>
+<div class="shell">
+  <!-- Sidebar — desktop/tablet -->
+  <div class="sidebar" id="sb">
+    <div class="sb-head"><div class="sb-title">Rooms</div></div>
+    <div class="sb-list" id="sbList"></div>
+    <div class="sb-add" onclick="openPk(-1)">+ Add Room</div>
+  </div>
+  <!-- Main -->
+  <div class="main" id="main"></div>
+</div>
+
+<!-- Picker sheet -->
+<div class="sh-bg" id="pkBg"></div>
+<div class="sh" id="pkSh">
+  <div class="sh-bar"></div>
+  <div class="sh-hd"><h3 id="pkTi">Add Room</h3><button class="sh-x" onclick="closePk()">✕</button></div>
+  <div class="sh-body" id="pkBd"></div>
+  <div style="position:relative"><div class="emo-dd" id="emoDD"></div></div>
+  <div class="sh-foot">
+    <button class="emo-b" id="emoB" onclick="togEmo()">🛋️</button>
+    <input id="rnI" placeholder="Room name">
+    <button class="sh-save" onclick="savePk()">Save</button>
   </div>
 </div>
 
-<!-- DIMMER SHEET -->
-<div class="sheet-bg" id="dimBg"></div>
-<div class="sheet" id="dimSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-head"><h3 id="dimTitle">Light</h3><button class="sheet-x" id="dimX">✕</button></div>
-  <div class="sheet-body">
-    <div class="dim-wrap">
+<!-- Dimmer sheet -->
+<div class="sh-bg" id="dimBg"></div>
+<div class="sh" id="dimSh">
+  <div class="sh-bar"></div>
+  <div class="sh-hd"><h3 id="dimTi">Light</h3><button class="sh-x" onclick="closeDim()">✕</button></div>
+  <div class="sh-body">
+    <div class="dim-w">
       <div class="dim-pct" id="dimPct">75%</div>
-      <div class="dim-track" id="dimTrack">
-        <div class="dim-fill" id="dimFill"></div>
-        <div class="dim-thumb" id="dimThumb"></div>
+      <div class="dim-trk" id="dimTrk">
+        <div class="dim-fl" id="dimFl"></div>
+        <div class="dim-th" id="dimTh"></div>
       </div>
-      <div class="dim-presets">
-        <div class="dim-pre" data-v="25">25</div>
-        <div class="dim-pre" data-v="50">50</div>
-        <div class="dim-pre" data-v="75">75</div>
-        <div class="dim-pre" data-v="100">100</div>
+      <div class="dim-pre">
+        <button class="dim-p" data-v="25">25</button>
+        <button class="dim-p" data-v="50">50</button>
+        <button class="dim-p" data-v="75">75</button>
+        <button class="dim-p" data-v="100">100</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- DELETE -->
+<!-- Delete confirm -->
 <div class="del-bg" id="delBg">
   <div class="del-box">
     <h3>Delete Room</h3>
     <p id="delMsg"></p>
     <div class="del-btns">
-      <button class="del-c" id="delC">Cancel</button>
-      <button class="del-d" id="delD">Delete</button>
+      <button class="d-c" onclick="document.getElementById('delBg').classList.remove('open')">Cancel</button>
+      <button class="d-d" onclick="doDel()">Delete</button>
     </div>
   </div>
 </div>
 
 <script>
-const DEVS=[
+const D=[
   {id:'h1',n:'Entrance 3',t:'light'},{id:'h12',n:'Entrance 1',t:'light'},{id:'h21',n:'Entrance 2',t:'light'},{id:'h16',n:'Entrance 4',t:'light'},
   {id:'h15',n:'Laundry 1',t:'light'},{id:'h13',n:'Laundry 2',t:'light'},{id:'h14',n:'Laundry 3',t:'light'},
   {id:'h17',n:'Lounge Light',t:'light'},{id:'h7',n:'Alfresco',t:'light'},
@@ -202,192 +220,148 @@ const DEVS=[
   {id:'ts1',n:'Cerise Lightstrip',t:'light'},{id:'ts2',n:'Cerise Lightstrip 2',t:'light'},
 ];
 const EMOS=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
-const st={};DEVS.forEach(d=>{st[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
+const S={};D.forEach(d=>{S[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
 
-let rooms=[],cur=0,editIdx=-1,delIdx=-1,pkChecked=new Set(),pkEmoji='🛋️',dimDev=null;
+let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dimId=null;
 
-// ═══ RENDER ═══
 function R(){
-  const a=document.getElementById('app'),f=document.getElementById('fab');
+  // Sidebar
+  let sb='';
+  rooms.forEach((r,i)=>{
+    const on=i===cur;
+    sb+='<div class="sb-room '+(on?'on':'')+'" onclick="go('+i+')">';
+    sb+='<div class="sb-emo">'+r.emoji+'</div>';
+    sb+='<div class="sb-rn">'+r.name+'</div>';
+    sb+='<div class="sb-dot"></div></div>';
+  });
+  document.getElementById('sbList').innerHTML=sb;
+
+  // Main
+  const m=document.getElementById('main');
   if(!rooms.length){
-    f.style.display='none';
-    a.innerHTML='<div class="empty"><div class="empty-ring"><div class="empty-ring-inner">🏠</div></div><h2>No Rooms</h2><p>Create a room and assign your lights and plugs to it</p><button class="btn-primary" onclick="openPicker(-1)">Add Room</button></div>';
+    m.innerHTML='<div class="empty"><div class="empty-icon">🏠</div><h2>No Rooms</h2><p>Create a room and assign your lights and plugs</p><button class="btn-p" onclick="openPk(-1)">Add Room</button></div>';
     return;
   }
-  f.style.display='flex';
+  if(cur>=rooms.length)cur=rooms.length-1;
   const rm=rooms[cur];
-  const onCount=rm.devs.filter(id=>st[id]&&st[id].on).length;
-  let h='<div class="rh">';
-  h+='<div class="rh-emoji">'+rm.emoji+'</div>';
-  h+='<div class="rh-info"><div class="rh-name">'+rm.name+'</div><div class="rh-sub">'+onCount+' of '+rm.devs.length+' on</div></div>';
-  h+='<button class="rh-btn" onclick="openPicker(cur)">✎</button>';
-  h+='<button class="rh-btn" onclick="confirmDel()">🗑</button>';
+  const onC=rm.devs.filter(id=>S[id]&&S[id].on).length;
+  const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
+  const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
+
+  let h='';
+  // Mobile room pills
+  h+='<div class="mob-rooms">';
+  rooms.forEach((r,i)=>{h+='<button class="mr-pill '+(i===cur?'on':'')+'" onclick="go('+i+')">'+r.emoji+' '+r.name+'</button>'});
+  h+='<button class="mr-pill add" onclick="openPk(-1)">+ Add</button>';
   h+='</div>';
 
-  h+='<div class="carousel-w"><div class="carousel" id="car" style="transform:translateX(-'+cur*100+'%)">';
-  rooms.forEach((rm,ri)=>{
-    h+='<div class="page">';
-    const lights=rm.devs.filter(id=>{const d=DEVS.find(x=>x.id===id);return d&&d.t==='light'});
-    const plugs=rm.devs.filter(id=>{const d=DEVS.find(x=>x.id===id);return d&&d.t==='plug'});
-
-    if(lights.length){
-      h+='<div class="sec"><div class="sec-label">Lights</div><div class="tiles">';
-      lights.forEach(id=>{const d=DEVS.find(x=>x.id===id);const s=st[id];if(!d)return;
-        h+=tile(d,s);
-      });
-      h+='</div></div>';
-    }
-    if(plugs.length){
-      h+='<div class="sec"><div class="sec-label">Power</div><div class="tiles">';
-      plugs.forEach(id=>{const d=DEVS.find(x=>x.id===id);const s=st[id];if(!d)return;
-        h+=tile(d,s);
-      });
-      h+='</div></div>';
-    }
-    h+='</div>';
-  });
-  h+='</div></div>';
-
-  h+='<div class="dots">';
-  rooms.forEach((_,i)=>{h+='<div class="dot '+(i===cur?'on':'')+'" onclick="go('+i+')"></div>'});
+  h+='<div class="content">';
+  // Header
+  h+='<div class="rh">';
+  h+='<div class="rh-emo">'+rm.emoji+'</div>';
+  h+='<div class="rh-info"><div class="rh-name">'+rm.name+'</div><div class="rh-sub">'+onC+' of '+rm.devs.length+' on</div></div>';
+  h+='<div class="rh-acts"><button class="rh-btn" onclick="openPk(cur)">✎</button><button class="rh-btn" onclick="askDel()">🗑</button></div>';
   h+='</div>';
-  a.innerHTML=h;
 
-  // Swipe — touch AND mouse/pointer for desktop
-  let sx=0,dx=0,sw=false;
-  const cw=document.querySelector('.carousel-w');
-  if(cw){
-    cw.onpointerdown=e=>{sx=e.clientX;sw=true;dx=0;cw.setPointerCapture(e.pointerId)};
-    cw.onpointermove=e=>{if(sw)dx=e.clientX-sx};
-    cw.onpointerup=()=>{if(Math.abs(dx)>40){if(dx<0&&cur<rooms.length-1)cur++;else if(dx>0&&cur>0)cur--;R()}dx=0;sw=false};
+  if(lights.length){
+    h+='<div class="sec"><div class="sec-label">Lights</div><div class="tiles">';
+    lights.forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)});
+    h+='</div></div>';
   }
+  if(plugs.length){
+    h+='<div class="sec"><div class="sec-label">Power</div><div class="tiles">';
+    plugs.forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)});
+    h+='</div></div>';
+  }
+  h+='</div>';
+  m.innerHTML=h;
 }
 
-function tile(d,s){
-  const on=s.on;
-  let h='<div class="tile '+(on?'on':'')+'" onclick="tapTile(\''+d.id+'\')">';
-  h+='<div class="tile-top">';
-  h+='<div class="tile-icon">'+(d.t==='plug'?'🔌':'💡')+'</div>';
-  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"><div class="tog-k"></div></div>';
-  h+='</div>';
-  h+='<div class="tile-name">'+d.n+'</div>';
-  if(d.t==='plug'){
-    h+='<div class="tile-val">'+(on?'On':'Off')+'</div>';
-  }else{
-    h+='<div class="tile-val">'+(on?s.bri+'%':'Off')+'</div>';
-    if(on) h+='<div class="mini-bar" onclick="event.stopPropagation()" onpointerdown="miniDrag(event,\''+d.id+'\')"><div class="mini-fill" style="width:'+s.bri+'%"></div></div>';
-  }
-  h+='</div>';
+function mkTile(d){
+  const s=S[d.id],on=s.on,isP=d.t==='plug';
+  let h='<div class="tile '+(on?'on':'')+'" onclick="tap(\''+d.id+'\')">';
+  h+='<div class="tile-top"><div class="tile-icon">'+(isP?'🔌':'💡')+'</div>';
+  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"></div></div>';
+  h+='<div class="tile-bot"><div class="tile-name">'+d.n+'</div>';
+  h+='<div class="tile-val">'+(isP?(on?'On':'Off'):(on?s.bri+'%':'Off'))+'</div>';
+  if(!isP&&on)h+='<div class="mbar"><div class="mfill" style="width:'+s.bri+'%"></div></div>';
+  h+='</div></div>';
   return h;
 }
 
 function go(i){cur=i;R()}
-function tog(id){st[id].on=!st[id].on;R()}
-function tapTile(id){const d=DEVS.find(x=>x.id===id);if(!d)return;if(d.t==='plug'){tog(id);return}openDimmer(d)}
-
-// Mini bar drag
-function miniDrag(e,id){
-  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
-  const rect=bar.getBoundingClientRect();
-  const up=e=>{const p=Math.round(((e.clientX-rect.left)/rect.width)*100);st[id].bri=Math.max(1,Math.min(100,p));st[id].on=true;R()};
-  up(e);bar.onpointermove=up;bar.onpointerup=()=>{bar.onpointermove=null};
-}
+function tog(id){S[id].on=!S[id].on;R()}
+function tap(id){const d=D.find(x=>x.id===id);if(!d)return;if(d.t==='plug'){tog(id);return}openDim(d)}
 
 // ═══ DIMMER ═══
-function openDimmer(d){
-  dimDev=d;st[d.id].on=true;
-  document.getElementById('dimTitle').textContent=d.n;
-  updDim(st[d.id].bri);
+function openDim(d){
+  dimId=d.id;S[d.id].on=true;
+  document.getElementById('dimTi').textContent=d.n;
+  setDim(S[d.id].bri);
   document.getElementById('dimBg').classList.add('open');
-  document.getElementById('dimSheet').classList.add('open');
+  document.getElementById('dimSh').classList.add('open');
 }
-function closeDim(){document.getElementById('dimBg').classList.remove('open');document.getElementById('dimSheet').classList.remove('open');R()}
-function updDim(v){
-  v=Math.max(1,Math.min(100,v));if(dimDev)st[dimDev.id].bri=v;
+function closeDim(){document.getElementById('dimBg').classList.remove('open');document.getElementById('dimSh').classList.remove('open');R()}
+function setDim(v){
+  v=Math.max(1,Math.min(100,v));if(dimId)S[dimId].bri=v;
   document.getElementById('dimPct').textContent=v+'%';
-  document.getElementById('dimFill').style.height=v+'%';
-  document.getElementById('dimThumb').style.bottom='calc('+v+'% - 3px)';
-  document.querySelectorAll('.dim-pre').forEach(p=>p.classList.toggle('on',+p.dataset.v===v));
+  document.getElementById('dimFl').style.height=v+'%';
+  document.getElementById('dimTh').style.bottom='calc('+v+'% - 3px)';
+  document.querySelectorAll('.dim-p').forEach(p=>p.classList.toggle('on',+p.dataset.v===v));
 }
-document.getElementById('dimTrack').onpointerdown=function(e){
+document.getElementById('dimTrk').onpointerdown=function(e){
   this.setPointerCapture(e.pointerId);const r=this.getBoundingClientRect();
-  const u=e=>{updDim(Math.round((1-(e.clientY-r.top)/r.height)*100))};u(e);
+  const u=e=>{setDim(Math.round((1-(e.clientY-r.top)/r.height)*100))};u(e);
   this.onpointermove=u;this.onpointerup=()=>{this.onpointermove=null};
 };
-document.querySelectorAll('.dim-pre').forEach(p=>p.onclick=()=>updDim(+p.dataset.v));
-document.getElementById('dimX').onclick=closeDim;
+document.querySelectorAll('.dim-p').forEach(p=>p.onclick=()=>setDim(+p.dataset.v));
 document.getElementById('dimBg').onclick=closeDim;
 
 // ═══ PICKER ═══
-function openPicker(idx){
-  editIdx=idx;pkChecked=new Set();
-  if(idx>=0){
-    const r=rooms[idx];pkEmoji=r.emoji;
-    document.getElementById('rnInput').value=r.name;
-    r.devs.forEach(d=>pkChecked.add(d));
-    document.getElementById('pkTitle').textContent='Edit Room';
-  }else{
-    pkEmoji='🛋️';document.getElementById('rnInput').value='';
-    document.getElementById('pkTitle').textContent='Add Room';
-  }
-  document.getElementById('emoBtn').textContent=pkEmoji;
-  renderPk();
+function openPk(idx){
+  editIdx=idx;pkCk=new Set();
+  if(idx>=0){const r=rooms[idx];pkEmo=r.emoji;document.getElementById('rnI').value=r.name;r.devs.forEach(d=>pkCk.add(d));document.getElementById('pkTi').textContent='Edit Room'}
+  else{pkEmo='🛋️';document.getElementById('rnI').value='';document.getElementById('pkTi').textContent='Add Room'}
+  document.getElementById('emoB').textContent=pkEmo;
+  rPk();
   document.getElementById('pkBg').classList.add('open');
-  document.getElementById('pkSheet').classList.add('open');
+  document.getElementById('pkSh').classList.add('open');
 }
-function closePk(){
-  document.getElementById('pkBg').classList.remove('open');
-  document.getElementById('pkSheet').classList.remove('open');
-  document.getElementById('emoDrop').classList.remove('open');
+function closePk(){document.getElementById('pkBg').classList.remove('open');document.getElementById('pkSh').classList.remove('open');document.getElementById('emoDD').classList.remove('open')}
+function rPk(){
+  const ls=D.filter(d=>d.t==='light'),ps=D.filter(d=>d.t==='plug');
+  let h='<div class="sec-label" style="margin-top:0">Lights</div>';
+  ls.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">💡</div></div>'});
+  h+='<div class="sec-label" style="margin-top:14px">Power</div>';
+  ps.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">🔌</div></div>'});
+  document.getElementById('pkBd').innerHTML=h;
 }
-function renderPk(){
-  const lights=DEVS.filter(d=>d.t==='light');
-  const plugs=DEVS.filter(d=>d.t==='plug');
-  let h='<div class="sec-label" style="margin-top:4px">Lights</div>';
-  lights.forEach(d=>{
-    const on=pkChecked.has(d.id);
-    h+='<div class="pi '+(on?'on':'')+'" onclick="pkTog(\''+d.id+'\')">';
-    h+='<div class="pi-check"></div><div class="pi-name">'+d.n+'</div><div class="pi-badge">💡</div></div>';
-  });
-  h+='<div class="sec-label" style="margin-top:12px">Power</div>';
-  plugs.forEach(d=>{
-    const on=pkChecked.has(d.id);
-    h+='<div class="pi '+(on?'on':'')+'" onclick="pkTog(\''+d.id+'\')">';
-    h+='<div class="pi-check"></div><div class="pi-name">'+d.n+'</div><div class="pi-badge">🔌</div></div>';
-  });
-  document.getElementById('pkBody').innerHTML=h;
-}
-function pkTog(id){pkChecked.has(id)?pkChecked.delete(id):pkChecked.add(id);renderPk()}
-
-document.getElementById('emoBtn').onclick=()=>{
-  const g=document.getElementById('emoDrop');
+function pkT(id){pkCk.has(id)?pkCk.delete(id):pkCk.add(id);rPk()}
+function togEmo(){
+  const g=document.getElementById('emoDD');
   if(g.classList.contains('open')){g.classList.remove('open');return}
-  g.innerHTML=EMOS.map(e=>'<div class="emo-o" onclick="pickEmo(\''+e+'\')">'+e+'</div>').join('');
+  g.innerHTML=EMOS.map(e=>'<div class="emo-o" onclick="pickE(\''+e+'\')">'+e+'</div>').join('');
   g.classList.add('open');
-};
-function pickEmo(e){pkEmoji=e;document.getElementById('emoBtn').textContent=e;document.getElementById('emoDrop').classList.remove('open')}
-
-document.getElementById('pkX').onclick=closePk;
+}
+function pickE(e){pkEmo=e;document.getElementById('emoB').textContent=e;document.getElementById('emoDD').classList.remove('open')}
 document.getElementById('pkBg').onclick=closePk;
-document.getElementById('pkSave').onclick=()=>{
-  const n=document.getElementById('rnInput').value.trim();
-  if(!n||!pkChecked.size)return;
-  if(editIdx>=0){rooms[editIdx]={name:n,emoji:pkEmoji,devs:[...pkChecked]}}
-  else{rooms.push({name:n,emoji:pkEmoji,devs:[...pkChecked]});cur=rooms.length-1}
+function savePk(){
+  const n=document.getElementById('rnI').value.trim();
+  if(!n||!pkCk.size)return;
+  if(editIdx>=0){rooms[editIdx]={name:n,emoji:pkEmo,devs:[...pkCk]}}
+  else{rooms.push({name:n,emoji:pkEmo,devs:[...pkCk]});cur=rooms.length-1}
   closePk();R();
-};
+}
 
 // ═══ DELETE ═══
-function confirmDel(){
-  delIdx=cur;
-  document.getElementById('delMsg').textContent='Remove "'+rooms[cur].name+'" and unassign its devices?';
+function askDel(){
+  document.getElementById('delMsg').textContent='Remove "'+rooms[cur].name+'"?';
   document.getElementById('delBg').classList.add('open');
 }
-document.getElementById('delC').onclick=()=>document.getElementById('delBg').classList.remove('open');
-document.getElementById('delD').onclick=()=>{
-  if(delIdx>=0){rooms.splice(delIdx,1);if(cur>=rooms.length)cur=Math.max(0,rooms.length-1)}
+function doDel(){
+  rooms.splice(cur,1);if(cur>=rooms.length)cur=Math.max(0,rooms.length-1);
   document.getElementById('delBg').classList.remove('open');R();
-};
+}
 
 R();
 </script>
