@@ -87,6 +87,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .lc:active{transform:scale(0.98)}
 .lc.on{border-color:rgba(232,166,28,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3),0 0 20px rgba(232,166,28,0.04)}
 .lc.grp{border-left:3px solid #3A3A3A}.lc.grp.on{border-left-color:#E8A61C}
+/* Expand chevron */
+.lc-chev{font-size:10px;color:#5A5848;margin-left:4px;transition:transform .2s}
+.lc-chev.open{transform:rotate(180deg)}
+/* Expanded member cards inside group */
+.grp-members{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:10px}
+.grp-members .lc{box-shadow:none;border:1px solid rgba(255,255,255,0.03);background:#161412}
 
 /* Row: icon · name · value · toggle */
 .lc-row{display:flex;align-items:center;gap:10px}
@@ -193,7 +199,7 @@ const G=[
 ];
 const EM=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
 const S={};D.forEach(d=>{S[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
-let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dmId=null,dmGrp=null;
+let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dmId=null,dmGrp=null,expanded={};
 
 function gOn(g){return g.members.some(id=>S[id]&&S[id].on)}
 function gBri(g){const on=g.members.filter(id=>S[id]&&S[id].on&&S[id].bri!==undefined);return on.length?Math.round(on.reduce((a,id)=>a+S[id].bri,0)/on.length):0}
@@ -240,7 +246,6 @@ function R(){
 
     h+='<div class="sec"><div class="gh"><div class="gh-l">Lights</div><div class="gh-c">'+litOn.length+'/'+allL.size+'</div>';
     h+='<div class="tg '+(anyOn?'on':'')+'" onclick="togAll(\'l\')"><div class="tg-k"></div></div></div>';
-    if(anyOn){h+='<div class="gbar" onpointerdown="gDrag(event,\'l\')"><div class="gbar-f" style="width:'+avg+'%"></div><div class="gbar-t" style="left:max(0px,calc('+avg+'% - 7px))"></div></div>'}
 
     h+='<div class="cards">';
     lGrps.forEach(g=>{h+=grpCard(g)});
@@ -293,20 +298,32 @@ function card(d){
 }
 
 function grpCard(g){
-  const on=gOn(g),isP=gIsPlug(g),bri=gBri(g),pct=on?bri:0;
-  let h='<div class="lc grp '+(on?'on':'')+'" onclick="tapG(\''+g.id+'\')">';
-  h+='<div class="lc-row">';
+  const on=gOn(g),isP=gIsPlug(g),bri=gBri(g),pct=on?bri:0,exp=!!expanded[g.id];
+  let h='<div class="lc grp '+(on?'on':'')+'">';
+  // Header row — click to expand/collapse
+  h+='<div class="lc-row" onclick="togExp(\''+g.id+'\')" style="cursor:pointer">';
   h+='<div class="lc-ic">👥</div>';
   h+='<div class="lc-nm">'+g.n+'<span class="lc-mem"> · '+g.members.length+'</span></div>';
   h+='<div class="lc-val'+(isP?' sm':'')+'">'+(isP?(on?'ON':'OFF'):(on?bri+'%':'Off'))+'</div>';
   h+='<div style="width:10px"></div>';
   h+='<div class="tg '+(on?'on':'')+'" onclick="event.stopPropagation();togG(\''+g.id+'\')"><div class="tg-k"></div></div>';
+  h+='<div class="lc-chev '+(exp?'open':'')+'">▼</div>';
   h+='</div>';
+  // Group brightness bar
   if(!isP){
     h+='<div class="bb" onclick="event.stopPropagation()" onpointerdown="gBDrag(event,\''+g.id+'\')">';
     h+='<div class="bb-trk"></div>';
     if(on&&pct>0)h+='<div class="bb-fl" style="width:'+pct+'%"></div>';
     h+='<div class="bb-th '+(on?'on':'off')+'" style="left:max(0px,calc('+pct+'% - 14px))"><div class="bb-g"></div><div class="bb-g"></div><div class="bb-g"></div></div>';
+    h+='</div>';
+  }
+  // Expanded: show all member lights individually
+  if(exp){
+    h+='<div class="grp-members">';
+    g.members.forEach(id=>{
+      const d=D.find(x=>x.id===id);
+      if(d)h+=card(d);
+    });
     h+='</div>';
   }
   h+='</div>';
@@ -318,7 +335,8 @@ function go(i){cur=i;R()}
 function tog(id){S[id].on=!S[id].on;R()}
 function tap(id){const d=D.find(x=>x.id===id);if(!d)return;d.t==='plug'?tog(id):openDm(d)}
 function togG(gid){const g=G.find(x=>x.id===gid);if(!g)return;const on=gOn(g);g.members.forEach(id=>{if(on){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});R()}
-function tapG(gid){const g=G.find(x=>x.id===gid);if(!g)return;gIsPlug(g)?togG(gid):openGDm(g)}
+function togExp(gid){expanded[gid]=!expanded[gid];R()}
+function tapG(gid){const g=G.find(x=>x.id===gid);if(!g)return;gIsPlug(g)?togG(gid):togExp(gid)}
 
 function bDrag(e,id){const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();const u=ev=>{S[id].bri=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));S[id].on=true;R()};u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null}}
 function gBDrag(e,gid){const g=G.find(x=>x.id===gid);if(!g)return;const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();const u=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null}}
