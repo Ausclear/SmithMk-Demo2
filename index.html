@@ -71,22 +71,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 @media(min-width:580px){.tiles{grid-template-columns:1fr 1fr}}
 @media(min-width:960px){.tiles{grid-template-columns:1fr 1fr 1fr}}
 
-.tile{background:#1A1916;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.tile{background:#1A1916;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:.15s;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
 .tile:active{transform:scale(0.98)}
-.tile.on{border-color:rgba(232,166,28,0.12)}
+.tile.on{border-color:rgba(232,166,28,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3),0 0 20px rgba(232,166,28,0.04)}
 .tile.on::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(232,166,28,0.03),transparent 70%);pointer-events:none}
-.tile.grp{border-left:3px solid var(--t4)}
-.tile.grp.on{border-left-color:var(--amber)}
+.tile.grp{border-left:3px solid #3a3a3a}
+.tile.grp.on{border-left-color:#E8A61C}
 /* Top row: icon + name + value + toggle */
 .tile-row{display:flex;align-items:center;gap:10px}
-.tile-icon{font-size:16px;color:#5A5848;width:18px;text-align:center}
+.tile-icon{font-size:18px;color:#5A5848;width:20px;text-align:center;flex-shrink:0}
 .tile.on .tile-icon{color:#E8A61C}
 .tile-name{flex:1;font-size:14px;font-weight:500;color:#5A5848;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tile.on .tile-name{color:#F0EDE6}
-.tile-val{font-size:13px;font-weight:700;color:#5A5848}
+.tile-val{font-size:13px;font-weight:700;color:#5A5848;flex-shrink:0;margin-right:2px}
 .tile.on .tile-val{color:#E8A61C}
 .tile-val.plug{font-size:11px}
-.tile-members{font-size:9px;color:#5A5848;margin-left:4px;font-weight:400}
+.tile-members{font-size:9px;color:#5A5848;margin-left:2px;font-weight:400}
 
 /* Toggle — matches Flutter _AmberToggle */
 .tog{width:44px;height:24px;border-radius:12px;background:#2A2924;position:relative;transition:.2s;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.3)}
@@ -98,8 +98,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 /* Brightness bar — matches Flutter _BrightnessBar exactly */
 .bbar{height:12px;border-radius:6px;background:rgba(255,255,255,0.06);margin-top:14px;position:relative;cursor:pointer;box-shadow:inset 0 2px 4px rgba(0,0,0,0.4)}
 .bbar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#A04800,#D4820A,#EDAC1A,#F5D070);position:absolute;top:0;left:0;box-shadow:0 0 8px rgba(232,166,28,0.25),0 0 2px rgba(232,166,28,0.4)}
-/* 3D fader thumb */
-.bbar-thumb{width:28px;height:30px;border-radius:5px;position:absolute;top:-9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
+/* 3D fader thumb — tall white block with grip lines */
+.bbar-thumb{width:28px;height:30px;border-radius:5px;position:absolute;top:-9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
 .bbar-thumb.on{background:linear-gradient(180deg,#fff,#e8e8e8,#d0d0d0)}
 .bbar-thumb.off{background:linear-gradient(180deg,#555,#444,#333)}
 .bbar-grip{width:12px;height:1.5px;border-radius:1px}
@@ -373,10 +373,11 @@ function mkTile(d){
   h+='<div class="tile-val'+(isP?' plug':'')+'">'+(isP?(on?'ON':'OFF'):(on?s.bri+'%':'Off'))+'</div>';
   h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"></div>';
   h+='</div>';
+  // Always show brightness bar for lights
   if(!isP){
     h+='<div class="bbar" onclick="event.stopPropagation()" onpointerdown="barDrag(event,\''+d.id+'\')">';
     if(on&&pct>0)h+='<div class="bbar-fill" style="width:'+pct+'%"></div>';
-    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:calc('+pct+'% - 14px)">';
+    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:max(0px, calc('+pct+'% - 14px))">';
     h+='<div class="bbar-grip"></div><div class="bbar-grip"></div><div class="bbar-grip"></div>';
     h+='</div></div>';
   }
@@ -414,7 +415,7 @@ function mkGrpTile(g){
   if(!isP){
     h+='<div class="bbar" onclick="event.stopPropagation()" onpointerdown="grpBarDrag(event,\''+g.id+'\')">';
     if(on&&pct>0)h+='<div class="bbar-fill" style="width:'+pct+'%"></div>';
-    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:calc('+pct+'% - 14px)">';
+    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:max(0px, calc('+pct+'% - 14px))">';
     h+='<div class="bbar-grip"></div><div class="bbar-grip"></div><div class="bbar-grip"></div>';
     h+='</div></div>';
   }
