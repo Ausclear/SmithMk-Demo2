@@ -338,8 +338,39 @@ function togG(gid){const g=G.find(x=>x.id===gid);if(!g)return;const on=gOn(g);g.
 function togExp(gid){expanded[gid]=!expanded[gid];R()}
 function tapG(gid){const g=G.find(x=>x.id===gid);if(!g)return;gIsPlug(g)?togG(gid):togExp(gid)}
 
-function bDrag(e,id){const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();const u=ev=>{S[id].bri=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));S[id].on=true;R()};u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null}}
-function gBDrag(e,gid){const g=G.find(x=>x.id===gid);if(!g)return;const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();const u=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null}}
+function bDrag(e,id){
+  const b=e.currentTarget;b.setPointerCapture(e.pointerId);
+  const r=b.getBoundingClientRect();
+  const fl=b.querySelector('.bb-fl');
+  const th=b.querySelector('.bb-th');
+  const lc=b.closest('.lc');
+  const val=lc?lc.querySelector('.lc-val'):null;
+  const u=ev=>{
+    const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));
+    S[id].bri=p;S[id].on=true;
+    if(fl){fl.style.width=p+'%'}else{const nf=document.createElement('div');nf.className='bb-fl';nf.style.width=p+'%';b.insertBefore(nf,th)}
+    if(th){th.style.left='max(0px,calc('+p+'% - 14px))';th.className='bb-th on'}
+    if(val)val.textContent=p+'%';
+  };
+  u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null;R()};
+}
+function gBDrag(e,gid){
+  const g=G.find(x=>x.id===gid);if(!g)return;
+  const b=e.currentTarget;b.setPointerCapture(e.pointerId);
+  const r=b.getBoundingClientRect();
+  const fl=b.querySelector('.bb-fl');
+  const th=b.querySelector('.bb-th');
+  const lc=b.closest('.lc');
+  const val=lc?lc.querySelector('.lc-val'):null;
+  const u=ev=>{
+    const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));
+    g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});
+    if(fl){fl.style.width=p+'%'}else{const nf=document.createElement('div');nf.className='bb-fl';nf.style.width=p+'%';b.insertBefore(nf,th)}
+    if(th){th.style.left='max(0px,calc('+p+'% - 14px))';th.className='bb-th on'}
+    if(val)val.textContent=p+'%';
+  };
+  u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null;R()};
+}
 
 // Toggle all lights/plugs in room
 function togAll(type){
