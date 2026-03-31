@@ -7,240 +7,175 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-:root{--bg:#0e0e0e;--s1:#161616;--s2:#1c1c1c;--amber:#FFB300;--gold:#c4a96b;--t1:#eee;--t2:#aaa;--t3:#666;--t4:#3a3a3a;--r:16px;--brd:rgba(255,255,255,0.05)}
-html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;overflow:hidden}
+html,body{height:100%;background:#0E0D0B;color:#F0EDE6;font-family:'DM Sans',sans-serif;overflow:hidden}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 
-/* ═══ SHELL — sidebar rooms list on wide, full page on mobile ═══ */
+/* ═══ SHELL ═══ */
 .shell{display:flex;height:100%}
+/* Sidebar — ≥768 */
+.sb{width:220px;background:#141210;border-right:1px solid rgba(255,255,255,0.05);display:none;flex-direction:column;flex-shrink:0}
+@media(min-width:768px){.sb{display:flex}}
+.sb-hd{padding:20px 16px 14px}.sb-hd span{font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase}
+.sb-list{flex:1;overflow-y:auto;padding:6px 8px}
+.sb-r{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;margin-bottom:2px;border:1px solid transparent;transition:.12s}
+.sb-r:hover{background:rgba(255,255,255,0.02)}
+.sb-r.on{background:rgba(232,166,28,0.05);border-color:rgba(232,166,28,0.1)}
+.sb-r .e{font-size:18px}.sb-r .n{flex:1;font-size:13px;font-weight:600;color:#5A5848;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-r.on .n{color:#F0EDE6}
+.sb-r .dot{width:5px;height:5px;border-radius:50%;background:#E8A61C;opacity:0}.sb-r.on .dot{opacity:1}
+.sb-add{padding:12px 16px;font-size:12px;font-weight:600;color:#C4A96B;cursor:pointer}
+.sb-add:hover{color:#E8A61C}
 
-/* Rooms sidebar — desktop/tablet only */
-.sidebar{width:220px;background:var(--s1);border-right:1px solid var(--brd);display:none;flex-direction:column;flex-shrink:0}
-@media(min-width:768px){.sidebar{display:flex}}
-.sb-head{padding:20px 16px 12px;border-bottom:1px solid var(--brd)}
-.sb-title{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:2px;text-transform:uppercase}
-.sb-list{flex:1;overflow-y:auto;padding:8px}
-.sb-room{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;transition:.15s;margin-bottom:2px}
-.sb-room:hover{background:rgba(255,255,255,0.03)}
-.sb-room.on{background:rgba(255,179,0,0.06);border:1px solid rgba(255,179,0,0.1)}
-.sb-room:not(.on){border:1px solid transparent}
-.sb-emo{font-size:18px;width:24px;text-align:center}
-.sb-rn{font-size:13px;font-weight:600;color:var(--t3);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sb-room.on .sb-rn{color:var(--t1)}
-.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);opacity:0;transition:.2s}
-.sb-room.on .sb-dot{opacity:1}
-.sb-add{display:flex;align-items:center;gap:8px;padding:10px 12px;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;border-radius:10px;margin:4px 8px}
-.sb-add:hover{background:rgba(255,179,0,0.04)}
+/* Main */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.wrap{max-width:900px;margin:0 auto;padding:0 16px 120px}
 
-/* Main content area */
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column}
-.content{max-width:900px;width:100%;margin:0 auto;padding:0 16px 120px;flex:1}
+/* Mobile pills */
+.pills{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.pills::-webkit-scrollbar{display:none}
+@media(min-width:768px){.pills{display:none}}
+.pill{padding:8px 14px;border-radius:20px;background:#1A1916;border:1px solid rgba(255,255,255,0.05);white-space:nowrap;font-size:12px;font-weight:600;color:#5A5848;flex-shrink:0}
+.pill.on{background:rgba(232,166,28,0.06);border-color:rgba(232,166,28,0.12);color:#F0EDE6}
+.pill.add{color:#C4A96B;border-color:rgba(232,166,28,0.08)}
 
-/* ═══ MOBILE ROOM SWITCHER — horizontal pills ═══ */
-.mob-rooms{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0;scrollbar-width:none}
-.mob-rooms::-webkit-scrollbar{display:none}
-@media(min-width:768px){.mob-rooms{display:none}}
-.mr-pill{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--s2);border:1px solid var(--brd);white-space:nowrap;flex-shrink:0;font-size:12px;font-weight:600;color:var(--t3);transition:.15s}
-.mr-pill.on{background:rgba(255,179,0,0.08);border-color:rgba(255,179,0,0.15);color:var(--t1)}
-.mr-pill.add{color:var(--gold);border-color:rgba(255,179,0,0.1)}
-
-/* ═══ EMPTY STATE ═══ */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;padding:40px;opacity:0;animation:fu .4s ease .1s forwards}
-.empty-icon{width:80px;height:80px;border-radius:24px;background:rgba(255,179,0,0.04);border:1px solid rgba(255,179,0,0.1);display:flex;align-items:center;justify-content:center;font-size:32px}
-.empty h2{font-size:18px;font-weight:700}
-.empty p{font-size:12px;color:var(--t3);text-align:center;line-height:1.6;max-width:240px}
-.btn-p{height:44px;padding:0 28px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px;transition:.12s}
-.btn-p:active{transform:scale(0.96)}
+/* ═══ EMPTY ═══ */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;opacity:0;animation:fu .4s ease .1s forwards}
+.empty-ic{width:72px;height:72px;border-radius:20px;background:rgba(232,166,28,0.04);border:1px solid rgba(232,166,28,0.1);display:flex;align-items:center;justify-content:center;font-size:28px}
+.empty h2{font-size:17px;font-weight:700}.empty p{font-size:12px;color:#5A5848;text-align:center;line-height:1.6;max-width:220px}
+.btn-a{height:42px;padding:0 26px;border-radius:11px;background:#E8A61C;color:#000;font-weight:700;font-size:13px}
+.btn-a:active{transform:scale(0.96)}
 
 /* ═══ ROOM HEADER ═══ */
-.rh{display:flex;align-items:center;gap:14px;padding:20px 0 4px}
-.rh-emo{width:48px;height:48px;border-radius:16px;background:rgba(255,179,0,0.05);border:1px solid rgba(255,179,0,0.1);display:flex;align-items:center;justify-content:center;font-size:24px}
-.rh-info{flex:1}
-.rh-name{font-size:20px;font-weight:800;letter-spacing:-0.3px}
-.rh-sub{font-size:11px;color:var(--t3);margin-top:2px;font-weight:500}
-.rh-acts{display:flex;gap:6px}
-.rh-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:13px;transition:.15s}
-.rh-btn:hover{border-color:rgba(255,179,0,0.15);color:var(--amber)}
+.rh{display:flex;align-items:center;gap:14px;padding:20px 0 6px}
+.rh-e{width:46px;height:46px;border-radius:14px;background:rgba(232,166,28,0.04);border:1px solid rgba(232,166,28,0.08);display:flex;align-items:center;justify-content:center;font-size:22px}
+.rh-i{flex:1}.rh-n{font-size:19px;font-weight:800;letter-spacing:-0.3px}.rh-s{font-size:11px;color:#5A5848;margin-top:2px}
+.rh-a{display:flex;gap:6px}
+.rh-b{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:#5A5848;font-size:13px}
+.rh-b:hover{border-color:rgba(232,166,28,0.12);color:#E8A61C}
 
-/* ═══ SECTION ═══ */
-.sec{margin-top:20px}
-.sec-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px}
+/* Scenes */
+.scenes{display:flex;gap:6px;padding:10px 0 6px;flex-wrap:wrap}
+.sc{padding:7px 14px;border-radius:10px;background:#1A1916;border:1px solid rgba(255,255,255,0.05);font-size:11px;font-weight:600;color:#5A5848;cursor:pointer}
+.sc:hover{border-color:rgba(232,166,28,0.1);color:#8A8778}
 
-/* ═══ DEVICE TILES — match approved Lighting page exactly ═══ */
-.tiles{display:grid;grid-template-columns:1fr;gap:8px}
-@media(min-width:580px){.tiles{grid-template-columns:1fr 1fr}}
-@media(min-width:960px){.tiles{grid-template-columns:1fr 1fr 1fr}}
+/* Section */
+.sec{margin-top:18px}
+/* Group header row */
+.gh{display:flex;align-items:center;gap:10px;padding:0 0 10px}
+.gh-l{font-size:10px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;flex:1}
+.gh-c{font-size:10px;color:#5A5848;font-weight:500}
+/* Group brightness bar (full width) */
+.gbar{height:6px;border-radius:3px;background:rgba(255,255,255,0.04);margin:-4px 0 12px;position:relative;cursor:pointer}
+.gbar-f{height:100%;border-radius:3px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070)}
+.gbar-t{width:14px;height:14px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:-4px;box-shadow:0 1px 3px rgba(0,0,0,0.4)}
 
-.tile{background:#1A1916;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:.15s;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.3)}
-.tile:active{transform:scale(0.98)}
-.tile.on{border-color:rgba(232,166,28,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3),0 0 20px rgba(232,166,28,0.04)}
-.tile.on::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(232,166,28,0.03),transparent 70%);pointer-events:none}
-.tile.grp{border-left:3px solid #3a3a3a}
-.tile.grp.on{border-left-color:#E8A61C}
-/* Top row: icon + name + value + toggle */
-.tile-row{display:flex;align-items:center;gap:10px}
-.tile-icon{font-size:18px;color:#5A5848;width:20px;text-align:center;flex-shrink:0}
-.tile.on .tile-icon{color:#E8A61C}
-.tile-name{flex:1;font-size:14px;font-weight:500;color:#5A5848;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile.on .tile-name{color:#F0EDE6}
-.tile-val{font-size:13px;font-weight:700;color:#5A5848;flex-shrink:0;margin-right:2px}
-.tile.on .tile-val{color:#E8A61C}
-.tile-val.plug{font-size:11px}
-.tile-members{font-size:9px;color:#5A5848;margin-left:2px;font-weight:400}
+/* ═══ CARDS GRID — 1 col phone, 2 at 580, 3 at 960 ═══ */
+.cards{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:580px){.cards{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.cards{grid-template-columns:1fr 1fr 1fr}}
 
-/* Toggle — matches Flutter _AmberToggle */
-.tog{width:44px;height:24px;border-radius:12px;background:#2A2924;position:relative;transition:.2s;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.3)}
-.tog.on{background:#E8A61C}
-.tog::after{content:'';width:18px;height:18px;border-radius:50%;position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
-.tog:not(.on)::after{background:linear-gradient(180deg,#5A5848,#4A4838)}
-.tog.on::after{background:linear-gradient(180deg,#fff,#e0e0e0);left:23px}
+/* ═══ LIGHT CARD — pixel match to Flutter _lightCard ═══ */
+.lc{
+  padding:16px;
+  background:#1A1916;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.05);
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  cursor:pointer;
+  transition:.12s;
+}
+.lc:active{transform:scale(0.98)}
+.lc.on{border-color:rgba(232,166,28,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3),0 0 20px rgba(232,166,28,0.04)}
+.lc.grp{border-left:3px solid #3A3A3A}.lc.grp.on{border-left-color:#E8A61C}
 
-/* Brightness bar — matches Flutter _BrightnessBar exactly */
-.bbar{height:12px;border-radius:6px;background:rgba(255,255,255,0.06);margin-top:14px;position:relative;cursor:pointer;box-shadow:inset 0 2px 4px rgba(0,0,0,0.4)}
-.bbar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#A04800,#D4820A,#EDAC1A,#F5D070);position:absolute;top:0;left:0;box-shadow:0 0 8px rgba(232,166,28,0.25),0 0 2px rgba(232,166,28,0.4)}
-/* 3D fader thumb — tall white block with grip lines */
-.bbar-thumb{width:28px;height:30px;border-radius:5px;position:absolute;top:-9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
-.bbar-thumb.on{background:linear-gradient(180deg,#fff,#e8e8e8,#d0d0d0)}
-.bbar-thumb.off{background:linear-gradient(180deg,#555,#444,#333)}
-.bbar-grip{width:12px;height:1.5px;border-radius:1px}
-.bbar-thumb.on .bbar-grip{background:rgba(0,0,0,0.12)}
-.bbar-thumb.off .bbar-grip{background:rgba(255,255,255,0.1)}
+/* Row: icon · name · value · toggle */
+.lc-row{display:flex;align-items:center;gap:10px}
+.lc-ic{font-size:18px;color:#5A5848;flex-shrink:0}.lc.on .lc-ic{color:#E8A61C}
+.lc-nm{flex:1;font-size:14px;font-weight:500;color:#5A5848;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lc.on .lc-nm{color:#F0EDE6}
+.lc-val{font-size:13px;font-weight:700;color:#5A5848;flex-shrink:0}.lc.on .lc-val{color:#E8A61C}
+.lc-val.sm{font-size:11px}
+.lc-mem{font-size:9px;color:#5A5848;margin-left:2px;font-weight:400}
 
-/* ═══ BOTTOM SHEET (shared) ═══ */
-.sh-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(3px)}
-.sh-bg.open{opacity:1;pointer-events:auto}
-.sh{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:var(--s1);border-radius:20px 20px 0 0;z-index:101;transform:translateY(100%);transition:.28s cubic-bezier(0.25,0.1,0.25,1);display:flex;flex-direction:column;overflow:hidden}
-.sh.open{transform:translateY(0)}
+/* Toggle — 44×24, amber bg, gradient knob */
+.tg{width:44px;height:24px;border-radius:12px;background:#2A2924;position:relative;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.3);transition:background .2s}
+.tg.on{background:#E8A61C}
+.tg-k{width:18px;height:18px;border-radius:50%;position:absolute;top:3px;left:3px;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .2s,background .2s}
+.tg:not(.on) .tg-k{background:linear-gradient(180deg,#5A5848,#4A4838)}
+.tg.on .tg-k{background:linear-gradient(180deg,#fff,#E0E0E0);left:23px}
+
+/* ═══ BRIGHTNESS BAR — 30px tall Stack, 12px track centred, 28×30 thumb ═══ */
+.bb{position:relative;height:30px;margin-top:14px;cursor:pointer;touch-action:none}
+/* Track — centred vertically (9px from top to centre 12px in 30px) */
+.bb-trk{position:absolute;top:9px;left:0;right:0;height:12px;border-radius:6px;background:rgba(255,255,255,0.06);box-shadow:inset 0 2px 4px rgba(0,0,0,0.4)}
+/* Fill — same position as track */
+.bb-fl{position:absolute;top:9px;left:0;height:12px;border-radius:6px;background:linear-gradient(90deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 8px rgba(232,166,28,0.25),0 0 2px rgba(232,166,28,0.4)}
+/* Thumb — 28×30, top:0, full height of the 30px container */
+.bb-th{position:absolute;top:0;width:28px;height:30px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.bb-th.on{background:linear-gradient(180deg,#fff,#E8E8E8,#D0D0D0);box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
+.bb-th.off{background:linear-gradient(180deg,#555,#444,#333);box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
+.bb-g{width:12px;height:1.5px;border-radius:1px}
+.bb-th.on .bb-g{background:rgba(0,0,0,0.12)}
+.bb-th.off .bb-g{background:rgba(255,255,255,0.1)}
+
+/* ═══ BOTTOM SHEET ═══ */
+.sh-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(3px)}.sh-bg.open{opacity:1;pointer-events:auto}
+.sh{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:#161412;border-radius:20px 20px 0 0;z-index:101;transform:translateY(100%);transition:.28s cubic-bezier(.25,.1,.25,1);display:flex;flex-direction:column;overflow:hidden}.sh.open{transform:translateY(0)}
 @media(min-width:600px){.sh{left:50%;right:auto;width:400px;transform:translate(-50%,100%);border-radius:20px;bottom:16px;max-height:80vh}.sh.open{transform:translate(-50%,0)}}
-.sh-bar{width:32px;height:4px;border-radius:2px;background:var(--t4);margin:8px auto 0;flex-shrink:0}
-.sh-hd{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}
-.sh-hd h3{flex:1;font-size:15px;font-weight:700}
-.sh-x{width:28px;height:28px;border-radius:8px;border:1px solid var(--brd);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:11px}
-.sh-body{flex:1;overflow-y:auto;padding:0 18px 18px;-webkit-overflow-scrolling:touch}
-.sh-foot{padding:10px 18px;border-top:1px solid var(--brd);display:flex;gap:8px;align-items:center;flex-shrink:0}
+.sh-bar{width:32px;height:4px;border-radius:2px;background:#3A3A3A;margin:8px auto 0;flex-shrink:0}
+.sh-hd{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}.sh-hd h3{flex:1;font-size:15px;font-weight:700}
+.sh-x{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:#5A5848;font-size:11px}
+.sh-bd{flex:1;overflow-y:auto;padding:0 18px 18px}
+.sh-ft{padding:10px 18px;border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:8px;align-items:center;flex-shrink:0}
 
-/* ═══ PICKER ITEMS ═══ */
-.pi{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.025);cursor:pointer}
-.pi:last-child{border:none}
-.pi-ck{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--t4);display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0}
-.pi.on .pi-ck{background:var(--amber);border-color:var(--amber)}
-.pi.on .pi-ck::after{content:'✓';color:#000;font-size:11px;font-weight:700}
-.pi-n{font-size:13px;color:var(--t2);flex:1}
-.pi.on .pi-n{color:var(--t1)}
-.pi-t{font-size:9px;color:var(--t4)}
-.emo-b{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--brd);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sh-foot input{flex:1;height:42px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--brd);color:var(--t1);padding:0 14px;font-size:13px;font-family:inherit}
-.sh-foot input::placeholder{color:var(--t4)}
-.sh-save{height:42px;padding:0 18px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px;flex-shrink:0}
+/* Picker items */
+.pi{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.025);cursor:pointer}.pi:last-child{border:none}
+.pi-ck{width:20px;height:20px;border-radius:6px;border:1.5px solid #3A3A3A;display:flex;align-items:center;justify-content:center;flex-shrink:0}.pi.on .pi-ck{background:#E8A61C;border-color:#E8A61C}.pi.on .pi-ck::after{content:'✓';color:#000;font-size:11px;font-weight:700}
+.pi-n{font-size:13px;color:#8A8778;flex:1}.pi.on .pi-n{color:#F0EDE6}
+.pi-t{font-size:9px;color:#3A3A3A}
+.em-b{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sh-ft input{flex:1;height:42px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);color:#F0EDE6;padding:0 14px;font-size:13px;font-family:inherit}.sh-ft input::placeholder{color:#3A3A3A}
+.sh-sv{height:42px;padding:0 18px;border-radius:12px;background:#E8A61C;color:#000;font-weight:700;font-size:13px;flex-shrink:0}
 
 /* Emoji dropdown */
-.emo-dd{position:absolute;bottom:52px;left:10px;background:#222;border:1px solid var(--brd);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:3px;z-index:110;box-shadow:0 8px 24px rgba(0,0,0,0.6)}
-.emo-dd.open{display:grid}
-.emo-o{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:7px;cursor:pointer}
-.emo-o:hover{background:rgba(255,179,0,0.08)}
+.em-dd{position:absolute;bottom:52px;left:10px;background:#1A1916;border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:3px;z-index:110;box-shadow:0 8px 24px rgba(0,0,0,0.6)}.em-dd.open{display:grid}
+.em-o{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:7px;cursor:pointer}.em-o:hover{background:rgba(232,166,28,0.06)}
 
-/* ═══ DIMMER ═══ */
-.dim-w{display:flex;flex-direction:column;align-items:center;padding:16px 0 4px;gap:14px}
-.dim-pct{font-size:44px;font-weight:800;color:var(--amber);letter-spacing:-2px}
-.dim-trk{width:54px;height:190px;border-radius:27px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
-.dim-fl{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 27px 27px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 14px rgba(255,179,0,0.2);transition:height 40ms}
-.dim-th{width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,0.7);position:absolute;left:7px;transition:bottom 40ms}
-.dim-pre{display:flex;gap:6px}
-.dim-p{width:42px;height:32px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--brd);color:var(--t2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
-.dim-p.on{border-color:rgba(255,179,0,0.15);color:var(--amber);background:rgba(255,179,0,0.05)}
+/* Dimmer */
+.dm-w{display:flex;flex-direction:column;align-items:center;padding:16px 0 4px;gap:14px}
+.dm-pct{font-size:44px;font-weight:800;color:#E8A61C;letter-spacing:-2px}
+.dm-trk{width:54px;height:190px;border-radius:27px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
+.dm-fl{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 27px 27px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 14px rgba(232,166,28,0.2)}
+.dm-th{width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,0.7);position:absolute;left:7px}
+.dm-pre{display:flex;gap:6px}
+.dm-p{width:42px;height:32px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);color:#8A8778;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.dm-p.on{border-color:rgba(232,166,28,0.15);color:#E8A61C;background:rgba(232,166,28,0.04)}
 
-/* ═══ DELETE ═══ */
-.del-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
-.del-bg.open{display:flex}
-.del-box{background:var(--s2);border:1px solid var(--brd);border-radius:16px;padding:24px;width:90%;max-width:300px;text-align:center}
-.del-box h3{font-size:15px;font-weight:700;margin-bottom:6px}
-.del-box p{font-size:12px;color:var(--t3);margin-bottom:16px;line-height:1.5}
-.del-btns{display:flex;gap:8px}
-.del-btns button{flex:1;height:38px;border-radius:10px;font-weight:700;font-size:12px}
-.d-c{background:rgba(255,255,255,0.06);color:var(--t2);border:1px solid var(--brd)}
-.d-d{background:#C03030;color:#fff}
+/* Delete */
+.del-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}.del-bg.open{display:flex}
+.del-box{background:#1A1916;border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:24px;width:90%;max-width:300px;text-align:center}
+.del-box h3{font-size:15px;font-weight:700;margin-bottom:6px}.del-box p{font-size:12px;color:#5A5848;margin-bottom:16px;line-height:1.5}
+.del-btns{display:flex;gap:8px}.del-btns button{flex:1;height:38px;border-radius:10px;font-weight:700;font-size:12px}
+.dc{background:rgba(255,255,255,0.04);color:#8A8778;border:1px solid rgba(255,255,255,0.05)}.dd{background:#C03030;color:#fff}
 
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-
-/* ═══ GROUP CONTROLS ═══ */
-.grp{display:flex;align-items:center;gap:10px;padding:10px 0 6px}
-.grp-label{font-size:12px;font-weight:700;color:var(--t2);flex:1}
-.grp-count{font-size:10px;color:var(--t3);font-weight:500;margin-right:4px}
-/* Group brightness bar */
-.grp-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.05);margin:-2px 0 10px;cursor:pointer;position:relative}
-.grp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070);transition:width 60ms}
-.grp-thumb{width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:-5px;box-shadow:0 1px 4px rgba(0,0,0,0.4);transition:left 60ms}
-
-/* ═══ ROOM SCENES ═══ */
-.scenes{display:flex;gap:6px;padding:8px 0 4px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap}
-.scenes::-webkit-scrollbar{display:none}
-.scene{padding:7px 14px;border-radius:10px;background:var(--s2);border:1px solid var(--brd);font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;transition:.15s;white-space:nowrap}
-.scene:hover{border-color:rgba(255,179,0,0.1);color:var(--t2)}
-.scene.on{background:rgba(255,179,0,0.08);border-color:rgba(255,179,0,0.15);color:var(--amber)}
 </style>
 </head>
 <body>
-
 <div class="shell">
-  <!-- Sidebar — desktop/tablet -->
-  <div class="sidebar" id="sb">
-    <div class="sb-head"><div class="sb-title">Rooms</div></div>
-    <div class="sb-list" id="sbList"></div>
-    <div class="sb-add" onclick="openPk(-1)">+ Add Room</div>
-  </div>
-  <!-- Main -->
+  <div class="sb" id="sb"><div class="sb-hd"><span>Rooms</span></div><div class="sb-list" id="sbL"></div><div class="sb-add" onclick="openPk(-1)">+ Add Room</div></div>
   <div class="main" id="main"></div>
 </div>
 
-<!-- Picker sheet -->
 <div class="sh-bg" id="pkBg"></div>
-<div class="sh" id="pkSh">
-  <div class="sh-bar"></div>
-  <div class="sh-hd"><h3 id="pkTi">Add Room</h3><button class="sh-x" onclick="closePk()">✕</button></div>
-  <div class="sh-body" id="pkBd"></div>
-  <div style="position:relative"><div class="emo-dd" id="emoDD"></div></div>
-  <div class="sh-foot">
-    <button class="emo-b" id="emoB" onclick="togEmo()">🛋️</button>
-    <input id="rnI" placeholder="Room name">
-    <button class="sh-save" onclick="savePk()">Save</button>
-  </div>
-</div>
+<div class="sh" id="pkSh"><div class="sh-bar"></div><div class="sh-hd"><h3 id="pkTi">Add Room</h3><button class="sh-x" onclick="closePk()">✕</button></div><div class="sh-bd" id="pkBd"></div><div style="position:relative"><div class="em-dd" id="emDD"></div></div><div class="sh-ft"><button class="em-b" id="emB" onclick="togEm()">🛋️</button><input id="rnI" placeholder="Room name"><button class="sh-sv" onclick="savePk()">Save</button></div></div>
 
-<!-- Dimmer sheet -->
-<div class="sh-bg" id="dimBg"></div>
-<div class="sh" id="dimSh">
-  <div class="sh-bar"></div>
-  <div class="sh-hd"><h3 id="dimTi">Light</h3><button class="sh-x" onclick="closeDim()">✕</button></div>
-  <div class="sh-body">
-    <div class="dim-w">
-      <div class="dim-pct" id="dimPct">75%</div>
-      <div class="dim-trk" id="dimTrk">
-        <div class="dim-fl" id="dimFl"></div>
-        <div class="dim-th" id="dimTh"></div>
-      </div>
-      <div class="dim-pre">
-        <button class="dim-p" data-v="25">25</button>
-        <button class="dim-p" data-v="50">50</button>
-        <button class="dim-p" data-v="75">75</button>
-        <button class="dim-p" data-v="100">100</button>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="sh-bg" id="dmBg"></div>
+<div class="sh" id="dmSh"><div class="sh-bar"></div><div class="sh-hd"><h3 id="dmTi">Light</h3><button class="sh-x" onclick="closeDm()">✕</button></div><div class="sh-bd"><div class="dm-w"><div class="dm-pct" id="dmPct">75%</div><div class="dm-trk" id="dmTrk"><div class="dm-fl" id="dmFl"></div><div class="dm-th" id="dmTh"></div></div><div class="dm-pre"><button class="dm-p" data-v="25">25</button><button class="dm-p" data-v="50">50</button><button class="dm-p" data-v="75">75</button><button class="dm-p" data-v="100">100</button></div></div></div></div>
 
-<!-- Delete confirm -->
-<div class="del-bg" id="delBg">
-  <div class="del-box">
-    <h3>Delete Room</h3>
-    <p id="delMsg"></p>
-    <div class="del-btns">
-      <button class="d-c" onclick="document.getElementById('delBg').classList.remove('open')">Cancel</button>
-      <button class="d-d" onclick="doDel()">Delete</button>
-    </div>
-  </div>
-</div>
+<div class="del-bg" id="delBg"><div class="del-box"><h3>Delete Room</h3><p id="delMsg"></p><div class="del-btns"><button class="dc" onclick="$('delBg').classList.remove('open')">Cancel</button><button class="dd" onclick="doDel()">Delete</button></div></div></div>
 
 <script>
+const $=id=>document.getElementById(id);
 const D=[
   {id:'h1',n:'Entrance 3',t:'light'},{id:'h12',n:'Entrance 1',t:'light'},{id:'h21',n:'Entrance 2',t:'light'},{id:'h16',n:'Entrance 4',t:'light'},
   {id:'h15',n:'Laundry 1',t:'light'},{id:'h13',n:'Laundry 2',t:'light'},{id:'h14',n:'Laundry 3',t:'light'},
@@ -249,365 +184,231 @@ const D=[
   {id:'t1',n:'UCL1',t:'plug'},{id:'t2',n:'UCL2',t:'plug'},{id:'tp',n:'Lounge Picture',t:'plug'},
   {id:'ts1',n:'Cerise Lightstrip',t:'light'},{id:'ts2',n:'Cerise Lightstrip 2',t:'light'},
 ];
-const EMOS=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
-const S={};D.forEach(d=>{S[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
-
-// Groups from Lighting page — each controls multiple lights/plugs as one
 const G=[
-  {id:'g:entrance',n:'Entrance Lights',t:'group',icon:'💡',members:['h1','h12','h21','h16']},
-  {id:'g:laundry',n:'Laundry Lights',t:'group',icon:'💡',members:['h15','h13','h14']},
-  {id:'g:master',n:'Master Bed Lights',t:'group',icon:'💡',members:['h8','h20']},
-  {id:'g:cerise',n:'Cerise Strips',t:'group',icon:'💡',members:['ts1','ts2']},
-  {id:'g:kitchen_plugs',n:'Kitchen Plugs',t:'group',icon:'🔌',members:['t1','t2']},
+  {id:'g:ent',n:'Entrance Lights',members:['h1','h12','h21','h16']},
+  {id:'g:ldy',n:'Laundry Lights',members:['h15','h13','h14']},
+  {id:'g:mb',n:'Master Bed Lights',members:['h8','h20']},
+  {id:'g:cer',n:'Cerise Strips',members:['ts1','ts2']},
+  {id:'g:kp',n:'Kitchen Plugs',members:['t1','t2']},
 ];
-// Group state derived from members
-function grpOn(g){return g.members.some(id=>S[id]&&S[id].on)}
-function grpBri(g){const on=g.members.filter(id=>S[id]&&S[id].on&&S[id].bri!==undefined);if(!on.length)return 0;return Math.round(on.reduce((a,id)=>a+S[id].bri,0)/on.length)}
-function grpIsPlug(g){return g.members.every(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'})}
-function togGrp(gid){const g=G.find(x=>x.id===gid);if(!g)return;const on=grpOn(g);g.members.forEach(id=>{if(on){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});R()}
+const EM=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
+const S={};D.forEach(d=>{S[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
+let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dmId=null,dmGrp=null;
 
-let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dimId=null;
+function gOn(g){return g.members.some(id=>S[id]&&S[id].on)}
+function gBri(g){const on=g.members.filter(id=>S[id]&&S[id].on&&S[id].bri!==undefined);return on.length?Math.round(on.reduce((a,id)=>a+S[id].bri,0)/on.length):0}
+function gIsPlug(g){return g.members.every(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'})}
 
+// ═══ RENDER ═══
 function R(){
   // Sidebar
-  let sb='';
-  rooms.forEach((r,i)=>{
-    const on=i===cur;
-    sb+='<div class="sb-room '+(on?'on':'')+'" onclick="go('+i+')">';
-    sb+='<div class="sb-emo">'+r.emoji+'</div>';
-    sb+='<div class="sb-rn">'+r.name+'</div>';
-    sb+='<div class="sb-dot"></div></div>';
-  });
-  document.getElementById('sbList').innerHTML=sb;
+  let sb='';rooms.forEach((r,i)=>{sb+='<div class="sb-r '+(i===cur?'on':'')+'" onclick="go('+i+')"><div class="e">'+r.emoji+'</div><div class="n">'+r.name+'</div><div class="dot"></div></div>'});
+  $('sbL').innerHTML=sb;
 
-  // Main
-  const m=document.getElementById('main');
-  if(!rooms.length){
-    m.innerHTML='<div class="empty"><div class="empty-icon">🏠</div><h2>No Rooms</h2><p>Create a room and assign your lights and plugs</p><button class="btn-p" onclick="openPk(-1)">Add Room</button></div>';
-    return;
-  }
+  const m=$('main');
+  if(!rooms.length){m.innerHTML='<div class="empty"><div class="empty-ic">🏠</div><h2>No Rooms</h2><p>Create a room and assign your lights and plugs</p><button class="btn-a" onclick="openPk(-1)">Add Room</button></div>';return}
   if(cur>=rooms.length)cur=rooms.length-1;
   const rm=rooms[cur];
-  // Separate groups from individual devices
-  const lgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&!grpIsPlug(g));
-  const pgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&grpIsPlug(g));
-  const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
-  const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
-  const allIds=[...lights,...plugs];lgrps.concat(pgrps).forEach(g=>g.members.forEach(id=>{if(!allIds.includes(id))allIds.push(id)}));
+
+  // Resolve all device IDs including group members
+  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
+  const indivL=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
+  const indivP=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
+  const lGrps=grps.filter(g=>!gIsPlug(g)), pGrps=grps.filter(g=>gIsPlug(g));
+
+  // All unique light/plug IDs for counts
+  const allL=new Set(indivL);lGrps.forEach(g=>g.members.forEach(id=>allL.add(id)));
+  const allP=new Set(indivP);pGrps.forEach(g=>g.members.forEach(id=>allP.add(id)));
+  const allIds=[...allL,...allP];
   const onC=allIds.filter(id=>S[id]&&S[id].on).length;
 
   let h='';
-  // Mobile room pills
-  h+='<div class="mob-rooms">';
-  rooms.forEach((r,i)=>{h+='<button class="mr-pill '+(i===cur?'on':'')+'" onclick="go('+i+')">'+r.emoji+' '+r.name+'</button>'});
-  h+='<button class="mr-pill add" onclick="openPk(-1)">+ Add</button>';
-  h+='</div>';
+  // Mobile pills
+  h+='<div class="pills">';rooms.forEach((r,i)=>{h+='<button class="pill '+(i===cur?'on':'')+'" onclick="go('+i+')">'+r.emoji+' '+r.name+'</button>'});h+='<button class="pill add" onclick="openPk(-1)">+ Add</button></div>';
 
-  h+='<div class="content">';
-  // Header
-  h+='<div class="rh">';
-  h+='<div class="rh-emo">'+rm.emoji+'</div>';
-  h+='<div class="rh-info"><div class="rh-name">'+rm.name+'</div><div class="rh-sub">'+onC+' of '+rm.devs.length+' on</div></div>';
-  h+='<div class="rh-acts"><button class="rh-btn" onclick="openPk(cur)">✎</button><button class="rh-btn" onclick="askDel()">🗑</button></div>';
-  h+='</div>';
+  h+='<div class="wrap">';
+  h+='<div class="rh"><div class="rh-e">'+rm.emoji+'</div><div class="rh-i"><div class="rh-n">'+rm.name+'</div><div class="rh-s">'+onC+' of '+allIds.length+' on</div></div><div class="rh-a"><button class="rh-b" onclick="openPk(cur)">✎</button><button class="rh-b" onclick="askDel()">🗑</button></div></div>';
 
-  // Room scenes
-  h+='<div class="scenes">';
-  h+='<button class="scene" onclick="roomScene(\'bright\')">☀️ Bright</button>';
-  h+='<button class="scene" onclick="roomScene(\'relax\')">🌅 Relax</button>';
-  h+='<button class="scene" onclick="roomScene(\'dim\')">🌙 Dim</button>';
-  h+='<button class="scene" onclick="roomScene(\'off\')">⚫ All Off</button>';
-  h+='</div>';
+  // Scenes
+  h+='<div class="scenes"><button class="sc" onclick="scene(\'bright\')">☀️ Bright</button><button class="sc" onclick="scene(\'relax\')">🌅 Relax</button><button class="sc" onclick="scene(\'dim\')">🌙 Dim</button><button class="sc" onclick="scene(\'off\')">⚫ All Off</button></div>';
 
-  if(lights.length || lgrps.length){
-    const allLightIds=[...lights];lgrps.forEach(g=>g.members.forEach(id=>{if(!allLightIds.includes(id))allLightIds.push(id)}));
-    const anyLitOn=allLightIds.some(id=>S[id]&&S[id].on);
-    const litOn=allLightIds.filter(id=>S[id]&&S[id].on);
-    const avgBri=anyLitOn?Math.round(litOn.filter(id=>S[id].bri!==undefined).reduce((a,id)=>a+S[id].bri,0)/Math.max(1,litOn.filter(id=>S[id].bri!==undefined).length)):0;
-    h+='<div class="sec">';
-    h+='<div class="grp"><div class="grp-label">Lights</div>';
-    h+='<div class="grp-count">'+litOn.length+'/'+allLightIds.length+'</div>';
-    h+='<div class="tog '+(anyLitOn?'on':'')+'" onclick="togAllLights()"></div></div>';
-    if(anyLitOn){
-      h+='<div class="grp-bar" onpointerdown="grpDrag(event,\'light\')">';
-      h+='<div class="grp-fill" style="width:'+avgBri+'%"></div>';
-      h+='<div class="grp-thumb" style="left:calc('+avgBri+'% - 8px)"></div>';
-      h+='</div>';
-    }
-    h+='<div class="tiles">';
-    // Groups first
-    lgrps.forEach(g=>{h+=mkGrpTile(g)});
-    // Then individual lights not in any group
-    lights.forEach(id=>{
-      const inGrp=lgrps.some(g=>g.members.includes(id));
-      if(!inGrp){const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)}
-    });
+  // LIGHTS section
+  if(allL.size){
+    const litOn=[...allL].filter(id=>S[id]&&S[id].on);
+    const anyOn=litOn.length>0;
+    const avg=anyOn?Math.round(litOn.filter(id=>S[id].bri!==undefined).reduce((a,id)=>a+S[id].bri,0)/Math.max(1,litOn.filter(id=>S[id].bri!==undefined).length)):0;
+
+    h+='<div class="sec"><div class="gh"><div class="gh-l">Lights</div><div class="gh-c">'+litOn.length+'/'+allL.size+'</div>';
+    h+='<div class="tg '+(anyOn?'on':'')+'" onclick="togAll(\'l\')"><div class="tg-k"></div></div></div>';
+    if(anyOn){h+='<div class="gbar" onpointerdown="gDrag(event,\'l\')"><div class="gbar-f" style="width:'+avg+'%"></div><div class="gbar-t" style="left:max(0px,calc('+avg+'% - 7px))"></div></div>'}
+
+    h+='<div class="cards">';
+    lGrps.forEach(g=>{h+=grpCard(g)});
+    const inGrp=new Set();lGrps.forEach(g=>g.members.forEach(id=>inGrp.add(id)));
+    indivL.filter(id=>!inGrp.has(id)).forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=card(d)});
     h+='</div></div>';
   }
-  if(plugs.length || pgrps.length){
-    const allPlugIds=[...plugs];pgrps.forEach(g=>g.members.forEach(id=>{if(!allPlugIds.includes(id))allPlugIds.push(id)}));
-    const anyPlgOn=allPlugIds.some(id=>S[id]&&S[id].on);
-    h+='<div class="sec">';
-    h+='<div class="grp"><div class="grp-label">Power</div>';
-    h+='<div class="grp-count">'+allPlugIds.filter(id=>S[id]&&S[id].on).length+'/'+allPlugIds.length+'</div>';
-    h+='<div class="tog '+(anyPlgOn?'on':'')+'" onclick="togAllPlugs()"></div></div>';
-    h+='<div class="tiles">';
-    pgrps.forEach(g=>{h+=mkGrpTile(g)});
-    plugs.forEach(id=>{
-      const inGrp=pgrps.some(g=>g.members.includes(id));
-      if(!inGrp){const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)}
-    });
+
+  // POWER section
+  if(allP.size){
+    const plgOn=[...allP].filter(id=>S[id]&&S[id].on);
+    const anyOn=plgOn.length>0;
+
+    h+='<div class="sec"><div class="gh"><div class="gh-l">Power</div><div class="gh-c">'+plgOn.length+'/'+allP.size+'</div>';
+    h+='<div class="tg '+(anyOn?'on':'')+'" onclick="togAll(\'p\')"><div class="tg-k"></div></div></div>';
+
+    h+='<div class="cards">';
+    pGrps.forEach(g=>{h+=grpCard(g)});
+    const inGrp=new Set();pGrps.forEach(g=>g.members.forEach(id=>inGrp.add(id)));
+    indivP.filter(id=>!inGrp.has(id)).forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=card(d)});
     h+='</div></div>';
   }
+
   h+='</div>';
   m.innerHTML=h;
 }
 
-function mkTile(d){
-  const s=S[d.id],on=s.on,isP=d.t==='plug';
-  const pct=on?(s.bri||0):0;
-  let h='<div class="tile '+(on?'on':'')+'" onclick="tap(\''+d.id+'\')">';
-  h+='<div class="tile-row">';
-  h+='<div class="tile-icon">'+(isP?'🔌':'💡')+'</div>';
-  h+='<div class="tile-name">'+d.n+'</div>';
-  h+='<div class="tile-val'+(isP?' plug':'')+'">'+(isP?(on?'ON':'OFF'):(on?s.bri+'%':'Off'))+'</div>';
-  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"></div>';
+// ═══ CARD — matches Flutter _lightCard exactly ═══
+function card(d){
+  const s=S[d.id],on=s.on,isP=d.t==='plug',bri=on?(s.bri||0):0;
+  let h='<div class="lc '+(on?'on':'')+'" onclick="tap(\''+d.id+'\')">';
+  // Row: icon · name · value · toggle
+  h+='<div class="lc-row">';
+  h+='<div class="lc-ic">'+(isP?'🔌':'💡')+'</div>';
+  h+='<div class="lc-nm">'+d.n+'</div>';
+  h+='<div class="lc-val'+(isP?' sm':'')+'">'+(isP?(on?'ON':'OFF'):(on?s.bri+'%':'Off'))+'</div>';
+  h+='<div style="width:10px"></div>';
+  h+='<div class="tg '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"><div class="tg-k"></div></div>';
   h+='</div>';
-  // Always show brightness bar for lights
+  // Brightness bar — always show for lights
   if(!isP){
-    h+='<div class="bbar" onclick="event.stopPropagation()" onpointerdown="barDrag(event,\''+d.id+'\')">';
-    if(on&&pct>0)h+='<div class="bbar-fill" style="width:'+pct+'%"></div>';
-    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:max(0px, calc('+pct+'% - 14px))">';
-    h+='<div class="bbar-grip"></div><div class="bbar-grip"></div><div class="bbar-grip"></div>';
-    h+='</div></div>';
+    h+='<div class="bb" onclick="event.stopPropagation()" onpointerdown="bDrag(event,\''+d.id+'\')">';
+    h+='<div class="bb-trk"></div>';
+    if(on&&bri>0)h+='<div class="bb-fl" style="width:'+bri+'%"></div>';
+    h+='<div class="bb-th '+(on?'on':'off')+'" style="left:max(0px,calc('+bri+'% - 14px))"><div class="bb-g"></div><div class="bb-g"></div><div class="bb-g"></div></div>';
+    h+='</div>';
   }
   h+='</div>';
   return h;
 }
 
-function barDrag(e,id){
-  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
-  const rect=bar.getBoundingClientRect();
-  const upd=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-rect.left)/rect.width)*100)));S[id].bri=p;S[id].on=true;R()};
-  upd(e);bar.onpointermove=upd;bar.onpointerup=()=>{bar.onpointermove=null};
+function grpCard(g){
+  const on=gOn(g),isP=gIsPlug(g),bri=gBri(g),pct=on?bri:0;
+  let h='<div class="lc grp '+(on?'on':'')+'" onclick="tapG(\''+g.id+'\')">';
+  h+='<div class="lc-row">';
+  h+='<div class="lc-ic">👥</div>';
+  h+='<div class="lc-nm">'+g.n+'<span class="lc-mem"> · '+g.members.length+'</span></div>';
+  h+='<div class="lc-val'+(isP?' sm':'')+'">'+(isP?(on?'ON':'OFF'):(on?bri+'%':'Off'))+'</div>';
+  h+='<div style="width:10px"></div>';
+  h+='<div class="tg '+(on?'on':'')+'" onclick="event.stopPropagation();togG(\''+g.id+'\')"><div class="tg-k"></div></div>';
+  h+='</div>';
+  if(!isP){
+    h+='<div class="bb" onclick="event.stopPropagation()" onpointerdown="gBDrag(event,\''+g.id+'\')">';
+    h+='<div class="bb-trk"></div>';
+    if(on&&pct>0)h+='<div class="bb-fl" style="width:'+pct+'%"></div>';
+    h+='<div class="bb-th '+(on?'on':'off')+'" style="left:max(0px,calc('+pct+'% - 14px))"><div class="bb-g"></div><div class="bb-g"></div><div class="bb-g"></div></div>';
+    h+='</div>';
+  }
+  h+='</div>';
+  return h;
 }
 
+// ═══ INTERACTIONS ═══
 function go(i){cur=i;R()}
 function tog(id){S[id].on=!S[id].on;R()}
-function tap(id){const d=D.find(x=>x.id===id);if(!d)return;if(d.t==='plug'){tog(id);return}openDim(d)}
-function tapGrp(gid){
-  const g=G.find(x=>x.id===gid);if(!g)return;
-  if(grpIsPlug(g)){togGrp(gid);return}
-  // Open dimmer for the group
-  openGrpDim(g);
-}
+function tap(id){const d=D.find(x=>x.id===id);if(!d)return;d.t==='plug'?tog(id):openDm(d)}
+function togG(gid){const g=G.find(x=>x.id===gid);if(!g)return;const on=gOn(g);g.members.forEach(id=>{if(on){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});R()}
+function tapG(gid){const g=G.find(x=>x.id===gid);if(!g)return;gIsPlug(g)?togG(gid):openGDm(g)}
 
-function mkGrpTile(g){
-  const on=grpOn(g),isP=grpIsPlug(g),bri=grpBri(g);
-  const pct=on?bri:0;
-  let h='<div class="tile grp '+(on?'on':'')+'" onclick="tapGrp(\''+g.id+'\')">';
-  h+='<div class="tile-row">';
-  h+='<div class="tile-icon">👥</div>';
-  h+='<div class="tile-name">'+g.n+'<span class="tile-members"> · '+g.members.length+'</span></div>';
-  h+='<div class="tile-val'+(isP?' plug':'')+'">'+(isP?(on?'ON':'OFF'):(on?bri+'%':'Off'))+'</div>';
-  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();togGrp(\''+g.id+'\')"></div>';
-  h+='</div>';
-  if(!isP){
-    h+='<div class="bbar" onclick="event.stopPropagation()" onpointerdown="grpBarDrag(event,\''+g.id+'\')">';
-    if(on&&pct>0)h+='<div class="bbar-fill" style="width:'+pct+'%"></div>';
-    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:max(0px, calc('+pct+'% - 14px))">';
-    h+='<div class="bbar-grip"></div><div class="bbar-grip"></div><div class="bbar-grip"></div>';
-    h+='</div></div>';
+function bDrag(e,id){const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();const u=ev=>{S[id].bri=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));S[id].on=true;R()};u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null}}
+function gBDrag(e,gid){const g=G.find(x=>x.id===gid);if(!g)return;const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();const u=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null}}
+
+// Toggle all lights/plugs in room
+function togAll(type){
+  const rm=rooms[cur];if(!rm)return;
+  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
+  const ids=new Set();
+  if(type==='l'){
+    rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'}).forEach(id=>ids.add(id));
+    grps.filter(g=>!gIsPlug(g)).forEach(g=>g.members.forEach(id=>ids.add(id)));
+  }else{
+    rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'}).forEach(id=>ids.add(id));
+    grps.filter(g=>gIsPlug(g)).forEach(g=>g.members.forEach(id=>ids.add(id)));
   }
-  h+='</div>';
-  return h;
-}
-
-function grpBarDrag(e,gid){
-  const g=G.find(x=>x.id===gid);if(!g)return;
-  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
-  const rect=bar.getBoundingClientRect();
-  const upd=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-rect.left)/rect.width)*100)));g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};
-  upd(e);bar.onpointermove=upd;bar.onpointerup=()=>{bar.onpointermove=null};
-}
-
-// ═══ GROUP DIMMER ═══
-let dimGrp=null;
-function openGrpDim(g){
-  dimGrp=g;dimId=null;
-  g.members.forEach(id=>{S[id].on=true});
-  document.getElementById('dimTi').textContent=g.n;
-  setDim(grpBri(g)||100);
-  document.getElementById('dimBg').classList.add('open');
-  document.getElementById('dimSh').classList.add('open');
-}
-
-// ═══ TOGGLE ALL in current room ═══
-function togAllLights(){
-  const rm=rooms[cur];if(!rm)return;
-  const lgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&!grpIsPlug(g));
-  const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
-  const allIds=[...lights];lgrps.forEach(g=>g.members.forEach(id=>{if(!allIds.includes(id))allIds.push(id)}));
-  const anyOn=allIds.some(id=>S[id]&&S[id].on);
-  allIds.forEach(id=>{if(anyOn){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});
-  R();
-}
-function togAllPlugs(){
-  const rm=rooms[cur];if(!rm)return;
-  const pgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&grpIsPlug(g));
-  const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
-  const allIds=[...plugs];pgrps.forEach(g=>g.members.forEach(id=>{if(!allIds.includes(id))allIds.push(id)}));
-  const anyOn=allIds.some(id=>S[id]&&S[id].on);
-  allIds.forEach(id=>{S[id].on=!anyOn});
+  const anyOn=[...ids].some(id=>S[id]&&S[id].on);
+  ids.forEach(id=>{if(anyOn){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});
   R();
 }
 
-// ═══ GROUP CONTROLS ═══
-function togGroup(type){
+// Group brightness drag (section-level)
+function gDrag(e,type){
   const rm=rooms[cur];if(!rm)return;
-  const ids=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t===type});
-  const anyOn=ids.some(id=>S[id]&&S[id].on);
-  ids.forEach(id=>{
-    if(anyOn){S[id].on=false}
-    else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}
-  });
-  R();
+  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
+  const ids=new Set();
+  if(type==='l'){rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'}).forEach(id=>ids.add(id));grps.filter(g=>!gIsPlug(g)).forEach(g=>g.members.forEach(id=>ids.add(id)))}
+  const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();
+  const u=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));ids.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};
+  u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null};
 }
 
-function grpDrag(e,type){
-  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
+// Scenes
+function scene(s){
   const rm=rooms[cur];if(!rm)return;
-  const ids=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t===type});
-  const rect=bar.getBoundingClientRect();
-  const upd=e=>{
-    const pct=Math.max(1,Math.min(100,Math.round(((e.clientX-rect.left)/rect.width)*100)));
-    ids.forEach(id=>{if(S[id].bri!==undefined){S[id].bri=pct;S[id].on=true}});
-    R();
-  };
-  upd(e);
-  bar.onpointermove=upd;
-  bar.onpointerup=()=>{bar.onpointermove=null};
-}
-
-// ═══ ROOM SCENES ═══
-function roomScene(scene){
-  const rm=rooms[cur];if(!rm)return;
-  // Collect ALL light and plug IDs including group members
-  const lgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&!grpIsPlug(g));
-  const pgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&grpIsPlug(g));
-  const lightIds=new Set(rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'}));
-  lgrps.forEach(g=>g.members.forEach(id=>lightIds.add(id)));
-  const plugIds=new Set(rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'}));
-  pgrps.forEach(g=>g.members.forEach(id=>plugIds.add(id)));
-
-  switch(scene){
-    case'bright':
-      lightIds.forEach(id=>{S[id].on=true;S[id].bri=100});
-      plugIds.forEach(id=>{S[id].on=true});
-      break;
-    case'relax':
-      lightIds.forEach(id=>{S[id].on=true;S[id].bri=50});
-      break;
-    case'dim':
-      lightIds.forEach(id=>{S[id].on=true;S[id].bri=20});
-      break;
-    case'off':
-      lightIds.forEach(id=>{S[id].on=false});
-      plugIds.forEach(id=>{S[id].on=false});
-      break;
-  }
-  R();
+  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
+  const allIds=new Set();rm.devs.forEach(id=>{const d=D.find(x=>x.id===id);if(d)allIds.add(id)});grps.forEach(g=>g.members.forEach(id=>allIds.add(id)));
+  allIds.forEach(id=>{
+    if(s==='off'){S[id].on=false}
+    else if(s==='bright'){S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}
+    else if(s==='relax'){S[id].on=true;if(S[id].bri!==undefined)S[id].bri=50}
+    else if(s==='dim'){S[id].on=true;if(S[id].bri!==undefined)S[id].bri=20}
+  });R();
 }
 
 // ═══ DIMMER ═══
-function openDim(d){
-  dimId=d.id;S[d.id].on=true;
-  document.getElementById('dimTi').textContent=d.n;
-  setDim(S[d.id].bri);
-  document.getElementById('dimBg').classList.add('open');
-  document.getElementById('dimSh').classList.add('open');
-}
-function closeDim(){document.getElementById('dimBg').classList.remove('open');document.getElementById('dimSh').classList.remove('open');dimGrp=null;R()}
-function setDim(v){
+function openDm(d){dmId=d.id;dmGrp=null;S[d.id].on=true;$('dmTi').textContent=d.n;setDm(S[d.id].bri);$('dmBg').classList.add('open');$('dmSh').classList.add('open')}
+function openGDm(g){dmGrp=g;dmId=null;g.members.forEach(id=>{S[id].on=true});$('dmTi').textContent=g.n;setDm(gBri(g)||100);$('dmBg').classList.add('open');$('dmSh').classList.add('open')}
+function closeDm(){$('dmBg').classList.remove('open');$('dmSh').classList.remove('open');dmGrp=null;R()}
+function setDm(v){
   v=Math.max(1,Math.min(100,v));
-  if(dimId)S[dimId].bri=v;
-  if(dimGrp)dimGrp.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=v;S[id].on=true}});
-  document.getElementById('dimPct').textContent=v+'%';
-  document.getElementById('dimFl').style.height=v+'%';
-  document.getElementById('dimTh').style.bottom='calc('+v+'% - 3px)';
-  document.querySelectorAll('.dim-p').forEach(p=>p.classList.toggle('on',+p.dataset.v===v));
+  if(dmId)S[dmId].bri=v;
+  if(dmGrp)dmGrp.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=v;S[id].on=true}});
+  $('dmPct').textContent=v+'%';$('dmFl').style.height=v+'%';$('dmTh').style.bottom='calc('+v+'% - 3px)';
+  document.querySelectorAll('.dm-p').forEach(p=>p.classList.toggle('on',+p.dataset.v===v));
 }
-document.getElementById('dimTrk').onpointerdown=function(e){
-  this.setPointerCapture(e.pointerId);const r=this.getBoundingClientRect();
-  const u=e=>{setDim(Math.round((1-(e.clientY-r.top)/r.height)*100))};u(e);
-  this.onpointermove=u;this.onpointerup=()=>{this.onpointermove=null};
-};
-document.querySelectorAll('.dim-p').forEach(p=>p.onclick=()=>setDim(+p.dataset.v));
-document.getElementById('dimBg').onclick=closeDim;
+$('dmTrk').onpointerdown=function(e){this.setPointerCapture(e.pointerId);const r=this.getBoundingClientRect();const u=ev=>{setDm(Math.round((1-(ev.clientY-r.top)/r.height)*100))};u(e);this.onpointermove=u;this.onpointerup=()=>{this.onpointermove=null}};
+document.querySelectorAll('.dm-p').forEach(p=>p.onclick=()=>setDm(+p.dataset.v));
+$('dmBg').onclick=closeDm;
 
 // ═══ PICKER ═══
 function openPk(idx){
   editIdx=idx;pkCk=new Set();
-  if(idx>=0){const r=rooms[idx];pkEmo=r.emoji;document.getElementById('rnI').value=r.name;r.devs.forEach(d=>pkCk.add(d));document.getElementById('pkTi').textContent='Edit Room'}
-  else{pkEmo='🛋️';document.getElementById('rnI').value='';document.getElementById('pkTi').textContent='Add Room'}
-  document.getElementById('emoB').textContent=pkEmo;
-  rPk();
-  document.getElementById('pkBg').classList.add('open');
-  document.getElementById('pkSh').classList.add('open');
+  if(idx>=0){const r=rooms[idx];pkEmo=r.emoji;$('rnI').value=r.name;r.devs.forEach(d=>pkCk.add(d));$('pkTi').textContent='Edit Room'}
+  else{pkEmo='🛋️';$('rnI').value='';$('pkTi').textContent='Add Room'}
+  $('emB').textContent=pkEmo;rPk();$('pkBg').classList.add('open');$('pkSh').classList.add('open');
 }
-function closePk(){document.getElementById('pkBg').classList.remove('open');document.getElementById('pkSh').classList.remove('open');document.getElementById('emoDD').classList.remove('open')}
+function closePk(){$('pkBg').classList.remove('open');$('pkSh').classList.remove('open');$('emDD').classList.remove('open')}
 function rPk(){
-  const ls=D.filter(d=>d.t==='light'),ps=D.filter(d=>d.t==='plug');
-  const lgr=G.filter(g=>!grpIsPlug(g)),pgr=G.filter(g=>grpIsPlug(g));
+  const lG=G.filter(g=>!gIsPlug(g)),pG=G.filter(g=>gIsPlug(g)),ls=D.filter(d=>d.t==='light'),ps=D.filter(d=>d.t==='plug');
   let h='';
-
-  // Light groups
-  if(lgr.length){
-    h+='<div class="sec-label" style="margin-top:0">Light Groups</div>';
-    lgr.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:var(--t4);font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'});
-  }
-
-  // Individual lights
-  h+='<div class="sec-label" style="margin-top:14px">Individual Lights</div>';
+  if(lG.length){h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:4px 0 6px">Light Groups</div>';
+    lG.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:#3A3A3A;font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'})}
+  h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:12px 0 6px">Individual Lights</div>';
   ls.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">💡</div></div>'});
-
-  // Plug groups
-  if(pgr.length){
-    h+='<div class="sec-label" style="margin-top:14px">Plug Groups</div>';
-    pgr.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:var(--t4);font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'});
-  }
-
-  // Individual plugs
-  h+='<div class="sec-label" style="margin-top:14px">Individual Plugs</div>';
+  if(pG.length){h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:12px 0 6px">Plug Groups</div>';
+    pG.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:#3A3A3A;font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'})}
+  h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:12px 0 6px">Individual Plugs</div>';
   ps.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">🔌</div></div>'});
-  document.getElementById('pkBd').innerHTML=h;
+  $('pkBd').innerHTML=h;
 }
 function pkT(id){pkCk.has(id)?pkCk.delete(id):pkCk.add(id);rPk()}
-function togEmo(){
-  const g=document.getElementById('emoDD');
-  if(g.classList.contains('open')){g.classList.remove('open');return}
-  g.innerHTML=EMOS.map(e=>'<div class="emo-o" onclick="pickE(\''+e+'\')">'+e+'</div>').join('');
-  g.classList.add('open');
-}
-function pickE(e){pkEmo=e;document.getElementById('emoB').textContent=e;document.getElementById('emoDD').classList.remove('open')}
-document.getElementById('pkBg').onclick=closePk;
-function savePk(){
-  const n=document.getElementById('rnI').value.trim();
-  if(!n||!pkCk.size)return;
-  if(editIdx>=0){rooms[editIdx]={name:n,emoji:pkEmo,devs:[...pkCk]}}
-  else{rooms.push({name:n,emoji:pkEmo,devs:[...pkCk]});cur=rooms.length-1}
-  closePk();R();
-}
+function togEm(){const g=$('emDD');if(g.classList.contains('open')){g.classList.remove('open');return}g.innerHTML=EM.map(e=>'<div class="em-o" onclick="pickE(\''+e+'\')">'+e+'</div>').join('');g.classList.add('open')}
+function pickE(e){pkEmo=e;$('emB').textContent=e;$('emDD').classList.remove('open')}
+$('pkBg').onclick=closePk;
+function savePk(){const n=$('rnI').value.trim();if(!n||!pkCk.size)return;if(editIdx>=0){rooms[editIdx]={name:n,emoji:pkEmo,devs:[...pkCk]}}else{rooms.push({name:n,emoji:pkEmo,devs:[...pkCk]});cur=rooms.length-1}closePk();R()}
 
 // ═══ DELETE ═══
-function askDel(){
-  document.getElementById('delMsg').textContent='Remove "'+rooms[cur].name+'"?';
-  document.getElementById('delBg').classList.add('open');
-}
-function doDel(){
-  rooms.splice(cur,1);if(cur>=rooms.length)cur=Math.max(0,rooms.length-1);
-  document.getElementById('delBg').classList.remove('open');R();
-}
+function askDel(){$('delMsg').textContent='Remove "'+rooms[cur].name+'"?';$('delBg').classList.add('open')}
+function doDel(){rooms.splice(cur,1);if(cur>=rooms.length)cur=Math.max(0,rooms.length-1);$('delBg').classList.remove('open');R()}
 
 R();
 </script>
