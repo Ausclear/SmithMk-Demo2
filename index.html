@@ -6,643 +6,390 @@
 <title>SmithMk — Rooms</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
 :root{
-  --bg:#121212;--card:#1E1E1E;--card2:#252525;
+  --bg:#121212;--card:rgba(255,255,255,0.05);--card-solid:#1A1A1A;
   --amber:#FFB300;--gold:#c4a96b;
-  --t1:#EEEEEE;--t2:#B0B0B0;--t3:#707070;
-  --inactive:#4A4A4A;
-  --border:rgba(255,255,255,0.07);
-  --border-amber:rgba(255,179,0,0.12);
+  --t1:#EEEEEE;--t2:#B0B0B0;--t3:#707070;--t4:#444;
+  --border:rgba(255,255,255,0.06);--border-a:rgba(255,179,0,0.15);
+  --r:14px;
 }
-html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;overflow:hidden;touch-action:pan-y}
+html,body{height:100%;background:var(--bg);color:var(--t1);font-family:'DM Sans',sans-serif;overflow:hidden}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+/* ═══ LAYOUT ═══ */
+#app{height:100%;display:flex;flex-direction:column}
 
 /* ═══ EMPTY STATE ═══ */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px;opacity:0;animation:fadeUp .5s ease forwards}
-.empty-icon{width:80px;height:80px;border-radius:50%;background:rgba(255,179,0,0.06);border:1px solid var(--border-amber);display:flex;align-items:center;justify-content:center;font-size:36px}
-.empty h2{font-size:20px;font-weight:700;color:var(--t1)}
-.empty p{font-size:13px;color:var(--t3);max-width:260px;text-align:center}
-.btn-add{padding:12px 32px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:14px;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(255,179,0,0.25)}
-.btn-add:active{transform:scale(0.97)}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;opacity:0;animation:fu .4s ease .1s forwards}
+.empty-ring{width:88px;height:88px;border-radius:50%;border:2px solid var(--border-a);display:flex;align-items:center;justify-content:center}
+.empty-ring-inner{width:64px;height:64px;border-radius:50%;background:rgba(255,179,0,0.04);display:flex;align-items:center;justify-content:center;font-size:28px}
+.empty h2{font-size:18px;font-weight:700;letter-spacing:-0.3px}
+.empty p{font-size:12px;color:var(--t3);max-width:220px;text-align:center;line-height:1.5}
+.btn-primary{height:44px;padding:0 28px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px;letter-spacing:0.3px;transition:.15s}
+.btn-primary:active{transform:scale(0.96);opacity:0.9}
 
-/* ═══ ROOM VIEW ═══ */
-#app{height:100%;display:flex;flex-direction:column}
-.room-header{padding:20px 20px 0;flex-shrink:0}
-.room-header-top{display:flex;align-items:center;gap:12px}
-.room-emoji{font-size:32px}
-.room-title{font-size:22px;font-weight:700;color:var(--t1);flex:1}
-.room-subtitle{font-size:11px;color:var(--t3);margin-top:2px;font-weight:500}
-.room-actions{display:flex;gap:8px}
-.room-actions button{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--t3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.room-actions button:hover{border-color:var(--border-amber);color:var(--amber)}
+/* ═══ ROOM HEADER ═══ */
+.rh{padding:16px 20px 12px;display:flex;align-items:center;gap:14px;flex-shrink:0}
+.rh-emoji{width:44px;height:44px;border-radius:14px;background:rgba(255,179,0,0.06);border:1px solid var(--border-a);display:flex;align-items:center;justify-content:center;font-size:22px}
+.rh-info{flex:1}
+.rh-name{font-size:18px;font-weight:700;letter-spacing:-0.3px}
+.rh-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.rh-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:13px;transition:.15s}
+.rh-btn:hover{border-color:var(--border-a);color:var(--amber)}
 
 /* ═══ CAROUSEL ═══ */
-.carousel-wrap{flex:1;overflow:hidden;position:relative}
-.carousel{display:flex;height:100%;transition:transform .35s cubic-bezier(0.4,0,0.2,1)}
-.carousel-page{min-width:100%;height:100%;overflow-y:auto;padding:16px 20px 100px}
+.carousel-w{flex:1;overflow:hidden;position:relative}
+.carousel{display:flex;height:100%;transition:transform .3s cubic-bezier(0.25,0.1,0.25,1)}
+.page{min-width:100%;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 120px}
 
-/* ═══ DOTS ═══ */
-.dots{display:flex;justify-content:center;gap:8px;padding:12px 0;flex-shrink:0}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--inactive);cursor:pointer;transition:.2s}
-.dot.active{background:var(--amber);box-shadow:0 0 8px rgba(255,179,0,0.4)}
+/* Dots */
+.dots{display:flex;justify-content:center;gap:6px;padding:10px 0 14px;flex-shrink:0}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--t4);transition:.2s}
+.dot.on{width:20px;border-radius:3px;background:var(--amber)}
 
-/* ═══ ADD ROOM FAB ═══ */
-.fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:16px;background:var(--amber);color:#000;font-size:26px;font-weight:700;border:none;cursor:pointer;box-shadow:0 6px 24px rgba(255,179,0,0.3);z-index:50;display:flex;align-items:center;justify-content:center;transition:.15s}
+/* ═══ DEVICE TILES — compact 2-col grid ═══ */
+.sec{margin-top:14px}
+.sec-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2px;text-transform:uppercase;padding:0 4px;margin-bottom:8px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(min-width:700px){.tiles{grid-template-columns:1fr 1fr 1fr}}
+@media(min-width:1100px){.tiles{grid-template-columns:1fr 1fr 1fr 1fr}}
+
+.tile{background:var(--card-solid);border-radius:var(--r);padding:14px;border:1px solid var(--border);position:relative;transition:.15s;overflow:hidden;cursor:pointer}
+.tile:active{transform:scale(0.98)}
+.tile.on{border-color:var(--border-a)}
+.tile.on::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);opacity:0.5}
+.tile-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tile-icon{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--t3)}
+.tile.on .tile-icon{background:rgba(255,179,0,0.08);color:var(--amber)}
+.tog{width:40px;height:22px;border-radius:11px;background:var(--t4);position:relative;transition:.2s;flex-shrink:0}
+.tog.on{background:var(--amber)}
+.tog-k{width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.tog.on .tog-k{left:21px}
+.tile-name{font-size:12px;font-weight:600;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.on .tile-name{color:var(--t1)}
+.tile-val{font-size:10px;color:var(--t4);margin-top:2px;font-weight:500}
+.tile.on .tile-val{color:var(--gold)}
+
+/* Mini brightness bar in tile */
+.mini-bar{height:4px;border-radius:2px;background:rgba(255,255,255,0.06);margin-top:8px;overflow:hidden;cursor:pointer}
+.mini-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070);transition:width .1s}
+
+/* ═══ FAB ═══ */
+.fab{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:14px;background:var(--amber);color:#000;font-size:22px;font-weight:700;display:none;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,179,0,0.3);z-index:50;transition:.15s}
 .fab:active{transform:scale(0.93)}
 
-/* ═══ DEVICE CARDS ═══ */
-.section-label{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:2px;text-transform:uppercase;margin:16px 0 10px}
-.devices-grid{display:grid;grid-template-columns:1fr;gap:10px}
-@media(min-width:580px){.devices-grid{grid-template-columns:1fr 1fr}}
-@media(min-width:960px){.devices-grid{grid-template-columns:1fr 1fr 1fr}}
+/* ═══ BOTTOM SHEET ═══ */
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;opacity:0;pointer-events:none;transition:.25s;backdrop-filter:blur(2px)}
+.sheet-bg.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:#1A1A1A;border-radius:20px 20px 0 0;z-index:101;transform:translateY(100%);transition:.3s cubic-bezier(0.25,0.1,0.25,1);display:flex;flex-direction:column;overflow:hidden}
+.sheet.open{transform:translateY(0)}
+@media(min-width:600px){.sheet{left:50%;right:auto;width:420px;transform:translate(-50%,100%);border-radius:20px;bottom:20px;max-height:80vh}.sheet.open{transform:translate(-50%,0)}}
 
-.dev-card{background:var(--card);border-radius:14px;padding:16px;border:1px solid var(--border);cursor:pointer;transition:.2s;position:relative;overflow:hidden}
-.dev-card:active{transform:scale(0.98)}
-.dev-card.on{border-color:var(--border-amber)}
-.dev-card.on::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,179,0,0.04),transparent 70%);pointer-events:none}
-.dev-row{display:flex;align-items:center;gap:10px}
-.dev-icon{font-size:18px;color:var(--t3);width:20px;text-align:center}
-.dev-card.on .dev-icon{color:var(--amber)}
-.dev-name{flex:1;font-size:14px;font-weight:500;color:var(--t3)}
-.dev-card.on .dev-name{color:var(--t1)}
-.dev-status{font-size:11px;font-weight:700;color:var(--t3)}
-.dev-card.on .dev-status{color:var(--amber)}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--t4);margin:10px auto 0;flex-shrink:0}
+.sheet-head{padding:16px 20px 12px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.sheet-head h3{flex:1;font-size:15px;font-weight:700}
+.sheet-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--t3);font-size:12px}
+.sheet-body{flex:1;overflow-y:auto;padding:0 20px 20px;-webkit-overflow-scrolling:touch}
 
-/* Toggle */
-.toggle{width:44px;height:24px;border-radius:12px;background:var(--inactive);cursor:pointer;position:relative;transition:.2s;flex-shrink:0;box-shadow:inset 0 2px 4px rgba(0,0,0,0.3)}
-.toggle.on{background:var(--amber)}
-.toggle-knob{width:18px;height:18px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
-.toggle.on .toggle-knob{left:23px}
+/* Picker items */
+.pi{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);cursor:pointer}
+.pi:last-child{border:none}
+.pi-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--t4);display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.pi.on .pi-check{background:var(--amber);border-color:var(--amber)}
+.pi.on .pi-check::after{content:'✓';color:#000;font-size:11px;font-weight:700}
+.pi-name{font-size:13px;color:var(--t2);flex:1}
+.pi.on .pi-name{color:var(--t1)}
+.pi-badge{font-size:9px;color:var(--t4);background:rgba(255,255,255,0.04);padding:2px 8px;border-radius:4px}
 
-/* Brightness bar */
-.bri-bar{height:12px;border-radius:6px;background:rgba(255,255,255,0.06);margin-top:14px;position:relative;cursor:pointer;box-shadow:inset 0 2px 4px rgba(0,0,0,0.4)}
-.bri-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#A04800,#D4820A,#EDAC1A,#F5D070);position:absolute;top:0;left:0;box-shadow:0 0 8px rgba(255,179,0,0.25)}
-.bri-thumb{width:28px;height:30px;border-radius:5px;background:linear-gradient(180deg,#fff,#e8e8e8,#d0d0d0);position:absolute;top:-9px;box-shadow:0 2px 6px rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-.bri-thumb span{width:12px;height:1.5px;border-radius:1px;background:rgba(0,0,0,0.12)}
+/* Sheet footer */
+.sheet-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-shrink:0}
+.emoji-btn{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);font-size:20px;display:flex;align-items:center;justify-content:center}
+.sheet-foot input{flex:1;height:44px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--t1);padding:0 14px;font-size:13px;font-family:inherit}
+.sheet-foot input::placeholder{color:var(--t4)}
+.sheet-save{height:44px;padding:0 20px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:13px}
 
-/* ═══ FULL PAGE DEVICE PICKER ═══ */
-.picker{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;opacity:0;transform:translateY(20px);transition:.3s}
-.picker.open{display:flex;opacity:1;transform:translateY(0)}
-.picker-head{padding:16px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border)}
-.picker-head h2{flex:1;font-size:18px;font-weight:700}
-.picker-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.picker-body{flex:1;overflow-y:auto;padding:16px 20px 100px}
-.picker-section{margin-bottom:20px}
-.picker-section-title{font-size:10px;font-weight:700;color:var(--t3);letter-spacing:2px;margin-bottom:10px;text-transform:uppercase}
-.picker-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;cursor:pointer;transition:.15s}
-.picker-item:hover{background:rgba(255,255,255,0.03)}
-.picker-check{width:22px;height:22px;border-radius:6px;border:2px solid var(--inactive);display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
-.picker-item.checked .picker-check{background:var(--amber);border-color:var(--amber)}
-.picker-item.checked .picker-check::after{content:'✓';color:#000;font-size:13px;font-weight:700}
-.picker-item-name{font-size:13px;color:var(--t2);flex:1}
-.picker-item.checked .picker-item-name{color:var(--t1)}
-.picker-item-type{font-size:10px;color:var(--t3)}
+/* Emoji dropdown */
+.emo-drop{position:absolute;bottom:56px;left:12px;background:#222;border:1px solid var(--border);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:4px;z-index:110;box-shadow:0 8px 24px rgba(0,0,0,0.6)}
+.emo-drop.open{display:grid}
+.emo-o{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:8px;cursor:pointer}
+.emo-o:hover{background:rgba(255,179,0,0.1)}
 
-/* Room name + emoji input */
-.picker-config{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-shrink:0}
-.emoji-btn{width:48px;height:48px;border-radius:12px;background:var(--card);border:1px solid var(--border);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.picker-config input{flex:1;height:48px;border-radius:12px;background:var(--card);border:1px solid var(--border);color:var(--t1);padding:0 16px;font-size:14px;font-family:inherit}
-.picker-config input::placeholder{color:var(--t3)}
-.picker-save{height:48px;padding:0 24px;border-radius:12px;background:var(--amber);color:#000;font-weight:700;font-size:14px;border:none;cursor:pointer}
+/* ═══ DIMMER SHEET ═══ */
+.dim-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 0 8px;gap:16px}
+.dim-pct{font-size:42px;font-weight:700;color:var(--amber);letter-spacing:-1px}
+.dim-track{width:56px;height:200px;border-radius:28px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
+.dim-fill{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 28px 28px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 16px rgba(255,179,0,0.25);transition:height 50ms}
+.dim-thumb{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,0.7);position:absolute;left:6px;box-shadow:0 0 6px rgba(255,255,255,0.2);transition:bottom 50ms}
+.dim-presets{display:flex;gap:6px}
+.dim-pre{width:44px;height:34px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--t2);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.dim-pre.on{border-color:var(--border-a);color:var(--amber);background:rgba(255,179,0,0.06)}
+.dim-name{font-size:12px;color:var(--t3)}
 
-/* Emoji picker dropdown */
-.emoji-grid{position:absolute;bottom:60px;left:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px;display:none;grid-template-columns:repeat(6,1fr);gap:6px;z-index:110;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
-.emoji-grid.open{display:grid}
-.emoji-opt{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border-radius:8px}
-.emoji-opt:hover{background:rgba(255,179,0,0.1)}
+/* ═══ DELETE ═══ */
+.del-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}
+.del-bg.open{display:flex}
+.del-box{background:#1E1E1E;border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:320px;text-align:center}
+.del-box h3{font-size:15px;font-weight:700;margin-bottom:6px}
+.del-box p{font-size:12px;color:var(--t3);margin-bottom:18px;line-height:1.5}
+.del-btns{display:flex;gap:8px}
+.del-btns button{flex:1;height:40px;border-radius:10px;font-weight:700;font-size:12px}
+.del-c{background:rgba(255,255,255,0.06);color:var(--t2);border:1px solid var(--border)}
+.del-d{background:#C03030;color:#fff}
 
-/* ═══ DIMMER MODAL ═══ */
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.modal-bg.open{display:flex}
-.modal-box{background:linear-gradient(145deg,rgba(30,30,30,0.95),rgba(18,18,18,0.98));border:1px solid var(--border);border-radius:20px;padding:24px;width:90%;max-width:360px;position:relative;box-shadow:0 8px 32px rgba(0,0,0,0.5)}
-.modal-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);border-radius:20px 20px 0 0}
-.modal-title{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-.modal-title span{font-size:24px}
-.modal-title h3{font-size:16px;font-weight:700;flex:1}
-.modal-x{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--t3);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-
-/* Vertical dimmer */
-.dimmer-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
-.dimmer-track{width:60px;height:220px;border-radius:30px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;box-shadow:inset 0 4px 12px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.04);overflow:hidden}
-.dimmer-fill{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 30px 30px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 20px rgba(255,179,0,0.3);transition:height 50ms}
-.dimmer-thumb{width:50px;height:6px;border-radius:3px;background:rgba(255,255,255,0.8);position:absolute;left:5px;box-shadow:0 0 8px rgba(255,255,255,0.3);transition:bottom 50ms}
-.dimmer-pct{font-size:36px;font-weight:700;color:var(--amber)}
-.dimmer-presets{display:flex;gap:8px}
-.dimmer-preset{padding:8px 16px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer}
-.dimmer-preset:hover,.dimmer-preset.active{border-color:var(--border-amber);color:var(--amber);background:rgba(255,179,0,0.06)}
-
-/* ═══ BLIND MODAL ═══ */
-.blind-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
-.blind-visual{width:180px;height:240px;background:var(--bg);border-radius:4px;border:1px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;cursor:ns-resize}
-.blind-headrail{position:absolute;top:0;left:0;right:0;height:10px;background:linear-gradient(180deg,#555,#333);border-radius:4px 4px 0 0;z-index:2}
-.blind-fabric{position:absolute;top:10px;left:2px;right:2px;background:repeating-linear-gradient(180deg,rgba(255,255,255,0.08) 0px,rgba(255,255,255,0.03) 2px,rgba(255,255,255,0.08) 4px);transition:height 50ms}
-.blind-bar{position:absolute;left:0;right:0;height:8px;background:linear-gradient(180deg,#666,#444);border-radius:2px;z-index:1}
-.blind-cord{position:absolute;top:10px;right:20px;width:2px;background:rgba(255,255,255,0.15);z-index:3}
-.blind-pct{font-size:28px;font-weight:700;color:var(--t1)}
-.blind-label{font-size:11px;color:var(--t3)}
-
-/* ═══ AIRCON MODAL ═══ */
-.aircon-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
-.aircon-temp{font-size:48px;font-weight:700;color:var(--t1)}
-.aircon-mode{font-size:12px;color:var(--amber);font-weight:600}
-.aircon-btns{display:flex;gap:12px}
-.aircon-btn{width:48px;height:48px;border-radius:14px;background:linear-gradient(180deg,#2c2c2c,#1a1a1a);border:1px solid rgba(255,255,255,0.08);color:var(--t1);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.06)}
-.aircon-btn:active{box-shadow:inset 0 2px 4px rgba(0,0,0,0.5)}
-.aircon-presets{display:flex;gap:8px}
-.aircon-p{padding:8px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--t2);font-size:11px;font-weight:600;cursor:pointer}
-.aircon-p.active{border-color:var(--border-amber);color:var(--amber);background:rgba(255,179,0,0.06)}
-
-/* ═══ MEDIA CARD (inline) ═══ */
-.media-card .media-controls{display:flex;align-items:center;gap:12px;margin-top:12px}
-.media-play{width:40px;height:40px;border-radius:50%;background:var(--amber);color:#000;font-size:16px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,179,0,0.3)}
-.media-vol{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);position:relative;cursor:pointer}
-.media-vol-fill{height:100%;border-radius:3px;background:var(--amber);width:60%}
-.media-label{font-size:11px;color:var(--t3);margin-top:8px}
-
-/* ═══ SENSOR CARD ═══ */
-.sensor-val{font-size:24px;font-weight:700;color:var(--t1)}
-.sensor-unit{font-size:12px;color:var(--t3);font-weight:500}
-
-/* ═══ DELETE CONFIRM ═══ */
-.del-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:300;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
-.del-overlay.open{display:flex}
-.del-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;width:90%;max-width:340px;text-align:center}
-.del-box h3{font-size:16px;font-weight:700;margin-bottom:8px}
-.del-box p{font-size:13px;color:var(--t3);margin-bottom:20px}
-.del-btns{display:flex;gap:10px}
-.del-btns button{flex:1;height:42px;border-radius:10px;border:none;font-weight:700;font-size:13px;cursor:pointer}
-.del-cancel{background:var(--card2);color:var(--t2);border:1px solid var(--border)!important}
-.del-confirm{background:#D04040;color:#fff}
-
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div id="app"></div>
-<div class="fab" id="addBtn" style="display:none">+</div>
+<button class="fab" id="fab" onclick="openPicker(-1)">+</button>
 
-<!-- DEVICE PICKER -->
-<div class="picker" id="picker">
-  <div class="picker-head">
-    <h2 id="pickerTitle">Add Room</h2>
-    <button class="picker-close" id="pickerClose">✕</button>
-  </div>
-  <div class="picker-body" id="pickerBody"></div>
-  <div style="position:relative">
-    <div class="emoji-grid" id="emojiGrid"></div>
-  </div>
-  <div class="picker-config">
-    <div class="emoji-btn" id="emojiBtn">🛋️</div>
-    <input id="roomName" placeholder="Room name">
-    <button class="picker-save" id="pickerSave">Save</button>
+<!-- PICKER SHEET -->
+<div class="sheet-bg" id="pkBg"></div>
+<div class="sheet" id="pkSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h3 id="pkTitle">Add Room</h3><button class="sheet-x" id="pkX">✕</button></div>
+  <div class="sheet-body" id="pkBody"></div>
+  <div style="position:relative"><div class="emo-drop" id="emoDrop"></div></div>
+  <div class="sheet-foot">
+    <button class="emoji-btn" id="emoBtn">🛋️</button>
+    <input id="rnInput" placeholder="Room name">
+    <button class="sheet-save" id="pkSave">Save</button>
   </div>
 </div>
 
-<!-- DIMMER MODAL -->
-<div class="modal-bg" id="dimmerModal">
-  <div class="modal-box">
-    <div class="modal-title"><span id="dimIcon">💡</span><h3 id="dimName">Light</h3><button class="modal-x" id="dimClose">✕</button></div>
-    <div class="dimmer-wrap">
-      <div class="dimmer-pct" id="dimPct">75%</div>
-      <div class="dimmer-track" id="dimTrack">
-        <div class="dimmer-fill" id="dimFill"></div>
-        <div class="dimmer-thumb" id="dimThumb"><span></span><span></span><span></span></div>
+<!-- DIMMER SHEET -->
+<div class="sheet-bg" id="dimBg"></div>
+<div class="sheet" id="dimSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head"><h3 id="dimTitle">Light</h3><button class="sheet-x" id="dimX">✕</button></div>
+  <div class="sheet-body">
+    <div class="dim-wrap">
+      <div class="dim-pct" id="dimPct">75%</div>
+      <div class="dim-track" id="dimTrack">
+        <div class="dim-fill" id="dimFill"></div>
+        <div class="dim-thumb" id="dimThumb"></div>
       </div>
-      <div class="dimmer-presets">
-        <div class="dimmer-preset" data-v="25">25%</div>
-        <div class="dimmer-preset" data-v="50">50%</div>
-        <div class="dimmer-preset" data-v="75">75%</div>
-        <div class="dimmer-preset" data-v="100">100%</div>
+      <div class="dim-presets">
+        <div class="dim-pre" data-v="25">25</div>
+        <div class="dim-pre" data-v="50">50</div>
+        <div class="dim-pre" data-v="75">75</div>
+        <div class="dim-pre" data-v="100">100</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- BLIND MODAL -->
-<div class="modal-bg" id="blindModal">
-  <div class="modal-box">
-    <div class="modal-title"><span>🪟</span><h3 id="blindName">Blind</h3><button class="modal-x" id="blindClose">✕</button></div>
-    <div class="blind-wrap">
-      <div class="blind-visual" id="blindVisual">
-        <div class="blind-headrail"></div>
-        <div class="blind-fabric" id="blindFabric"></div>
-        <div class="blind-bar" id="blindBar"></div>
-        <div class="blind-cord" id="blindCord"></div>
-      </div>
-      <div class="blind-pct" id="blindPct">0%</div>
-      <div class="blind-label">Drag blind to adjust</div>
-    </div>
-  </div>
-</div>
-
-<!-- AIRCON MODAL -->
-<div class="modal-bg" id="airconModal">
-  <div class="modal-box">
-    <div class="modal-title"><span>❄️</span><h3>Ducted Aircon</h3><button class="modal-x" id="airconClose">✕</button></div>
-    <div class="aircon-wrap">
-      <div class="aircon-mode" id="airconMode">COOLING</div>
-      <div class="aircon-temp" id="airconTemp">22°</div>
-      <div class="aircon-btns">
-        <button class="aircon-btn" id="airconDn">−</button>
-        <button class="aircon-btn" id="airconUp">+</button>
-      </div>
-      <div class="aircon-presets">
-        <div class="aircon-p" data-v="18">18°</div>
-        <div class="aircon-p" data-v="20">20°</div>
-        <div class="aircon-p active" data-v="22">22°</div>
-        <div class="aircon-p" data-v="24">24°</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- DELETE CONFIRM -->
-<div class="del-overlay" id="delOverlay">
+<!-- DELETE -->
+<div class="del-bg" id="delBg">
   <div class="del-box">
-    <h3>Delete Room?</h3>
-    <p id="delMsg">This will remove the room and all device assignments.</p>
+    <h3>Delete Room</h3>
+    <p id="delMsg"></p>
     <div class="del-btns">
-      <button class="del-cancel" id="delCancel">Cancel</button>
-      <button class="del-confirm" id="delConfirm">Delete</button>
+      <button class="del-c" id="delC">Cancel</button>
+      <button class="del-d" id="delD">Delete</button>
     </div>
   </div>
 </div>
 
 <script>
-// ═══ DATA ═══
-const ALL_DEVICES = [
-  // Hue lights (11 reachable)
-  {id:'hue:1',name:'Entrance 3',type:'light',icon:'💡'},
-  {id:'hue:12',name:'Entrance 1',type:'light',icon:'💡'},
-  {id:'hue:21',name:'Entrance 2',type:'light',icon:'💡'},
-  {id:'hue:16',name:'Entrance 4',type:'light',icon:'💡'},
-  {id:'hue:15',name:'Laundry 1',type:'light',icon:'💡'},
-  {id:'hue:13',name:'Laundry 2',type:'light',icon:'💡'},
-  {id:'hue:14',name:'Laundry 3',type:'light',icon:'💡'},
-  {id:'hue:17',name:'Lounge Light',type:'light',icon:'💡'},
-  {id:'hue:7',name:'Alfresco',type:'light',icon:'💡'},
-  {id:'hue:8',name:'MBLight 1',type:'light',icon:'💡'},
-  {id:'hue:20',name:'MBLight 2',type:'light',icon:'💡'},
-  // Tapo plugs
-  {id:'tapo:ucl1',name:'UCL1',type:'plug',icon:'🔌'},
-  {id:'tapo:ucl2',name:'UCL2',type:'plug',icon:'🔌'},
-  {id:'tapo:picture',name:'Lounge Picture',type:'plug',icon:'🔌'},
-  // Tapo strips
-  {id:'tapo:strip1',name:'Cerise Lightstrip',type:'light',icon:'💡'},
-  {id:'tapo:strip2',name:'Cerise Lightstrip 2',type:'light',icon:'💡'},
-  // Blinds
-  {id:'blind:1',name:'LH Lounge Sheer',type:'blind',icon:'🪟'},
-  {id:'blind:2',name:'RH Lounge Sheer',type:'blind',icon:'🪟'},
-  {id:'blind:3',name:'LH Lounge Blockout',type:'blind',icon:'🪟'},
-  {id:'blind:4',name:'RH Lounge Blockout',type:'blind',icon:'🪟'},
-  {id:'blind:5',name:'Master Bedroom',type:'blind',icon:'🪟'},
-  // Aircon
-  {id:'aircon:ducted',name:'Ducted Aircon',type:'aircon',icon:'❄️'},
-  // Media
-  {id:'media:lounge_echo',name:'Lounge Echo',type:'media',icon:'🎵'},
-  {id:'media:meals_echo',name:'Meals Echo',type:'media',icon:'🎵'},
-  {id:'media:bedroom_echo',name:'Bedroom Echo',type:'media',icon:'🎵'},
-  // Sensors
-  {id:'sensor:lounge_temp',name:'Lounge Temperature',type:'sensor',icon:'🌡️'},
-  {id:'sensor:bedroom_temp',name:'Bedroom Temperature',type:'sensor',icon:'🌡️'},
+const DEVS=[
+  {id:'h1',n:'Entrance 3',t:'light'},{id:'h12',n:'Entrance 1',t:'light'},{id:'h21',n:'Entrance 2',t:'light'},{id:'h16',n:'Entrance 4',t:'light'},
+  {id:'h15',n:'Laundry 1',t:'light'},{id:'h13',n:'Laundry 2',t:'light'},{id:'h14',n:'Laundry 3',t:'light'},
+  {id:'h17',n:'Lounge Light',t:'light'},{id:'h7',n:'Alfresco',t:'light'},
+  {id:'h8',n:'MBLight 1',t:'light'},{id:'h20',n:'MBLight 2',t:'light'},
+  {id:'t1',n:'UCL1',t:'plug'},{id:'t2',n:'UCL2',t:'plug'},{id:'tp',n:'Lounge Picture',t:'plug'},
+  {id:'ts1',n:'Cerise Lightstrip',t:'light'},{id:'ts2',n:'Cerise Lightstrip 2',t:'light'},
 ];
+const EMOS=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
+const st={};DEVS.forEach(d=>{st[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
 
-const EMOJIS = ['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
-
-let rooms = [];
-let currentRoom = 0;
-let editingRoom = -1; // -1 = new room
-let delTarget = -1;
-
-// Device state
-const devState = {};
-ALL_DEVICES.forEach(d => {
-  if (d.type === 'light') devState[d.id] = {on:false,bri:75};
-  else if (d.type === 'plug') devState[d.id] = {on:false};
-  else if (d.type === 'blind') devState[d.id] = {pos:0};
-  else if (d.type === 'aircon') devState[d.id] = {on:false,temp:22,mode:'cool'};
-  else if (d.type === 'media') devState[d.id] = {playing:false,vol:60};
-  else if (d.type === 'sensor') devState[d.id] = {val:(19+Math.random()*4).toFixed(1)};
-});
+let rooms=[],cur=0,editIdx=-1,delIdx=-1,pkChecked=new Set(),pkEmoji='🛋️',dimDev=null;
 
 // ═══ RENDER ═══
-function render() {
-  const app = document.getElementById('app');
-  const fab = document.getElementById('addBtn');
-
-  if (rooms.length === 0) {
-    fab.style.display = 'none';
-    app.innerHTML = '<div class="empty"><div class="empty-icon">🏠</div><h2>No Rooms Yet</h2><p>Create your first room and assign devices to it</p><button class="btn-add" onclick="openPicker(-1)">Add Room</button></div>';
-    document.querySelector('.dots')?.remove();
+function R(){
+  const a=document.getElementById('app'),f=document.getElementById('fab');
+  if(!rooms.length){
+    f.style.display='none';
+    a.innerHTML='<div class="empty"><div class="empty-ring"><div class="empty-ring-inner">🏠</div></div><h2>No Rooms</h2><p>Create a room and assign your lights and plugs to it</p><button class="btn-primary" onclick="openPicker(-1)">Add Room</button></div>';
     return;
   }
+  f.style.display='flex';
+  const rm=rooms[cur];
+  const onCount=rm.devs.filter(id=>st[id]&&st[id].on).length;
+  let h='<div class="rh">';
+  h+='<div class="rh-emoji">'+rm.emoji+'</div>';
+  h+='<div class="rh-info"><div class="rh-name">'+rm.name+'</div><div class="rh-sub">'+onCount+' of '+rm.devs.length+' on</div></div>';
+  h+='<button class="rh-btn" onclick="openPicker(cur)">✎</button>';
+  h+='<button class="rh-btn" onclick="confirmDel()">🗑</button>';
+  h+='</div>';
 
-  fab.style.display = 'flex';
-  let h = '<div class="room-header"><div class="room-header-top">';
-  h += '<div class="room-emoji">' + rooms[currentRoom].emoji + '</div>';
-  h += '<div><div class="room-title">' + rooms[currentRoom].name + '</div>';
-  h += '<div class="room-subtitle">' + rooms[currentRoom].devices.length + ' devices</div></div>';
-  h += '<div class="room-actions">';
-  h += '<button onclick="openPicker(currentRoom)" title="Edit">✎</button>';
-  h += '<button onclick="confirmDelete()" title="Delete">🗑</button>';
-  h += '</div></div></div>';
+  h+='<div class="carousel-w"><div class="carousel" id="car" style="transform:translateX(-'+cur*100+'%)">';
+  rooms.forEach((rm,ri)=>{
+    h+='<div class="page">';
+    const lights=rm.devs.filter(id=>{const d=DEVS.find(x=>x.id===id);return d&&d.t==='light'});
+    const plugs=rm.devs.filter(id=>{const d=DEVS.find(x=>x.id===id);return d&&d.t==='plug'});
 
-  h += '<div class="carousel-wrap"><div class="carousel" id="carousel" style="transform:translateX(-' + (currentRoom * 100) + '%)">';
-  rooms.forEach((room, ri) => {
-    h += '<div class="carousel-page">';
-    // Group devices by type
-    const groups = {light:[],plug:[],blind:[],aircon:[],media:[],sensor:[]};
-    room.devices.forEach(did => {
-      const d = ALL_DEVICES.find(x => x.id === did);
-      if (d && groups[d.type]) groups[d.type].push(d);
-    });
-
-    Object.entries(groups).forEach(([type, devs]) => {
-      if (devs.length === 0) return;
-      const labels = {light:'Lights',plug:'Power',blind:'Blinds',aircon:'Climate',media:'Media',sensor:'Sensors'};
-      h += '<div class="section-label">' + labels[type] + '</div>';
-      h += '<div class="devices-grid">';
-      devs.forEach(d => {
-        const s = devState[d.id] || {};
-        const isOn = s.on || s.playing || false;
-        h += '<div class="dev-card ' + (isOn ? 'on' : '') + '" onclick="tapDevice(\'' + d.id + '\')">';
-        h += '<div class="dev-row">';
-        h += '<div class="dev-icon">' + d.icon + '</div>';
-        h += '<div class="dev-name">' + d.name + '</div>';
-
-        if (type === 'light') {
-          h += '<div class="dev-status">' + (s.on ? s.bri + '%' : 'Off') + '</div>';
-          h += '<div class="toggle ' + (s.on ? 'on' : '') + '" onclick="event.stopPropagation();toggleDev(\'' + d.id + '\')"><div class="toggle-knob"></div></div>';
-        } else if (type === 'plug') {
-          h += '<div class="dev-status">' + (s.on ? 'ON' : 'OFF') + '</div>';
-          h += '<div class="toggle ' + (s.on ? 'on' : '') + '" onclick="event.stopPropagation();toggleDev(\'' + d.id + '\')"><div class="toggle-knob"></div></div>';
-        } else if (type === 'blind') {
-          h += '<div class="dev-status">' + s.pos + '%</div>';
-        } else if (type === 'aircon') {
-          h += '<div class="dev-status">' + (s.on ? s.temp + '°' : 'Off') + '</div>';
-          h += '<div class="toggle ' + (s.on ? 'on' : '') + '" onclick="event.stopPropagation();toggleDev(\'' + d.id + '\')"><div class="toggle-knob"></div></div>';
-        } else if (type === 'media') {
-          h += '<div class="dev-status">' + (s.playing ? '▶' : '⏸') + '</div>';
-        } else if (type === 'sensor') {
-          h += '<div class="sensor-val">' + s.val + '° <span class="sensor-unit">C</span></div>';
-        }
-        h += '</div>'; // dev-row
-
-        // Brightness bar for lights
-        if (type === 'light' && s.on) {
-          h += '<div class="bri-bar" onclick="event.stopPropagation()" onpointerdown="startBri(event,\'' + d.id + '\')">';
-          h += '<div class="bri-fill" style="width:' + s.bri + '%"></div>';
-          h += '<div class="bri-thumb" style="left:calc(' + s.bri + '% - 14px)"><span></span><span></span><span></span></div>';
-          h += '</div>';
-        }
-
-        h += '</div>'; // dev-card
+    if(lights.length){
+      h+='<div class="sec"><div class="sec-label">Lights</div><div class="tiles">';
+      lights.forEach(id=>{const d=DEVS.find(x=>x.id===id);const s=st[id];if(!d)return;
+        h+=tile(d,s);
       });
-      h += '</div>'; // devices-grid
-    });
-    h += '</div>'; // carousel-page
+      h+='</div></div>';
+    }
+    if(plugs.length){
+      h+='<div class="sec"><div class="sec-label">Power</div><div class="tiles">';
+      plugs.forEach(id=>{const d=DEVS.find(x=>x.id===id);const s=st[id];if(!d)return;
+        h+=tile(d,s);
+      });
+      h+='</div></div>';
+    }
+    h+='</div>';
   });
-  h += '</div></div>'; // carousel + wrap
+  h+='</div></div>';
 
-  // Dots
-  h += '<div class="dots">';
-  rooms.forEach((_, i) => {
-    h += '<div class="dot ' + (i === currentRoom ? 'active' : '') + '" onclick="goRoom(' + i + ')"></div>';
-  });
-  h += '</div>';
-
-  app.innerHTML = h;
+  h+='<div class="dots">';
+  rooms.forEach((_,i)=>{h+='<div class="dot '+(i===cur?'on':'')+'" onclick="go('+i+')"></div>'});
+  h+='</div>';
+  a.innerHTML=h;
 
   // Swipe
-  let sx = 0, dx = 0, swiping = false;
-  const cw = document.querySelector('.carousel-wrap');
-  if (cw) {
-    cw.ontouchstart = e => { sx = e.touches[0].clientX; swiping = true; };
-    cw.ontouchmove = e => { if (!swiping) return; dx = e.touches[0].clientX - sx; };
-    cw.ontouchend = () => {
-      if (Math.abs(dx) > 50) {
-        if (dx < 0 && currentRoom < rooms.length - 1) currentRoom++;
-        else if (dx > 0 && currentRoom > 0) currentRoom--;
-        render();
-      }
-      dx = 0; swiping = false;
-    };
+  let sx=0,dx=0,sw=false;
+  const cw=document.querySelector('.carousel-w');
+  if(cw){
+    cw.ontouchstart=e=>{sx=e.touches[0].clientX;sw=true;dx=0};
+    cw.ontouchmove=e=>{if(sw)dx=e.touches[0].clientX-sx};
+    cw.ontouchend=()=>{if(Math.abs(dx)>40){if(dx<0&&cur<rooms.length-1)cur++;else if(dx>0&&cur>0)cur--;R()}dx=0;sw=false};
   }
 }
 
-function goRoom(i) { currentRoom = i; render(); }
-
-// ═══ DEVICE INTERACTIONS ═══
-function toggleDev(id) {
-  const s = devState[id];
-  if (s.on !== undefined) s.on = !s.on;
-  if (s.playing !== undefined) s.playing = !s.playing;
-  render();
+function tile(d,s){
+  const on=s.on;
+  let h='<div class="tile '+(on?'on':'')+'" onclick="tapTile(\''+d.id+'\')">';
+  h+='<div class="tile-top">';
+  h+='<div class="tile-icon">'+(d.t==='plug'?'🔌':'💡')+'</div>';
+  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"><div class="tog-k"></div></div>';
+  h+='</div>';
+  h+='<div class="tile-name">'+d.n+'</div>';
+  if(d.t==='plug'){
+    h+='<div class="tile-val">'+(on?'On':'Off')+'</div>';
+  }else{
+    h+='<div class="tile-val">'+(on?s.bri+'%':'Off')+'</div>';
+    if(on) h+='<div class="mini-bar" onclick="event.stopPropagation()" onpointerdown="miniDrag(event,\''+d.id+'\')"><div class="mini-fill" style="width:'+s.bri+'%"></div></div>';
+  }
+  h+='</div>';
+  return h;
 }
 
-function tapDevice(id) {
-  const d = ALL_DEVICES.find(x => x.id === id);
-  if (!d) return;
-  if (d.type === 'light') openDimmer(d);
-  else if (d.type === 'blind') openBlind(d);
-  else if (d.type === 'aircon') openAircon(d);
-  else if (d.type === 'plug') toggleDev(id);
-  else if (d.type === 'media') toggleDev(id);
+function go(i){cur=i;R()}
+function tog(id){st[id].on=!st[id].on;R()}
+function tapTile(id){const d=DEVS.find(x=>x.id===id);if(!d)return;if(d.t==='plug'){tog(id);return}openDimmer(d)}
+
+// Mini bar drag
+function miniDrag(e,id){
+  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
+  const rect=bar.getBoundingClientRect();
+  const up=e=>{const p=Math.round(((e.clientX-rect.left)/rect.width)*100);st[id].bri=Math.max(1,Math.min(100,p));st[id].on=true;R()};
+  up(e);bar.onpointermove=up;bar.onpointerup=()=>{bar.onpointermove=null};
 }
 
 // ═══ DIMMER ═══
-let dimDevice = null;
-function openDimmer(d) {
-  dimDevice = d;
-  const s = devState[d.id];
-  s.on = true;
-  document.getElementById('dimName').textContent = d.name;
-  updateDimmer(s.bri);
-  document.getElementById('dimmerModal').classList.add('open');
+function openDimmer(d){
+  dimDev=d;st[d.id].on=true;
+  document.getElementById('dimTitle').textContent=d.n;
+  updDim(st[d.id].bri);
+  document.getElementById('dimBg').classList.add('open');
+  document.getElementById('dimSheet').classList.add('open');
 }
-function updateDimmer(v) {
-  v = Math.max(1, Math.min(100, v));
-  if (dimDevice) devState[dimDevice.id].bri = v;
-  document.getElementById('dimPct').textContent = v + '%';
-  document.getElementById('dimFill').style.height = v + '%';
-  document.getElementById('dimThumb').style.bottom = 'calc(' + v + '% - 3px)';
-  document.querySelectorAll('.dimmer-preset').forEach(p => p.classList.toggle('active', +p.dataset.v === v));
+function closeDim(){document.getElementById('dimBg').classList.remove('open');document.getElementById('dimSheet').classList.remove('open');R()}
+function updDim(v){
+  v=Math.max(1,Math.min(100,v));if(dimDev)st[dimDev.id].bri=v;
+  document.getElementById('dimPct').textContent=v+'%';
+  document.getElementById('dimFill').style.height=v+'%';
+  document.getElementById('dimThumb').style.bottom='calc('+v+'% - 3px)';
+  document.querySelectorAll('.dim-pre').forEach(p=>p.classList.toggle('on',+p.dataset.v===v));
 }
-document.getElementById('dimTrack').onpointerdown = function(e) {
-  this.setPointerCapture(e.pointerId);
-  const rect = this.getBoundingClientRect();
-  const update = e => { const pct = Math.round((1 - (e.clientY - rect.top) / rect.height) * 100); updateDimmer(pct); };
-  update(e);
-  this.onpointermove = update;
-  this.onpointerup = () => { this.onpointermove = null; render(); };
+document.getElementById('dimTrack').onpointerdown=function(e){
+  this.setPointerCapture(e.pointerId);const r=this.getBoundingClientRect();
+  const u=e=>{updDim(Math.round((1-(e.clientY-r.top)/r.height)*100))};u(e);
+  this.onpointermove=u;this.onpointerup=()=>{this.onpointermove=null};
 };
-document.querySelectorAll('.dimmer-preset').forEach(p => p.onclick = () => { updateDimmer(+p.dataset.v); render(); });
-document.getElementById('dimClose').onclick = () => { document.getElementById('dimmerModal').classList.remove('open'); render(); };
-document.getElementById('dimmerModal').onclick = e => { if (e.target.id === 'dimmerModal') { document.getElementById('dimmerModal').classList.remove('open'); render(); } };
+document.querySelectorAll('.dim-pre').forEach(p=>p.onclick=()=>updDim(+p.dataset.v));
+document.getElementById('dimX').onclick=closeDim;
+document.getElementById('dimBg').onclick=closeDim;
 
-// ═══ BLIND ═══
-let blindDevice = null;
-function openBlind(d) {
-  blindDevice = d;
-  const s = devState[d.id];
-  document.getElementById('blindName').textContent = d.name;
-  updateBlind(s.pos);
-  document.getElementById('blindModal').classList.add('open');
-}
-function updateBlind(v) {
-  v = Math.max(0, Math.min(100, v));
-  if (blindDevice) devState[blindDevice.id].pos = v;
-  const h = (v / 100) * 230;
-  document.getElementById('blindFabric').style.height = h + 'px';
-  document.getElementById('blindBar').style.top = (10 + h) + 'px';
-  document.getElementById('blindCord').style.height = (10 + h) + 'px';
-  document.getElementById('blindPct').textContent = v + '%';
-}
-document.getElementById('blindVisual').onpointerdown = function(e) {
-  this.setPointerCapture(e.pointerId);
-  const rect = this.getBoundingClientRect();
-  const update = e => { const pct = Math.round(((e.clientY - rect.top - 10) / (rect.height - 10)) * 100); updateBlind(pct); };
-  update(e);
-  this.onpointermove = update;
-  this.onpointerup = () => { this.onpointermove = null; render(); };
-};
-document.getElementById('blindClose').onclick = () => { document.getElementById('blindModal').classList.remove('open'); render(); };
-document.getElementById('blindModal').onclick = e => { if (e.target.id === 'blindModal') { document.getElementById('blindModal').classList.remove('open'); render(); } };
-
-// ═══ AIRCON ═══
-let airconTemp = 22;
-function openAircon(d) {
-  const s = devState[d.id];
-  s.on = true;
-  airconTemp = s.temp;
-  updateAircon();
-  document.getElementById('airconModal').classList.add('open');
-}
-function updateAircon() {
-  document.getElementById('airconTemp').textContent = airconTemp + '°';
-  document.getElementById('airconMode').textContent = airconTemp < 22 ? 'COOLING' : airconTemp > 23 ? 'HEATING' : 'AUTO';
-  document.querySelectorAll('.aircon-p').forEach(p => p.classList.toggle('active', +p.dataset.v === airconTemp));
-  const d = ALL_DEVICES.find(x => x.type === 'aircon');
-  if (d) devState[d.id].temp = airconTemp;
-}
-document.getElementById('airconUp').onclick = () => { airconTemp = Math.min(30, airconTemp + 1); updateAircon(); };
-document.getElementById('airconDn').onclick = () => { airconTemp = Math.max(16, airconTemp - 1); updateAircon(); };
-document.querySelectorAll('.aircon-p').forEach(p => p.onclick = () => { airconTemp = +p.dataset.v; updateAircon(); });
-document.getElementById('airconClose').onclick = () => { document.getElementById('airconModal').classList.remove('open'); render(); };
-document.getElementById('airconModal').onclick = e => { if (e.target.id === 'airconModal') { document.getElementById('airconModal').classList.remove('open'); render(); } };
-
-// ═══ BRIGHTNESS BAR (inline) ═══
-function startBri(e, id) {
-  const bar = e.currentTarget;
-  bar.setPointerCapture(e.pointerId);
-  const rect = bar.getBoundingClientRect();
-  const update = e => { const pct = Math.round(((e.clientX - rect.left) / rect.width) * 100); devState[id].bri = Math.max(1, Math.min(100, pct)); render(); };
-  update(e);
-  bar.onpointermove = update;
-  bar.onpointerup = () => { bar.onpointermove = null; };
-}
-
-// ═══ DEVICE PICKER ═══
-let pickerChecked = new Set();
-let pickerEmoji = '🛋️';
-
-function openPicker(roomIdx) {
-  editingRoom = roomIdx;
-  pickerChecked = new Set();
-  if (roomIdx >= 0) {
-    const r = rooms[roomIdx];
-    document.getElementById('roomName').value = r.name;
-    pickerEmoji = r.emoji;
-    r.devices.forEach(d => pickerChecked.add(d));
-    document.getElementById('pickerTitle').textContent = 'Edit Room';
-  } else {
-    document.getElementById('roomName').value = '';
-    pickerEmoji = '🛋️';
-    document.getElementById('pickerTitle').textContent = 'Add Room';
+// ═══ PICKER ═══
+function openPicker(idx){
+  editIdx=idx;pkChecked=new Set();
+  if(idx>=0){
+    const r=rooms[idx];pkEmoji=r.emoji;
+    document.getElementById('rnInput').value=r.name;
+    r.devs.forEach(d=>pkChecked.add(d));
+    document.getElementById('pkTitle').textContent='Edit Room';
+  }else{
+    pkEmoji='🛋️';document.getElementById('rnInput').value='';
+    document.getElementById('pkTitle').textContent='Add Room';
   }
-  document.getElementById('emojiBtn').textContent = pickerEmoji;
-  renderPicker();
-  document.getElementById('picker').classList.add('open');
+  document.getElementById('emoBtn').textContent=pkEmoji;
+  renderPk();
+  document.getElementById('pkBg').classList.add('open');
+  document.getElementById('pkSheet').classList.add('open');
 }
-
-function renderPicker() {
-  const body = document.getElementById('pickerBody');
-  const groups = {light:[],plug:[],blind:[],aircon:[],media:[],sensor:[]};
-  ALL_DEVICES.forEach(d => { if (groups[d.type]) groups[d.type].push(d); });
-  const labels = {light:'Lights',plug:'Power Plugs',blind:'Blinds',aircon:'Climate',media:'Media',sensor:'Sensors'};
-
-  let h = '';
-  Object.entries(groups).forEach(([type, devs]) => {
-    if (devs.length === 0) return;
-    h += '<div class="picker-section"><div class="picker-section-title">' + labels[type] + '</div>';
-    devs.forEach(d => {
-      const checked = pickerChecked.has(d.id);
-      h += '<div class="picker-item ' + (checked ? 'checked' : '') + '" onclick="togglePicker(\'' + d.id + '\')">';
-      h += '<div class="picker-check"></div>';
-      h += '<div class="picker-item-name">' + d.name + '</div>';
-      h += '<div class="picker-item-type">' + d.icon + '</div>';
-      h += '</div>';
-    });
-    h += '</div>';
+function closePk(){
+  document.getElementById('pkBg').classList.remove('open');
+  document.getElementById('pkSheet').classList.remove('open');
+  document.getElementById('emoDrop').classList.remove('open');
+}
+function renderPk(){
+  const lights=DEVS.filter(d=>d.t==='light');
+  const plugs=DEVS.filter(d=>d.t==='plug');
+  let h='<div class="sec-label" style="margin-top:4px">Lights</div>';
+  lights.forEach(d=>{
+    const on=pkChecked.has(d.id);
+    h+='<div class="pi '+(on?'on':'')+'" onclick="pkTog(\''+d.id+'\')">';
+    h+='<div class="pi-check"></div><div class="pi-name">'+d.n+'</div><div class="pi-badge">💡</div></div>';
   });
-  body.innerHTML = h;
+  h+='<div class="sec-label" style="margin-top:12px">Power</div>';
+  plugs.forEach(d=>{
+    const on=pkChecked.has(d.id);
+    h+='<div class="pi '+(on?'on':'')+'" onclick="pkTog(\''+d.id+'\')">';
+    h+='<div class="pi-check"></div><div class="pi-name">'+d.n+'</div><div class="pi-badge">🔌</div></div>';
+  });
+  document.getElementById('pkBody').innerHTML=h;
 }
+function pkTog(id){pkChecked.has(id)?pkChecked.delete(id):pkChecked.add(id);renderPk()}
 
-function togglePicker(id) {
-  if (pickerChecked.has(id)) pickerChecked.delete(id); else pickerChecked.add(id);
-  renderPicker();
-}
-
-// Emoji picker
-document.getElementById('emojiBtn').onclick = () => {
-  const grid = document.getElementById('emojiGrid');
-  if (grid.classList.contains('open')) { grid.classList.remove('open'); return; }
-  grid.innerHTML = EMOJIS.map(e => '<div class="emoji-opt" onclick="pickEmoji(\'' + e + '\')">' + e + '</div>').join('');
-  grid.classList.add('open');
+document.getElementById('emoBtn').onclick=()=>{
+  const g=document.getElementById('emoDrop');
+  if(g.classList.contains('open')){g.classList.remove('open');return}
+  g.innerHTML=EMOS.map(e=>'<div class="emo-o" onclick="pickEmo(\''+e+'\')">'+e+'</div>').join('');
+  g.classList.add('open');
 };
-function pickEmoji(e) {
-  pickerEmoji = e;
-  document.getElementById('emojiBtn').textContent = e;
-  document.getElementById('emojiGrid').classList.remove('open');
-}
+function pickEmo(e){pkEmoji=e;document.getElementById('emoBtn').textContent=e;document.getElementById('emoDrop').classList.remove('open')}
 
-document.getElementById('pickerClose').onclick = () => document.getElementById('picker').classList.remove('open');
-document.getElementById('pickerSave').onclick = () => {
-  const name = document.getElementById('roomName').value.trim();
-  if (!name || pickerChecked.size === 0) return;
-  if (editingRoom >= 0) {
-    rooms[editingRoom].name = name;
-    rooms[editingRoom].emoji = pickerEmoji;
-    rooms[editingRoom].devices = [...pickerChecked];
-  } else {
-    rooms.push({name, emoji: pickerEmoji, devices: [...pickerChecked]});
-    currentRoom = rooms.length - 1;
-  }
-  document.getElementById('picker').classList.remove('open');
-  render();
+document.getElementById('pkX').onclick=closePk;
+document.getElementById('pkBg').onclick=closePk;
+document.getElementById('pkSave').onclick=()=>{
+  const n=document.getElementById('rnInput').value.trim();
+  if(!n||!pkChecked.size)return;
+  if(editIdx>=0){rooms[editIdx]={name:n,emoji:pkEmoji,devs:[...pkChecked]}}
+  else{rooms.push({name:n,emoji:pkEmoji,devs:[...pkChecked]});cur=rooms.length-1}
+  closePk();R();
 };
 
 // ═══ DELETE ═══
-function confirmDelete() {
-  delTarget = currentRoom;
-  document.getElementById('delMsg').textContent = 'Delete "' + rooms[currentRoom].name + '"? This will remove the room and all device assignments.';
-  document.getElementById('delOverlay').classList.add('open');
+function confirmDel(){
+  delIdx=cur;
+  document.getElementById('delMsg').textContent='Remove "'+rooms[cur].name+'" and unassign its devices?';
+  document.getElementById('delBg').classList.add('open');
 }
-document.getElementById('delCancel').onclick = () => document.getElementById('delOverlay').classList.remove('open');
-document.getElementById('delConfirm').onclick = () => {
-  if (delTarget >= 0) {
-    rooms.splice(delTarget, 1);
-    if (currentRoom >= rooms.length) currentRoom = Math.max(0, rooms.length - 1);
-  }
-  document.getElementById('delOverlay').classList.remove('open');
-  render();
+document.getElementById('delC').onclick=()=>document.getElementById('delBg').classList.remove('open');
+document.getElementById('delD').onclick=()=>{
+  if(delIdx>=0){rooms.splice(delIdx,1);if(cur>=rooms.length)cur=Math.max(0,rooms.length-1)}
+  document.getElementById('delBg').classList.remove('open');R();
 };
 
-// ═══ FAB ═══
-document.getElementById('addBtn').onclick = () => openPicker(-1);
-
-// ═══ INIT ═══
-render();
+R();
 </script>
 </body>
 </html>
