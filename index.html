@@ -238,6 +238,20 @@ const D=[
 const EMOS=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
 const S={};D.forEach(d=>{S[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
 
+// Groups from Lighting page — each controls multiple lights/plugs as one
+const G=[
+  {id:'g:entrance',n:'Entrance Lights',t:'group',icon:'💡',members:['h1','h12','h21','h16']},
+  {id:'g:laundry',n:'Laundry Lights',t:'group',icon:'💡',members:['h15','h13','h14']},
+  {id:'g:master',n:'Master Bed Lights',t:'group',icon:'💡',members:['h8','h20']},
+  {id:'g:cerise',n:'Cerise Strips',t:'group',icon:'💡',members:['ts1','ts2']},
+  {id:'g:kitchen_plugs',n:'Kitchen Plugs',t:'group',icon:'🔌',members:['t1','t2']},
+];
+// Group state derived from members
+function grpOn(g){return g.members.some(id=>S[id]&&S[id].on)}
+function grpBri(g){const on=g.members.filter(id=>S[id]&&S[id].on&&S[id].bri!==undefined);if(!on.length)return 0;return Math.round(on.reduce((a,id)=>a+S[id].bri,0)/on.length)}
+function grpIsPlug(g){return g.members.every(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'})}
+function togGrp(gid){const g=G.find(x=>x.id===gid);if(!g)return;const on=grpOn(g);g.members.forEach(id=>{if(on){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});R()}
+
 let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dimId=null;
 
 function R(){
@@ -260,9 +274,13 @@ function R(){
   }
   if(cur>=rooms.length)cur=rooms.length-1;
   const rm=rooms[cur];
-  const onC=rm.devs.filter(id=>S[id]&&S[id].on).length;
+  // Separate groups from individual devices
+  const lgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&!grpIsPlug(g));
+  const pgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&grpIsPlug(g));
   const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
   const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
+  const allIds=[...lights,...plugs];lgrps.concat(pgrps).forEach(g=>g.members.forEach(id=>{if(!allIds.includes(id))allIds.push(id)}));
+  const onC=allIds.filter(id=>S[id]&&S[id].on).length;
 
   let h='';
   // Mobile room pills
@@ -287,14 +305,15 @@ function R(){
   h+='<button class="scene" onclick="roomScene(\'off\')">⚫ All Off</button>';
   h+='</div>';
 
-  if(lights.length){
-    const anyLitOn=lights.some(id=>S[id]&&S[id].on);
-    const avgBri=anyLitOn?Math.round(lights.filter(id=>S[id]&&S[id].on).reduce((a,id)=>a+S[id].bri,0)/Math.max(1,lights.filter(id=>S[id]&&S[id].on).length)):0;
+  if(lights.length || lgrps.length){
+    const allLightIds=[...lights];lgrps.forEach(g=>g.members.forEach(id=>{if(!allLightIds.includes(id))allLightIds.push(id)}));
+    const anyLitOn=allLightIds.some(id=>S[id]&&S[id].on);
+    const litOn=allLightIds.filter(id=>S[id]&&S[id].on);
+    const avgBri=anyLitOn?Math.round(litOn.filter(id=>S[id].bri!==undefined).reduce((a,id)=>a+S[id].bri,0)/Math.max(1,litOn.filter(id=>S[id].bri!==undefined).length)):0;
     h+='<div class="sec">';
     h+='<div class="grp"><div class="grp-label">Lights</div>';
-    h+='<div class="grp-count">'+lights.filter(id=>S[id]&&S[id].on).length+'/'+lights.length+'</div>';
-    h+='<div class="tog '+(anyLitOn?'on':'')+'" onclick="togGroup(\'light\')"></div></div>';
-    // Group brightness bar
+    h+='<div class="grp-count">'+litOn.length+'/'+allLightIds.length+'</div>';
+    h+='<div class="tog '+(anyLitOn?'on':'')+'" onclick="togAllLights()"></div></div>';
     if(anyLitOn){
       h+='<div class="grp-bar" onpointerdown="grpDrag(event,\'light\')">';
       h+='<div class="grp-fill" style="width:'+avgBri+'%"></div>';
@@ -302,17 +321,28 @@ function R(){
       h+='</div>';
     }
     h+='<div class="tiles">';
-    lights.forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)});
+    // Groups first
+    lgrps.forEach(g=>{h+=mkGrpTile(g)});
+    // Then individual lights not in any group
+    lights.forEach(id=>{
+      const inGrp=lgrps.some(g=>g.members.includes(id));
+      if(!inGrp){const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)}
+    });
     h+='</div></div>';
   }
-  if(plugs.length){
-    const anyPlgOn=plugs.some(id=>S[id]&&S[id].on);
+  if(plugs.length || pgrps.length){
+    const allPlugIds=[...plugs];pgrps.forEach(g=>g.members.forEach(id=>{if(!allPlugIds.includes(id))allPlugIds.push(id)}));
+    const anyPlgOn=allPlugIds.some(id=>S[id]&&S[id].on);
     h+='<div class="sec">';
     h+='<div class="grp"><div class="grp-label">Power</div>';
-    h+='<div class="grp-count">'+plugs.filter(id=>S[id]&&S[id].on).length+'/'+plugs.length+'</div>';
-    h+='<div class="tog '+(anyPlgOn?'on':'')+'" onclick="togGroup(\'plug\')"></div></div>';
+    h+='<div class="grp-count">'+allPlugIds.filter(id=>S[id]&&S[id].on).length+'/'+allPlugIds.length+'</div>';
+    h+='<div class="tog '+(anyPlgOn?'on':'')+'" onclick="togAllPlugs()"></div></div>';
     h+='<div class="tiles">';
-    plugs.forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)});
+    pgrps.forEach(g=>{h+=mkGrpTile(g)});
+    plugs.forEach(id=>{
+      const inGrp=pgrps.some(g=>g.members.includes(id));
+      if(!inGrp){const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)}
+    });
     h+='</div></div>';
   }
   h+='</div>';
@@ -334,6 +364,55 @@ function mkTile(d){
 function go(i){cur=i;R()}
 function tog(id){S[id].on=!S[id].on;R()}
 function tap(id){const d=D.find(x=>x.id===id);if(!d)return;if(d.t==='plug'){tog(id);return}openDim(d)}
+function tapGrp(gid){
+  const g=G.find(x=>x.id===gid);if(!g)return;
+  if(grpIsPlug(g)){togGrp(gid);return}
+  // Open dimmer for the group
+  openGrpDim(g);
+}
+
+function mkGrpTile(g){
+  const on=grpOn(g),isP=grpIsPlug(g),bri=grpBri(g);
+  let h='<div class="tile '+(on?'on':'')+'" onclick="tapGrp(\''+g.id+'\')" style="border-left:3px solid '+(on?'var(--amber)':'var(--t4)')+'">';
+  h+='<div class="tile-top"><div class="tile-icon">👥</div>';
+  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();togGrp(\''+g.id+'\')"></div></div>';
+  h+='<div class="tile-bot"><div class="tile-name">'+g.n+'</div>';
+  h+='<div class="tile-val">'+(isP?(on?'On':'Off'):(on?bri+'%':'Off'))+' · '+g.members.length+' devices</div>';
+  if(!isP&&on)h+='<div class="mbar"><div class="mfill" style="width:'+bri+'%"></div></div>';
+  h+='</div></div>';
+  return h;
+}
+
+// ═══ GROUP DIMMER ═══
+let dimGrp=null;
+function openGrpDim(g){
+  dimGrp=g;dimId=null;
+  g.members.forEach(id=>{S[id].on=true});
+  document.getElementById('dimTi').textContent=g.n;
+  setDim(grpBri(g)||100);
+  document.getElementById('dimBg').classList.add('open');
+  document.getElementById('dimSh').classList.add('open');
+}
+
+// ═══ TOGGLE ALL in current room ═══
+function togAllLights(){
+  const rm=rooms[cur];if(!rm)return;
+  const lgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&!grpIsPlug(g));
+  const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
+  const allIds=[...lights];lgrps.forEach(g=>g.members.forEach(id=>{if(!allIds.includes(id))allIds.push(id)}));
+  const anyOn=allIds.some(id=>S[id]&&S[id].on);
+  allIds.forEach(id=>{if(anyOn){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});
+  R();
+}
+function togAllPlugs(){
+  const rm=rooms[cur];if(!rm)return;
+  const pgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&grpIsPlug(g));
+  const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
+  const allIds=[...plugs];pgrps.forEach(g=>g.members.forEach(id=>{if(!allIds.includes(id))allIds.push(id)}));
+  const anyOn=allIds.some(id=>S[id]&&S[id].on);
+  allIds.forEach(id=>{S[id].on=!anyOn});
+  R();
+}
 
 // ═══ GROUP CONTROLS ═══
 function togGroup(type){
@@ -365,22 +444,28 @@ function grpDrag(e,type){
 // ═══ ROOM SCENES ═══
 function roomScene(scene){
   const rm=rooms[cur];if(!rm)return;
-  const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
-  const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
+  // Collect ALL light and plug IDs including group members
+  const lgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&!grpIsPlug(g));
+  const pgrps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(g=>g&&grpIsPlug(g));
+  const lightIds=new Set(rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'}));
+  lgrps.forEach(g=>g.members.forEach(id=>lightIds.add(id)));
+  const plugIds=new Set(rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'}));
+  pgrps.forEach(g=>g.members.forEach(id=>plugIds.add(id)));
+
   switch(scene){
     case'bright':
-      lights.forEach(id=>{S[id].on=true;S[id].bri=100});
-      plugs.forEach(id=>{S[id].on=true});
+      lightIds.forEach(id=>{S[id].on=true;S[id].bri=100});
+      plugIds.forEach(id=>{S[id].on=true});
       break;
     case'relax':
-      lights.forEach(id=>{S[id].on=true;S[id].bri=50});
+      lightIds.forEach(id=>{S[id].on=true;S[id].bri=50});
       break;
     case'dim':
-      lights.forEach(id=>{S[id].on=true;S[id].bri=20});
+      lightIds.forEach(id=>{S[id].on=true;S[id].bri=20});
       break;
     case'off':
-      lights.forEach(id=>{S[id].on=false});
-      plugs.forEach(id=>{S[id].on=false});
+      lightIds.forEach(id=>{S[id].on=false});
+      plugIds.forEach(id=>{S[id].on=false});
       break;
   }
   R();
@@ -394,9 +479,11 @@ function openDim(d){
   document.getElementById('dimBg').classList.add('open');
   document.getElementById('dimSh').classList.add('open');
 }
-function closeDim(){document.getElementById('dimBg').classList.remove('open');document.getElementById('dimSh').classList.remove('open');R()}
+function closeDim(){document.getElementById('dimBg').classList.remove('open');document.getElementById('dimSh').classList.remove('open');dimGrp=null;R()}
 function setDim(v){
-  v=Math.max(1,Math.min(100,v));if(dimId)S[dimId].bri=v;
+  v=Math.max(1,Math.min(100,v));
+  if(dimId)S[dimId].bri=v;
+  if(dimGrp)dimGrp.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=v;S[id].on=true}});
   document.getElementById('dimPct').textContent=v+'%';
   document.getElementById('dimFl').style.height=v+'%';
   document.getElementById('dimTh').style.bottom='calc('+v+'% - 3px)';
@@ -423,9 +510,27 @@ function openPk(idx){
 function closePk(){document.getElementById('pkBg').classList.remove('open');document.getElementById('pkSh').classList.remove('open');document.getElementById('emoDD').classList.remove('open')}
 function rPk(){
   const ls=D.filter(d=>d.t==='light'),ps=D.filter(d=>d.t==='plug');
-  let h='<div class="sec-label" style="margin-top:0">Lights</div>';
+  const lgr=G.filter(g=>!grpIsPlug(g)),pgr=G.filter(g=>grpIsPlug(g));
+  let h='';
+
+  // Light groups
+  if(lgr.length){
+    h+='<div class="sec-label" style="margin-top:0">Light Groups</div>';
+    lgr.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:var(--t4);font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'});
+  }
+
+  // Individual lights
+  h+='<div class="sec-label" style="margin-top:14px">Individual Lights</div>';
   ls.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">💡</div></div>'});
-  h+='<div class="sec-label" style="margin-top:14px">Power</div>';
+
+  // Plug groups
+  if(pgr.length){
+    h+='<div class="sec-label" style="margin-top:14px">Plug Groups</div>';
+    pgr.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:var(--t4);font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'});
+  }
+
+  // Individual plugs
+  h+='<div class="sec-label" style="margin-top:14px">Individual Plugs</div>';
   ps.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">🔌</div></div>'});
   document.getElementById('pkBd').innerHTML=h;
 }
