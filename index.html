@@ -147,6 +147,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .d-d{background:#C03030;color:#fff}
 
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ═══ GROUP CONTROLS ═══ */
+.grp{display:flex;align-items:center;gap:10px;padding:10px 0 6px}
+.grp-label{font-size:12px;font-weight:700;color:var(--t2);flex:1}
+.grp-count{font-size:10px;color:var(--t3);font-weight:500;margin-right:4px}
+/* Group brightness bar */
+.grp-bar{height:6px;border-radius:3px;background:rgba(255,255,255,0.05);margin:-2px 0 10px;cursor:pointer;position:relative}
+.grp-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070);transition:width 60ms}
+.grp-thumb{width:16px;height:16px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:-5px;box-shadow:0 1px 4px rgba(0,0,0,0.4);transition:left 60ms}
+
+/* ═══ ROOM SCENES ═══ */
+.scenes{display:flex;gap:6px;padding:8px 0 4px;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap}
+.scenes::-webkit-scrollbar{display:none}
+.scene{padding:7px 14px;border-radius:10px;background:var(--s2);border:1px solid var(--brd);font-size:11px;font-weight:600;color:var(--t3);cursor:pointer;transition:.15s;white-space:nowrap}
+.scene:hover{border-color:rgba(255,179,0,0.1);color:var(--t2)}
+.scene.on{background:rgba(255,179,0,0.08);border-color:rgba(255,179,0,0.15);color:var(--amber)}
 </style>
 </head>
 <body>
@@ -263,13 +279,39 @@ function R(){
   h+='<div class="rh-acts"><button class="rh-btn" onclick="openPk(cur)">✎</button><button class="rh-btn" onclick="askDel()">🗑</button></div>';
   h+='</div>';
 
+  // Room scenes
+  h+='<div class="scenes">';
+  h+='<button class="scene" onclick="roomScene(\'bright\')">☀️ Bright</button>';
+  h+='<button class="scene" onclick="roomScene(\'relax\')">🌅 Relax</button>';
+  h+='<button class="scene" onclick="roomScene(\'dim\')">🌙 Dim</button>';
+  h+='<button class="scene" onclick="roomScene(\'off\')">⚫ All Off</button>';
+  h+='</div>';
+
   if(lights.length){
-    h+='<div class="sec"><div class="sec-label">Lights</div><div class="tiles">';
+    const anyLitOn=lights.some(id=>S[id]&&S[id].on);
+    const avgBri=anyLitOn?Math.round(lights.filter(id=>S[id]&&S[id].on).reduce((a,id)=>a+S[id].bri,0)/Math.max(1,lights.filter(id=>S[id]&&S[id].on).length)):0;
+    h+='<div class="sec">';
+    h+='<div class="grp"><div class="grp-label">Lights</div>';
+    h+='<div class="grp-count">'+lights.filter(id=>S[id]&&S[id].on).length+'/'+lights.length+'</div>';
+    h+='<div class="tog '+(anyLitOn?'on':'')+'" onclick="togGroup(\'light\')"></div></div>';
+    // Group brightness bar
+    if(anyLitOn){
+      h+='<div class="grp-bar" onpointerdown="grpDrag(event,\'light\')">';
+      h+='<div class="grp-fill" style="width:'+avgBri+'%"></div>';
+      h+='<div class="grp-thumb" style="left:calc('+avgBri+'% - 8px)"></div>';
+      h+='</div>';
+    }
+    h+='<div class="tiles">';
     lights.forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)});
     h+='</div></div>';
   }
   if(plugs.length){
-    h+='<div class="sec"><div class="sec-label">Power</div><div class="tiles">';
+    const anyPlgOn=plugs.some(id=>S[id]&&S[id].on);
+    h+='<div class="sec">';
+    h+='<div class="grp"><div class="grp-label">Power</div>';
+    h+='<div class="grp-count">'+plugs.filter(id=>S[id]&&S[id].on).length+'/'+plugs.length+'</div>';
+    h+='<div class="tog '+(anyPlgOn?'on':'')+'" onclick="togGroup(\'plug\')"></div></div>';
+    h+='<div class="tiles">';
     plugs.forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=mkTile(d)});
     h+='</div></div>';
   }
@@ -292,6 +334,57 @@ function mkTile(d){
 function go(i){cur=i;R()}
 function tog(id){S[id].on=!S[id].on;R()}
 function tap(id){const d=D.find(x=>x.id===id);if(!d)return;if(d.t==='plug'){tog(id);return}openDim(d)}
+
+// ═══ GROUP CONTROLS ═══
+function togGroup(type){
+  const rm=rooms[cur];if(!rm)return;
+  const ids=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t===type});
+  const anyOn=ids.some(id=>S[id]&&S[id].on);
+  ids.forEach(id=>{
+    if(anyOn){S[id].on=false}
+    else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}
+  });
+  R();
+}
+
+function grpDrag(e,type){
+  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
+  const rm=rooms[cur];if(!rm)return;
+  const ids=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t===type});
+  const rect=bar.getBoundingClientRect();
+  const upd=e=>{
+    const pct=Math.max(1,Math.min(100,Math.round(((e.clientX-rect.left)/rect.width)*100)));
+    ids.forEach(id=>{if(S[id].bri!==undefined){S[id].bri=pct;S[id].on=true}});
+    R();
+  };
+  upd(e);
+  bar.onpointermove=upd;
+  bar.onpointerup=()=>{bar.onpointermove=null};
+}
+
+// ═══ ROOM SCENES ═══
+function roomScene(scene){
+  const rm=rooms[cur];if(!rm)return;
+  const lights=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
+  const plugs=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
+  switch(scene){
+    case'bright':
+      lights.forEach(id=>{S[id].on=true;S[id].bri=100});
+      plugs.forEach(id=>{S[id].on=true});
+      break;
+    case'relax':
+      lights.forEach(id=>{S[id].on=true;S[id].bri=50});
+      break;
+    case'dim':
+      lights.forEach(id=>{S[id].on=true;S[id].bri=20});
+      break;
+    case'off':
+      lights.forEach(id=>{S[id].on=false});
+      plugs.forEach(id=>{S[id].on=false});
+      break;
+  }
+  R();
+}
 
 // ═══ DIMMER ═══
 function openDim(d){
