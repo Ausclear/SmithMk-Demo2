@@ -66,31 +66,45 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .sec{margin-top:20px}
 .sec-label{font-size:9px;font-weight:700;color:var(--t4);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:10px}
 
-/* ═══ DEVICE TILES — square-ish, chunky, Savant-inspired ═══ */
-.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-@media(min-width:500px){.tiles{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:768px){.tiles{grid-template-columns:repeat(3,1fr)}}
-@media(min-width:1000px){.tiles{grid-template-columns:repeat(4,1fr)}}
+/* ═══ DEVICE TILES — match approved Lighting page exactly ═══ */
+.tiles{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:580px){.tiles{grid-template-columns:1fr 1fr}}
+@media(min-width:960px){.tiles{grid-template-columns:1fr 1fr 1fr}}
 
-.tile{aspect-ratio:1.15;background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--brd);display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
-.tile:active{transform:scale(0.97)}
-.tile.on{border-color:rgba(255,179,0,0.12)}
-.tile.on::after{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:var(--amber);opacity:0.3}
-.tile-icon{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:17px}
-.tile.on .tile-icon{background:rgba(255,179,0,0.1)}
-.tile-top{display:flex;align-items:flex-start;justify-content:space-between}
-.tog{width:38px;height:20px;border-radius:10px;background:var(--t4);position:relative;transition:.2s;flex-shrink:0}
-.tog.on{background:var(--amber)}
-.tog::after{content:'';width:14px;height:14px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,0.3)}
-.tog.on::after{left:21px}
-.tile-bot{display:flex;flex-direction:column;gap:2px}
-.tile-name{font-size:12px;font-weight:600;color:var(--t3)}
-.tile.on .tile-name{color:var(--t1)}
-.tile-val{font-size:10px;color:var(--t4);font-weight:500}
-.tile.on .tile-val{color:var(--gold)}
-/* Mini bar */
-.mbar{height:3px;border-radius:2px;background:rgba(255,255,255,0.05);margin-top:4px;overflow:hidden}
-.mfill{height:100%;border-radius:2px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070)}
+.tile{background:#1A1916;border-radius:12px;padding:16px;border:1px solid rgba(255,255,255,0.05);cursor:pointer;transition:.15s;position:relative;overflow:hidden}
+.tile:active{transform:scale(0.98)}
+.tile.on{border-color:rgba(232,166,28,0.12)}
+.tile.on::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(232,166,28,0.03),transparent 70%);pointer-events:none}
+.tile.grp{border-left:3px solid var(--t4)}
+.tile.grp.on{border-left-color:var(--amber)}
+/* Top row: icon + name + value + toggle */
+.tile-row{display:flex;align-items:center;gap:10px}
+.tile-icon{font-size:16px;color:#5A5848;width:18px;text-align:center}
+.tile.on .tile-icon{color:#E8A61C}
+.tile-name{flex:1;font-size:14px;font-weight:500;color:#5A5848;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile.on .tile-name{color:#F0EDE6}
+.tile-val{font-size:13px;font-weight:700;color:#5A5848}
+.tile.on .tile-val{color:#E8A61C}
+.tile-val.plug{font-size:11px}
+.tile-members{font-size:9px;color:#5A5848;margin-left:4px;font-weight:400}
+
+/* Toggle — matches Flutter _AmberToggle */
+.tog{width:44px;height:24px;border-radius:12px;background:#2A2924;position:relative;transition:.2s;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.3)}
+.tog.on{background:#E8A61C}
+.tog::after{content:'';width:18px;height:18px;border-radius:50%;position:absolute;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.tog:not(.on)::after{background:linear-gradient(180deg,#5A5848,#4A4838)}
+.tog.on::after{background:linear-gradient(180deg,#fff,#e0e0e0);left:23px}
+
+/* Brightness bar — matches Flutter _BrightnessBar exactly */
+.bbar{height:12px;border-radius:6px;background:rgba(255,255,255,0.06);margin-top:14px;position:relative;cursor:pointer;box-shadow:inset 0 2px 4px rgba(0,0,0,0.4)}
+.bbar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#A04800,#D4820A,#EDAC1A,#F5D070);position:absolute;top:0;left:0;box-shadow:0 0 8px rgba(232,166,28,0.25),0 0 2px rgba(232,166,28,0.4)}
+/* 3D fader thumb */
+.bbar-thumb{width:28px;height:30px;border-radius:5px;position:absolute;top:-9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
+.bbar-thumb.on{background:linear-gradient(180deg,#fff,#e8e8e8,#d0d0d0)}
+.bbar-thumb.off{background:linear-gradient(180deg,#555,#444,#333)}
+.bbar-grip{width:12px;height:1.5px;border-radius:1px}
+.bbar-thumb.on .bbar-grip{background:rgba(0,0,0,0.12)}
+.bbar-thumb.off .bbar-grip{background:rgba(255,255,255,0.1)}
 
 /* ═══ BOTTOM SHEET (shared) ═══ */
 .sh-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(3px)}
@@ -351,14 +365,30 @@ function R(){
 
 function mkTile(d){
   const s=S[d.id],on=s.on,isP=d.t==='plug';
+  const pct=on?(s.bri||0):0;
   let h='<div class="tile '+(on?'on':'')+'" onclick="tap(\''+d.id+'\')">';
-  h+='<div class="tile-top"><div class="tile-icon">'+(isP?'🔌':'💡')+'</div>';
-  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"></div></div>';
-  h+='<div class="tile-bot"><div class="tile-name">'+d.n+'</div>';
-  h+='<div class="tile-val">'+(isP?(on?'On':'Off'):(on?s.bri+'%':'Off'))+'</div>';
-  if(!isP&&on)h+='<div class="mbar"><div class="mfill" style="width:'+s.bri+'%"></div></div>';
-  h+='</div></div>';
+  h+='<div class="tile-row">';
+  h+='<div class="tile-icon">'+(isP?'🔌':'💡')+'</div>';
+  h+='<div class="tile-name">'+d.n+'</div>';
+  h+='<div class="tile-val'+(isP?' plug':'')+'">'+(isP?(on?'ON':'OFF'):(on?s.bri+'%':'Off'))+'</div>';
+  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"></div>';
+  h+='</div>';
+  if(!isP){
+    h+='<div class="bbar" onclick="event.stopPropagation()" onpointerdown="barDrag(event,\''+d.id+'\')">';
+    if(on&&pct>0)h+='<div class="bbar-fill" style="width:'+pct+'%"></div>';
+    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:calc('+pct+'% - 14px)">';
+    h+='<div class="bbar-grip"></div><div class="bbar-grip"></div><div class="bbar-grip"></div>';
+    h+='</div></div>';
+  }
+  h+='</div>';
   return h;
+}
+
+function barDrag(e,id){
+  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
+  const rect=bar.getBoundingClientRect();
+  const upd=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-rect.left)/rect.width)*100)));S[id].bri=p;S[id].on=true;R()};
+  upd(e);bar.onpointermove=upd;bar.onpointerup=()=>{bar.onpointermove=null};
 }
 
 function go(i){cur=i;R()}
@@ -373,14 +403,31 @@ function tapGrp(gid){
 
 function mkGrpTile(g){
   const on=grpOn(g),isP=grpIsPlug(g),bri=grpBri(g);
-  let h='<div class="tile '+(on?'on':'')+'" onclick="tapGrp(\''+g.id+'\')" style="border-left:3px solid '+(on?'var(--amber)':'var(--t4)')+'">';
-  h+='<div class="tile-top"><div class="tile-icon">👥</div>';
-  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();togGrp(\''+g.id+'\')"></div></div>';
-  h+='<div class="tile-bot"><div class="tile-name">'+g.n+'</div>';
-  h+='<div class="tile-val">'+(isP?(on?'On':'Off'):(on?bri+'%':'Off'))+' · '+g.members.length+' devices</div>';
-  if(!isP&&on)h+='<div class="mbar"><div class="mfill" style="width:'+bri+'%"></div></div>';
-  h+='</div></div>';
+  const pct=on?bri:0;
+  let h='<div class="tile grp '+(on?'on':'')+'" onclick="tapGrp(\''+g.id+'\')">';
+  h+='<div class="tile-row">';
+  h+='<div class="tile-icon">👥</div>';
+  h+='<div class="tile-name">'+g.n+'<span class="tile-members"> · '+g.members.length+'</span></div>';
+  h+='<div class="tile-val'+(isP?' plug':'')+'">'+(isP?(on?'ON':'OFF'):(on?bri+'%':'Off'))+'</div>';
+  h+='<div class="tog '+(on?'on':'')+'" onclick="event.stopPropagation();togGrp(\''+g.id+'\')"></div>';
+  h+='</div>';
+  if(!isP){
+    h+='<div class="bbar" onclick="event.stopPropagation()" onpointerdown="grpBarDrag(event,\''+g.id+'\')">';
+    if(on&&pct>0)h+='<div class="bbar-fill" style="width:'+pct+'%"></div>';
+    h+='<div class="bbar-thumb '+(on?'on':'off')+'" style="left:calc('+pct+'% - 14px)">';
+    h+='<div class="bbar-grip"></div><div class="bbar-grip"></div><div class="bbar-grip"></div>';
+    h+='</div></div>';
+  }
+  h+='</div>';
   return h;
+}
+
+function grpBarDrag(e,gid){
+  const g=G.find(x=>x.id===gid);if(!g)return;
+  const bar=e.currentTarget;bar.setPointerCapture(e.pointerId);
+  const rect=bar.getBoundingClientRect();
+  const upd=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-rect.left)/rect.width)*100)));g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};
+  upd(e);bar.onpointermove=upd;bar.onpointerup=()=>{bar.onpointermove=null};
 }
 
 // ═══ GROUP DIMMER ═══
