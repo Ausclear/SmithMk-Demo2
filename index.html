@@ -253,13 +253,13 @@ function R(){
   h+='</div>';
   a.innerHTML=h;
 
-  // Swipe
+  // Swipe — touch AND mouse/pointer for desktop
   let sx=0,dx=0,sw=false;
   const cw=document.querySelector('.carousel-w');
   if(cw){
-    cw.ontouchstart=e=>{sx=e.touches[0].clientX;sw=true;dx=0};
-    cw.ontouchmove=e=>{if(sw)dx=e.touches[0].clientX-sx};
-    cw.ontouchend=()=>{if(Math.abs(dx)>40){if(dx<0&&cur<rooms.length-1)cur++;else if(dx>0&&cur>0)cur--;R()}dx=0;sw=false};
+    cw.onpointerdown=e=>{sx=e.clientX;sw=true;dx=0;cw.setPointerCapture(e.pointerId)};
+    cw.onpointermove=e=>{if(sw)dx=e.clientX-sx};
+    cw.onpointerup=()=>{if(Math.abs(dx)>40){if(dx<0&&cur<rooms.length-1)cur++;else if(dx>0&&cur>0)cur--;R()}dx=0;sw=false};
   }
 }
 
