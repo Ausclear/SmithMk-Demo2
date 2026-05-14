@@ -2,464 +2,618 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>SmithMk — Rooms</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AusClear — Security Clearance Specialists</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
-html,body{height:100%;background:#0E0D0B;color:#F0EDE6;font-family:'DM Sans',sans-serif;overflow:hidden}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
-
-/* ═══ SHELL ═══ */
-.shell{display:flex;height:100%}
-/* Sidebar — ≥768 */
-.sb{width:220px;background:#141210;border-right:1px solid rgba(255,255,255,0.05);display:none;flex-direction:column;flex-shrink:0}
-@media(min-width:768px){.sb{display:flex}}
-.sb-hd{padding:20px 16px 14px}.sb-hd span{font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase}
-.sb-list{flex:1;overflow-y:auto;padding:6px 8px}
-.sb-r{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;cursor:pointer;margin-bottom:2px;border:1px solid transparent;transition:.12s}
-.sb-r:hover{background:rgba(255,255,255,0.02)}
-.sb-r.on{background:rgba(232,166,28,0.05);border-color:rgba(232,166,28,0.1)}
-.sb-r .e{font-size:18px}.sb-r .n{flex:1;font-size:13px;font-weight:600;color:#5A5848;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sb-r.on .n{color:#F0EDE6}
-.sb-r .dot{width:5px;height:5px;border-radius:50%;background:#E8A61C;opacity:0}.sb-r.on .dot{opacity:1}
-.sb-add{padding:12px 16px;font-size:12px;font-weight:600;color:#C4A96B;cursor:pointer}
-.sb-add:hover{color:#E8A61C}
-
-/* Main */
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.wrap{max-width:900px;margin:0 auto;padding:0 16px 120px}
-
-/* Mobile pills */
-.pills{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
-.pills::-webkit-scrollbar{display:none}
-@media(min-width:768px){.pills{display:none}}
-.pill{padding:8px 14px;border-radius:20px;background:#1A1916;border:1px solid rgba(255,255,255,0.05);white-space:nowrap;font-size:12px;font-weight:600;color:#5A5848;flex-shrink:0}
-.pill.on{background:rgba(232,166,28,0.06);border-color:rgba(232,166,28,0.12);color:#F0EDE6}
-.pill.add{color:#C4A96B;border-color:rgba(232,166,28,0.08)}
-
-/* ═══ EMPTY ═══ */
-.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:18px;opacity:0;animation:fu .4s ease .1s forwards}
-.empty-ic{width:72px;height:72px;border-radius:20px;background:rgba(232,166,28,0.04);border:1px solid rgba(232,166,28,0.1);display:flex;align-items:center;justify-content:center;font-size:28px}
-.empty h2{font-size:17px;font-weight:700}.empty p{font-size:12px;color:#5A5848;text-align:center;line-height:1.6;max-width:220px}
-.btn-a{height:42px;padding:0 26px;border-radius:11px;background:#E8A61C;color:#000;font-weight:700;font-size:13px}
-.btn-a:active{transform:scale(0.96)}
-
-/* ═══ ROOM HEADER ═══ */
-.rh{display:flex;align-items:center;gap:14px;padding:20px 0 6px}
-.rh-e{width:46px;height:46px;border-radius:14px;background:rgba(232,166,28,0.04);border:1px solid rgba(232,166,28,0.08);display:flex;align-items:center;justify-content:center;font-size:22px}
-.rh-i{flex:1}.rh-n{font-size:19px;font-weight:800;letter-spacing:-0.3px}.rh-s{font-size:11px;color:#5A5848;margin-top:2px}
-.rh-a{display:flex;gap:6px}
-.rh-b{width:34px;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:#5A5848;font-size:13px}
-.rh-b:hover{border-color:rgba(232,166,28,0.12);color:#E8A61C}
-
-/* Scenes */
-.scenes{display:flex;gap:6px;padding:10px 0 6px;flex-wrap:wrap}
-.sc{padding:7px 14px;border-radius:10px;background:#1A1916;border:1px solid rgba(255,255,255,0.05);font-size:11px;font-weight:600;color:#5A5848;cursor:pointer}
-.sc:hover{border-color:rgba(232,166,28,0.1);color:#8A8778}
-
-/* Section */
-.sec{margin-top:18px}
-/* Group header row */
-.gh{display:flex;align-items:center;gap:10px;padding:0 0 10px}
-.gh-l{font-size:10px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;flex:1}
-.gh-c{font-size:10px;color:#5A5848;font-weight:500}
-/* Group brightness bar (full width) */
-.gbar{height:6px;border-radius:3px;background:rgba(255,255,255,0.04);margin:-4px 0 12px;position:relative;cursor:pointer}
-.gbar-f{height:100%;border-radius:3px;background:linear-gradient(90deg,#A04800,#EDAC1A,#F5D070)}
-.gbar-t{width:14px;height:14px;border-radius:50%;background:linear-gradient(180deg,#fff,#ddd);position:absolute;top:-4px;box-shadow:0 1px 3px rgba(0,0,0,0.4)}
-
-/* ═══ CARDS GRID — 1 col phone, 2 at 580, 3 at 960 ═══ */
-.cards{display:grid;grid-template-columns:1fr;gap:8px}
-@media(min-width:580px){.cards{grid-template-columns:1fr 1fr}}
-@media(min-width:960px){.cards{grid-template-columns:1fr 1fr 1fr}}
-
-/* ═══ LIGHT CARD — pixel match to Flutter _lightCard ═══ */
-.lc{
-  padding:16px;
-  background:#1A1916;
-  border-radius:12px;
-  border:1px solid rgba(255,255,255,0.05);
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);
-  cursor:pointer;
-  transition:.12s;
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{
+  width:100%;height:100%;
+  background:#050D1F;
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+  color:#fff;
 }
-.lc:active{transform:scale(0.98)}
-.lc.on{border-color:rgba(232,166,28,0.12);box-shadow:0 2px 8px rgba(0,0,0,0.3),0 0 20px rgba(232,166,28,0.04)}
-.lc.grp{border-left:3px solid #3A3A3A}.lc.grp.on{border-left-color:#E8A61C}
-/* Expand chevron */
-.lc-chev{font-size:10px;color:#5A5848;margin-left:4px;transition:transform .2s}
-.lc-chev.open{transform:rotate(180deg)}
-/* Expanded member cards inside group */
-.grp-members{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);display:flex;flex-direction:column;gap:10px}
-.grp-members .lc{box-shadow:none;border:1px solid rgba(255,255,255,0.03);background:#161412}
 
-/* Row: icon · name · value · toggle */
-.lc-row{display:flex;align-items:center;gap:10px}
-.lc-ic{font-size:18px;color:#5A5848;flex-shrink:0}.lc.on .lc-ic{color:#E8A61C}
-.lc-nm{flex:1;font-size:14px;font-weight:500;color:#5A5848;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.lc.on .lc-nm{color:#F0EDE6}
-.lc-val{font-size:13px;font-weight:700;color:#5A5848;flex-shrink:0}.lc.on .lc-val{color:#E8A61C}
-.lc-val.sm{font-size:11px}
-.lc-mem{font-size:9px;color:#5A5848;margin-left:2px;font-weight:400}
+/* ── CANVAS BACKGROUND ── */
+#bg{
+  position:fixed;inset:0;
+  z-index:1;
+  pointer-events:none;
+}
 
-/* Toggle — 44×24, amber bg, gradient knob */
-.tg{width:44px;height:24px;border-radius:12px;background:#2A2924;position:relative;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.3);transition:background .2s}
-.tg.on{background:#E8A61C}
-.tg-k{width:18px;height:18px;border-radius:50%;position:absolute;top:3px;left:3px;box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .2s,background .2s}
-.tg:not(.on) .tg-k{background:linear-gradient(180deg,#5A5848,#4A4838)}
-.tg.on .tg-k{background:linear-gradient(180deg,#fff,#E0E0E0);left:23px}
+/* ── SCENES ── */
+.scene{
+  position:fixed;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:80px;
+  opacity:0;
+  pointer-events:none;
+  z-index:10;
+}
+.scene.active{pointer-events:auto}
 
-/* ═══ BRIGHTNESS BAR — 30px tall Stack, 12px track centred, 28×30 thumb ═══ */
-.bb{position:relative;height:30px;margin-top:14px;cursor:pointer;touch-action:none}
-/* Track — centred vertically (9px from top to centre 12px in 30px) */
-.bb-trk{position:absolute;top:9px;left:0;right:0;height:12px;border-radius:6px;background:rgba(255,255,255,0.06);box-shadow:inset 0 2px 4px rgba(0,0,0,0.4)}
-/* Fill — same position as track */
-.bb-fl{position:absolute;top:9px;left:0;height:12px;border-radius:6px;background:linear-gradient(90deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 8px rgba(232,166,28,0.25),0 0 2px rgba(232,166,28,0.4)}
-/* Thumb — 28×30, top:0, full height of the 30px container */
-.bb-th{position:absolute;top:0;width:28px;height:30px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-.bb-th.on{background:linear-gradient(180deg,#fff,#E8E8E8,#D0D0D0);box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
-.bb-th.off{background:linear-gradient(180deg,#555,#444,#333);box-shadow:0 2px 6px rgba(0,0,0,0.5),0 1px 2px rgba(0,0,0,0.3)}
-.bb-g{width:12px;height:1.5px;border-radius:1px}
-.bb-th.on .bb-g{background:rgba(0,0,0,0.12)}
-.bb-th.off .bb-g{background:rgba(255,255,255,0.1)}
+/* ── PER-SCENE GLOWS ── */
+.sg{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+  filter:blur(90px);
+  z-index:0;
+}
+.scene > *:not(.sg){position:relative;z-index:1}
 
-/* ═══ BOTTOM SHEET ═══ */
-.sh-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;opacity:0;pointer-events:none;transition:.2s;backdrop-filter:blur(3px)}.sh-bg.open{opacity:1;pointer-events:auto}
-.sh{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:#161412;border-radius:20px 20px 0 0;z-index:101;transform:translateY(100%);transition:.28s cubic-bezier(.25,.1,.25,1);display:flex;flex-direction:column;overflow:hidden}.sh.open{transform:translateY(0)}
-@media(min-width:600px){.sh{left:50%;right:auto;width:400px;transform:translate(-50%,100%);border-radius:20px;bottom:16px;max-height:80vh}.sh.open{transform:translate(-50%,0)}}
-.sh-bar{width:32px;height:4px;border-radius:2px;background:#3A3A3A;margin:8px auto 0;flex-shrink:0}
-.sh-hd{padding:14px 18px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}.sh-hd h3{flex:1;font-size:15px;font-weight:700}
-.sh-x{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:#5A5848;font-size:11px}
-.sh-bd{flex:1;overflow-y:auto;padding:0 18px 18px}
-.sh-ft{padding:10px 18px;border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:8px;align-items:center;flex-shrink:0}
+/* ── NOISE OVERLAY ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:999;
+  opacity:.45;
+}
 
-/* Picker items */
-.pi{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.025);cursor:pointer}.pi:last-child{border:none}
-.pi-ck{width:20px;height:20px;border-radius:6px;border:1.5px solid #3A3A3A;display:flex;align-items:center;justify-content:center;flex-shrink:0}.pi.on .pi-ck{background:#E8A61C;border-color:#E8A61C}.pi.on .pi-ck::after{content:'✓';color:#000;font-size:11px;font-weight:700}
-.pi-n{font-size:13px;color:#8A8778;flex:1}.pi.on .pi-n{color:#F0EDE6}
-.pi-t{font-size:9px;color:#3A3A3A}
-.em-b{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sh-ft input{flex:1;height:42px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);color:#F0EDE6;padding:0 14px;font-size:13px;font-family:inherit}.sh-ft input::placeholder{color:#3A3A3A}
-.sh-sv{height:42px;padding:0 18px;border-radius:12px;background:#E8A61C;color:#000;font-weight:700;font-size:13px;flex-shrink:0}
+/* ── GOLD SWEEP LINE ── */
+#sweep{
+  position:fixed;
+  left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent 0%,rgba(201,168,76,0.08) 15%,#C9A84C 50%,rgba(201,168,76,0.08) 85%,transparent 100%);
+  z-index:800;
+  top:0;
+  opacity:0;
+  pointer-events:none;
+  box-shadow:0 0 12px rgba(201,168,76,0.5),0 0 24px rgba(201,168,76,0.2);
+}
 
-/* Emoji dropdown */
-.em-dd{position:absolute;bottom:52px;left:10px;background:#1A1916;border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(6,1fr);gap:3px;z-index:110;box-shadow:0 8px 24px rgba(0,0,0,0.6)}.em-dd.open{display:grid}
-.em-o{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:17px;border-radius:7px;cursor:pointer}.em-o:hover{background:rgba(232,166,28,0.06)}
+/* ── LOGO ── */
+.logo{
+  display:flex;align-items:center;gap:20px;
+}
+.logo-shield{width:56px;height:66px;flex-shrink:0}
+.logo-words{display:flex;flex-direction:column}
+.logo-name{
+  font-size:42px;font-weight:700;letter-spacing:-1.5px;line-height:1;
+  background:linear-gradient(135deg,#fff 20%,#E8C46A 60%,#C9A84C);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.logo-sub{font-size:10px;letter-spacing:4.5px;text-transform:uppercase;color:rgba(255,255,255,0.28);margin-top:7px}
 
-/* Dimmer */
-.dm-w{display:flex;flex-direction:column;align-items:center;padding:16px 0 4px;gap:14px}
-.dm-pct{font-size:44px;font-weight:800;color:#E8A61C;letter-spacing:-2px}
-.dm-trk{width:54px;height:190px;border-radius:27px;background:rgba(255,255,255,0.04);position:relative;cursor:pointer;border:1px solid rgba(255,255,255,0.04);overflow:hidden}
-.dm-fl{position:absolute;bottom:0;left:0;right:0;border-radius:0 0 27px 27px;background:linear-gradient(0deg,#A04800,#D4820A,#EDAC1A,#F5D070);box-shadow:0 0 14px rgba(232,166,28,0.2)}
-.dm-th{width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,0.7);position:absolute;left:7px}
-.dm-pre{display:flex;gap:6px}
-.dm-p{width:42px;height:32px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);color:#8A8778;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
-.dm-p.on{border-color:rgba(232,166,28,0.15);color:#E8A61C;background:rgba(232,166,28,0.04)}
+/* ── SCENE 1: PROBLEM ── */
+#s1{background:linear-gradient(160deg,#0A0C14 0%,#060810 60%,#0D0A06 100%)}
+.s1-eyebrow{
+  font-size:clamp(12px,1.1vw,15px);
+  font-weight:500;letter-spacing:5px;text-transform:uppercase;
+  color:rgba(255,255,255,0.25);
+  margin-bottom:26px;
+}
+.s1-h1,.s1-h2,.s1-h3{
+  font-size:clamp(50px,7vw,96px);
+  font-weight:700;letter-spacing:-2px;line-height:1.02;
+  overflow:hidden;
+  margin-bottom:6px;
+}
+.s1-h3{color:#E53E3E;margin-bottom:44px}
+.clip-inner{display:block;transform:translateY(110%)}
+.pain-row{
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+}
+.pain-pill{
+  display:flex;align-items:center;gap:9px;
+  background:rgba(229,62,62,0.05);
+  border:1px solid rgba(229,62,62,0.16);
+  border-radius:100px;
+  padding:9px 20px;
+  font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);
+  opacity:0;transform:translateY(14px);
+}
+.pdot{width:5px;height:5px;border-radius:50%;background:#E53E3E;flex-shrink:0}
 
-/* Delete */
-.del-bg{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px)}.del-bg.open{display:flex}
-.del-box{background:#1A1916;border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:24px;width:90%;max-width:300px;text-align:center}
-.del-box h3{font-size:15px;font-weight:700;margin-bottom:6px}.del-box p{font-size:12px;color:#5A5848;margin-bottom:16px;line-height:1.5}
-.del-btns{display:flex;gap:8px}.del-btns button{flex:1;height:38px;border-radius:10px;font-weight:700;font-size:12px}
-.dc{background:rgba(255,255,255,0.04);color:#8A8778;border:1px solid rgba(255,255,255,0.05)}.dd{background:#C03030;color:#fff}
+/* ── SCENE 2: SOLUTION ── */
+#s2{background:linear-gradient(160deg,#050D1F,#061422 60%,#050F1A)}
+.s2-eyebrow{font-size:clamp(11px,1vw,14px);font-weight:600;letter-spacing:5px;text-transform:uppercase;color:rgba(255,255,255,0.22);margin-bottom:32px;overflow:hidden}
+.s2-logo{margin-bottom:36px;overflow:hidden}
+.s2-hl{
+  font-size:clamp(40px,5.5vw,72px);
+  font-weight:700;letter-spacing:-2px;line-height:1.05;
+  text-align:center;overflow:hidden;margin-bottom:6px;
+}
+.s2-sub{
+  font-size:clamp(15px,1.5vw,19px);
+  color:rgba(255,255,255,0.4);text-align:center;
+  margin-top:22px;font-weight:400;line-height:1.75;
+  overflow:hidden;
+}
+.gold-grad{
+  background:linear-gradient(90deg,#E8C46A,#C9A84C);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
 
-@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* ── SCENE 3: SERVICES ── */
+#s3{background:linear-gradient(160deg,#060812,#040A14)}
+.s3-hl{font-size:clamp(32px,4.5vw,58px);font-weight:700;letter-spacing:-1.5px;text-align:center;margin-bottom:40px;overflow:hidden}
+.srv-row{display:flex;gap:16px;width:100%;max-width:1020px}
+.srv{
+  flex:1;
+  background:rgba(255,255,255,0.025);
+  border:1px solid rgba(255,255,255,0.055);
+  border-radius:18px;
+  padding:26px 22px;
+  opacity:0;transform:translateY(38px);
+  position:relative;overflow:hidden;
+}
+.srv::after{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  border-radius:18px 18px 0 0;
+}
+.srv.b::after{background:linear-gradient(90deg,#4A90D9,#5BA8F5)}
+.srv.n1::after{background:linear-gradient(90deg,#C9A84C,#E8C46A)}
+.srv.n2::after{background:linear-gradient(90deg,#9B59B6,#C97EDE)}
+.srv-icon{
+  width:42px;height:42px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:11px;
+  margin-bottom:14px;
+}
+.srv.b .srv-icon{background:rgba(74,144,217,0.1);color:#4A90D9}
+.srv.n1 .srv-icon{background:rgba(201,168,76,0.1);color:#C9A84C}
+.srv.n2 .srv-icon{background:rgba(155,89,182,0.1);color:#C97EDE}
+.srv-name{font-size:23px;font-weight:700;letter-spacing:-0.5px;margin-bottom:5px}
+.srv-tag{
+  display:inline-block;font-size:9px;font-weight:700;letter-spacing:2.5px;
+  text-transform:uppercase;border-radius:100px;padding:3px 10px;
+  margin-bottom:14px;
+}
+.srv.b .srv-tag{background:rgba(74,144,217,0.1);color:#4A90D9;border:1px solid rgba(74,144,217,0.18)}
+.srv.n1 .srv-tag{background:rgba(201,168,76,0.1);color:#C9A84C;border:1px solid rgba(201,168,76,0.18)}
+.srv.n2 .srv-tag{background:rgba(155,89,182,0.1);color:#C97EDE;border:1px solid rgba(155,89,182,0.18)}
+.srv-desc{font-size:13px;color:rgba(255,255,255,0.42);line-height:1.75;margin-bottom:18px;font-weight:400}
+.srv-how{
+  display:flex;align-items:center;gap:7px;
+  font-size:11px;font-weight:600;letter-spacing:0.3px;
+  padding:7px 12px;border-radius:8px;
+}
+.srv.b .srv-how{background:rgba(74,144,217,0.07);color:#4A90D9}
+.srv.n1 .srv-how{background:rgba(201,168,76,0.07);color:#C9A84C}
+.srv.n2 .srv-how{background:rgba(155,89,182,0.07);color:#C97EDE}
+.hdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.srv.b .hdot{background:#4A90D9}
+.srv.n1 .hdot{background:#C9A84C}
+.srv.n2 .hdot{background:#C97EDE}
+
+/* ── SCENE 4: PROCESS ── */
+#s4{background:linear-gradient(160deg,#040C1A,#050F1E)}
+.s4-hl{font-size:clamp(32px,4.5vw,58px);font-weight:700;letter-spacing:-1.5px;text-align:center;margin-bottom:44px;overflow:hidden}
+.steps-row{display:flex;align-items:center;width:100%;max-width:840px}
+.step{
+  flex:1;text-align:center;
+  opacity:0;transform:translateY(30px);
+}
+.step-n{font-size:10px;font-weight:600;letter-spacing:3.5px;color:rgba(255,255,255,0.18);text-transform:uppercase;margin-bottom:14px}
+.step-icon{
+  width:62px;height:62px;border-radius:15px;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 14px;
+}
+.step:nth-child(1) .step-icon{background:rgba(74,144,217,0.08);border:1px solid rgba(74,144,217,0.16);color:#4A90D9}
+.step:nth-child(3) .step-icon{background:rgba(201,168,76,0.08);border:1px solid rgba(201,168,76,0.16);color:#C9A84C}
+.step:nth-child(5) .step-icon{background:rgba(0,196,154,0.08);border:1px solid rgba(0,196,154,0.16);color:#00C49A}
+.step-title{font-size:16px;font-weight:600;margin-bottom:7px}
+.step-desc{font-size:12.5px;color:rgba(255,255,255,0.38);line-height:1.65;max-width:180px;margin:0 auto;font-weight:400}
+.conn{
+  flex:0 0 68px;text-align:center;
+  opacity:0;
+}
+.conn-line{width:48px;height:1px;background:linear-gradient(90deg,rgba(201,168,76,0.15),rgba(201,168,76,0.45),rgba(201,168,76,0.15));margin:0 auto 9px}
+.conn-arr{
+  width:6px;height:6px;
+  border-top:1.5px solid rgba(201,168,76,0.4);
+  border-right:1.5px solid rgba(201,168,76,0.4);
+  transform:rotate(45deg);
+  margin:0 auto;
+}
+
+/* ── SCENE 5: CTA ── */
+#s5{background:linear-gradient(160deg,#060A14,#050D1F)}
+.s5-badge{
+  display:inline-flex;align-items:center;gap:9px;
+  background:rgba(0,196,154,0.07);
+  border:1px solid rgba(0,196,154,0.18);
+  border-radius:100px;padding:7px 20px;
+  font-size:12px;font-weight:600;color:#00C49A;
+  margin-bottom:28px;
+  opacity:0;
+  letter-spacing:0.3px;
+}
+.s5-bdot{width:6px;height:6px;border-radius:50%;background:#00C49A;box-shadow:0 0 8px rgba(0,196,154,0.7);flex-shrink:0}
+.s5-h1,.s5-h2{
+  font-size:clamp(54px,8vw,108px);
+  font-weight:700;letter-spacing:-3px;line-height:1;
+  text-align:center;overflow:hidden;
+}
+.s5-h1{margin-bottom:4px}
+.s5-h2{margin-bottom:36px}
+.s5-sub{font-size:clamp(14px,1.5vw,18px);color:rgba(255,255,255,0.38);text-align:center;line-height:1.8;margin-bottom:40px;overflow:hidden;font-weight:400}
+.s5-url{
+  font-size:clamp(20px,3vw,40px);
+  font-weight:700;letter-spacing:-0.5px;
+  overflow:hidden;
+  margin-bottom:24px;
+}
+.s5-url .clip-inner{
+  background:linear-gradient(90deg,#E8C46A 0%,#C9A84C 30%,#FFE599 50%,#C9A84C 70%,#E8C46A 100%);
+  background-size:200% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.s5-url .clip-inner.shimmer{
+  animation:gold-shimmer 2.5s linear infinite;
+}
+@keyframes gold-shimmer{
+  0%{background-position:100% center}
+  100%{background-position:-100% center}
+}
+.s5-foot{
+  font-size:10px;letter-spacing:4.5px;text-transform:uppercase;
+  color:rgba(255,255,255,0.13);
+  overflow:hidden;
+}
+
+/* ── PROGRESS ── */
+#progress-bar{
+  position:fixed;bottom:0;left:0;
+  height:2px;
+  background:linear-gradient(90deg,#3A7BD5 0%,#C9A84C 55%,#E8C46A 100%);
+  z-index:500;
+  transform-origin:left;
+  transform:scaleX(0);
+}
+.nav-dots{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:500;
+}
+.nav-dot{
+  width:5px;height:5px;border-radius:3px;
+  background:rgba(255,255,255,0.12);
+  transition:all .4s ease;
+  cursor:pointer;
+}
+.nav-dot.on{width:20px;background:#C9A84C}
 </style>
 </head>
 <body>
-<div class="shell">
-  <div class="sb" id="sb"><div class="sb-hd"><span>Rooms</span></div><div class="sb-list" id="sbL"></div><div class="sb-add" onclick="openPk(-1)">+ Add Room</div></div>
-  <div class="main" id="main"></div>
-</div>
 
-<div class="sh-bg" id="pkBg"></div>
-<div class="sh" id="pkSh"><div class="sh-bar"></div><div class="sh-hd"><h3 id="pkTi">Add Room</h3><button class="sh-x" onclick="closePk()">✕</button></div><div class="sh-bd" id="pkBd"></div><div style="position:relative"><div class="em-dd" id="emDD"></div></div><div class="sh-ft"><button class="em-b" id="emB" onclick="togEm()">🛋️</button><input id="rnI" placeholder="Room name"><button class="sh-sv" onclick="savePk()">Save</button></div></div>
+<canvas id="bg"></canvas>
+<div id="sweep"></div>
 
-<div class="sh-bg" id="dmBg"></div>
-<div class="sh" id="dmSh"><div class="sh-bar"></div><div class="sh-hd"><h3 id="dmTi">Light</h3><button class="sh-x" onclick="closeDm()">✕</button></div><div class="sh-bd"><div class="dm-w"><div class="dm-pct" id="dmPct">75%</div><div class="dm-trk" id="dmTrk"><div class="dm-fl" id="dmFl"></div><div class="dm-th" id="dmTh"></div></div><div class="dm-pre"><button class="dm-p" data-v="25">25</button><button class="dm-p" data-v="50">50</button><button class="dm-p" data-v="75">75</button><button class="dm-p" data-v="100">100</button></div></div></div></div>
+<!-- S1: PROBLEM -->
+<section class="scene" id="s1">
+  <div class="sg" style="width:520px;height:520px;background:radial-gradient(circle,rgba(229,62,62,0.09) 0%,transparent 70%);bottom:-120px;left:-80px"></div>
+  <div class="sg" style="width:300px;height:300px;background:radial-gradient(circle,rgba(229,62,62,0.04) 0%,transparent 70%);top:10%;right:10%"></div>
+  <div class="s1-eyebrow">Sound familiar?</div>
+  <div class="s1-h1"><span class="clip-inner">Security clearances.</span></div>
+  <div class="s1-h2"><span class="clip-inner">Endless forms.</span></div>
+  <div class="s1-h3"><span class="clip-inner">No answers.</span></div>
+  <div class="pain-row">
+    <div class="pain-pill"><div class="pdot"></div>Confusing AGSVA requirements</div>
+    <div class="pain-pill"><div class="pdot"></div>Months of silence</div>
+    <div class="pain-pill"><div class="pdot"></div>No guidance on what’s needed</div>
+  </div>
+</section>
 
-<div class="del-bg" id="delBg"><div class="del-box"><h3>Delete Room</h3><p id="delMsg"></p><div class="del-btns"><button class="dc" onclick="$('delBg').classList.remove('open')">Cancel</button><button class="dd" onclick="doDel()">Delete</button></div></div></div>
+<!-- S2: AUSCLEAR -->
+<section class="scene" id="s2">
+  <div class="sg" style="width:640px;height:640px;background:radial-gradient(circle,rgba(201,168,76,0.1) 0%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+  <div class="s2-eyebrow"><span class="clip-inner">Introducing</span></div>
+  <div class="s2-logo">
+    <div class="logo clip-inner">
+      <div class="logo-shield">
+        <svg viewBox="0 0 56 66" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:56px;height:66px;filter:drop-shadow(0 0 28px rgba(201,168,76,0.45))">
+          <path d="M28 2L54 11V30C54 46.5 42.5 57.5 28 61C13.5 57.5 2 46.5 2 30V11L28 2Z" fill="url(#shFill)" stroke="url(#shEdge)" stroke-width="0.75"/>
+          <path d="M28 2L54 11" stroke="rgba(255,235,150,0.3)" stroke-width="0.5"/>
+          <path d="M28 2L2 11" stroke="rgba(255,235,150,0.3)" stroke-width="0.5"/>
+          <path d="M28 8L50 15.5V30C50 44 39.5 53.5 28 57.5C16.5 53.5 6 44 6 30V15.5L28 8Z" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="0.75"/>
+          <path id="logoCheck" d="M14 33L22.5 41.5L42 21" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="52" stroke-dashoffset="52"/>
+          <defs>
+            <linearGradient id="shFill" x1="28" y1="2" x2="28" y2="61" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#D4AA50"/>
+              <stop offset="0.4" stop-color="#C9A84C"/>
+              <stop offset="1" stop-color="#7A5A1C"/>
+            </linearGradient>
+            <linearGradient id="shEdge" x1="28" y1="2" x2="28" y2="61" gradientUnits="userSpaceOnUse">
+              <stop stop-color="rgba(240,210,110,0.7)"/>
+              <stop offset="1" stop-color="rgba(90,60,15,0.5)"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="logo-words">
+        <div class="logo-name">AusClear</div>
+        <div class="logo-sub">Security Clearance Specialists</div>
+      </div>
+    </div>
+  </div>
+  <div class="s2-hl"><span class="clip-inner">We make it <span class="gold-grad">simple.</span></span></div>
+  <div class="s2-hl"><span class="clip-inner" style="font-size:0.55em;color:rgba(255,255,255,0.38);font-weight:400;letter-spacing:0">Australia’s security clearance specialists.</span></div>
+  <div class="s2-sub"><span class="clip-inner">Baseline sponsorship. NV1 &amp; NV2 referrals.<br>Expert guidance every step of the way.</span></div>
+</section>
+
+<!-- S3: SERVICES -->
+<section class="scene" id="s3">
+  <div class="sg" style="width:420px;height:420px;background:radial-gradient(circle,rgba(74,144,217,0.07) 0%,transparent 70%);top:-60px;right:-40px"></div>
+  <div class="s3-hl"><span class="clip-inner">We cover <span class="gold-grad">all levels.</span></span></div>
+  <div class="srv-row">
+    <div class="srv b">
+      <div class="srv-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L22 6V12C22 17.5 17.5 21.8 12 23C6.5 21.8 2 17.5 2 12V6L12 2Z"/>
+          <path d="M8 12L11 15L16 9"/>
+        </svg>
+      </div>
+      <div class="srv-name">Baseline</div>
+      <div class="srv-tag">Protected</div>
+      <div class="srv-desc">Entry-level government clearance. AusClear sponsors you directly — fast, clear, no confusion.</div>
+      <div class="srv-how"><div class="hdot"></div>Direct Sponsorship</div>
+    </div>
+    <div class="srv n1">
+      <div class="srv-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="11" width="16" height="11" rx="2"/>
+          <path d="M8 11V7C8 4.8 9.8 3 12 3C14.2 3 16 4.8 16 7V11"/>
+          <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="srv-name">NV1</div>
+      <div class="srv-tag">Secret</div>
+      <div class="srv-desc">Higher-tier clearance for sensitive roles. We connect you with our trusted, verified referral partners.</div>
+      <div class="srv-how"><div class="hdot"></div>Referral Partner</div>
+    </div>
+    <div class="srv n2">
+      <div class="srv-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L22 8.5L18 22H6L2 8.5L12 2Z"/>
+          <path d="M2 8.5H22" stroke-opacity="0.4" stroke-width="1"/>
+          <path d="M6 22L12 2M18 22L12 2" stroke-opacity="0.35" stroke-width="1"/>
+        </svg>
+      </div>
+      <div class="srv-name">NV2</div>
+      <div class="srv-tag">Top Secret</div>
+      <div class="srv-desc">Top-tier clearance. Expert referral to specialist partners with full support throughout your application.</div>
+      <div class="srv-how"><div class="hdot"></div>Referral Partner</div>
+    </div>
+  </div>
+</section>
+
+<!-- S4: PROCESS -->
+<section class="scene" id="s4">
+  <div class="sg" style="width:700px;height:180px;background:radial-gradient(ellipse,rgba(201,168,76,0.06) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+  <div class="s4-hl"><span class="clip-inner">Three steps to <span class="gold-grad">cleared.</span></span></div>
+  <div class="steps-row">
+    <div class="step">
+      <div class="step-n">Step 01</div>
+      <div class="step-icon">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z"/>
+          <path d="M14 2V8H20"/>
+          <path d="M9 13H15M9 17H13"/>
+        </svg>
+      </div>
+      <div class="step-title">You apply</div>
+      <div class="step-desc">Fill in a short online form. No confusing jargon.</div>
+    </div>
+    <div class="conn"><div class="conn-line"></div><div class="conn-arr"></div></div>
+    <div class="step">
+      <div class="step-n">Step 02</div>
+      <div class="step-icon">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+        </svg>
+      </div>
+      <div class="step-title">We act</div>
+      <div class="step-desc">We sponsor your Baseline or refer you for NV1 / NV2.</div>
+    </div>
+    <div class="conn"><div class="conn-line"></div><div class="conn-arr"></div></div>
+    <div class="step">
+      <div class="step-n">Step 03</div>
+      <div class="step-icon">
+        <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L14.5 4.5H17.5V7.5L20 10L17.5 12.5V15.5H14.5L12 18L9.5 15.5H6.5V12.5L4 10L6.5 7.5V4.5H9.5L12 2Z"/>
+          <path d="M9 10L11 12L15 8"/>
+        </svg>
+      </div>
+      <div class="step-title">You’re cleared</div>
+      <div class="step-desc">We guide you through every step until confirmed.</div>
+    </div>
+  </div>
+</section>
+
+<!-- S5: CTA -->
+<section class="scene" id="s5">
+  <div class="sg" style="width:720px;height:720px;background:radial-gradient(circle,rgba(201,168,76,0.11) 0%,transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+  <div class="s5-badge"><div class="s5-bdot"></div>Australian Security Clearance Specialists</div>
+  <div class="s5-h1"><span class="clip-inner">Ready to get</span></div>
+  <div class="s5-h2"><span class="clip-inner gold-grad">cleared?</span></div>
+  <div class="s5-sub"><span class="clip-inner">Baseline sponsorship. NV1 &amp; NV2 referrals.<br>Expert guidance, every step of the way.</span></div>
+  <div class="s5-url"><span class="clip-inner">www.ausclear.com.au</span></div>
+  <div class="s5-foot"><span class="clip-inner">Trusted&nbsp;&nbsp;&middot;&nbsp;&nbsp;Professional&nbsp;&nbsp;&middot;&nbsp;&nbsp;Australian</span></div>
+</section>
+
+<div id="progress-bar"></div>
+<div class="nav-dots" id="navDots"></div>
 
 <script>
-const $=id=>document.getElementById(id);
-const D=[
-  {id:'h1',n:'Entrance 3',t:'light'},{id:'h12',n:'Entrance 1',t:'light'},{id:'h21',n:'Entrance 2',t:'light'},{id:'h16',n:'Entrance 4',t:'light'},
-  {id:'h15',n:'Laundry 1',t:'light'},{id:'h13',n:'Laundry 2',t:'light'},{id:'h14',n:'Laundry 3',t:'light'},
-  {id:'h17',n:'Lounge Light',t:'light'},{id:'h7',n:'Alfresco',t:'light'},
-  {id:'h8',n:'MBLight 1',t:'light'},{id:'h20',n:'MBLight 2',t:'light'},
-  {id:'t1',n:'UCL1',t:'plug'},{id:'t2',n:'UCL2',t:'plug'},{id:'tp',n:'Lounge Picture',t:'plug'},
-  {id:'ts1',n:'Cerise Lightstrip',t:'light'},{id:'ts2',n:'Cerise Lightstrip 2',t:'light'},
-];
-const G=[
-  {id:'g:ent',n:'Entrance Lights',members:['h1','h12','h21','h16']},
-  {id:'g:ldy',n:'Laundry Lights',members:['h15','h13','h14']},
-  {id:'g:mb',n:'Master Bed Lights',members:['h8','h20']},
-  {id:'g:cer',n:'Cerise Strips',members:['ts1','ts2']},
-  {id:'g:kp',n:'Kitchen Plugs',members:['t1','t2']},
-];
-const EM=['🛋️','🛏️','🍳','🚿','🌿','🏡','🎮','👶','🐕','🏋️','🚗','📚','🧺','🍽️','☀️','🌙'];
-const S={};D.forEach(d=>{S[d.id]=d.t==='plug'?{on:false}:{on:false,bri:100}});
-let rooms=[],cur=0,editIdx=-1,pkCk=new Set(),pkEmo='🛋️',dmId=null,dmGrp=null,expanded={};
-
-function gOn(g){return g.members.some(id=>S[id]&&S[id].on)}
-function gBri(g){const on=g.members.filter(id=>S[id]&&S[id].on&&S[id].bri!==undefined);return on.length?Math.round(on.reduce((a,id)=>a+S[id].bri,0)/on.length):0}
-function gIsPlug(g){return g.members.every(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'})}
-
-// ═══ RENDER ═══
-function R(){
-  // Sidebar
-  let sb='';rooms.forEach((r,i)=>{sb+='<div class="sb-r '+(i===cur?'on':'')+'" onclick="go('+i+')"><div class="e">'+r.emoji+'</div><div class="n">'+r.name+'</div><div class="dot"></div></div>'});
-  $('sbL').innerHTML=sb;
-
-  const m=$('main');
-  if(!rooms.length){m.innerHTML='<div class="empty"><div class="empty-ic">🏠</div><h2>No Rooms</h2><p>Create a room and assign your lights and plugs</p><button class="btn-a" onclick="openPk(-1)">Add Room</button></div>';return}
-  if(cur>=rooms.length)cur=rooms.length-1;
-  const rm=rooms[cur];
-
-  // Resolve all device IDs including group members
-  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
-  const indivL=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'});
-  const indivP=rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'});
-  const lGrps=grps.filter(g=>!gIsPlug(g)), pGrps=grps.filter(g=>gIsPlug(g));
-
-  // All unique light/plug IDs for counts
-  const allL=new Set(indivL);lGrps.forEach(g=>g.members.forEach(id=>allL.add(id)));
-  const allP=new Set(indivP);pGrps.forEach(g=>g.members.forEach(id=>allP.add(id)));
-  const allIds=[...allL,...allP];
-  const onC=allIds.filter(id=>S[id]&&S[id].on).length;
-
-  let h='';
-  // Mobile pills
-  h+='<div class="pills">';rooms.forEach((r,i)=>{h+='<button class="pill '+(i===cur?'on':'')+'" onclick="go('+i+')">'+r.emoji+' '+r.name+'</button>'});h+='<button class="pill add" onclick="openPk(-1)">+ Add</button></div>';
-
-  h+='<div class="wrap">';
-  h+='<div class="rh"><div class="rh-e">'+rm.emoji+'</div><div class="rh-i"><div class="rh-n">'+rm.name+'</div><div class="rh-s">'+onC+' of '+allIds.length+' on</div></div><div class="rh-a"><button class="rh-b" onclick="openPk(cur)">✎</button><button class="rh-b" onclick="askDel()">🗑</button></div></div>';
-
-  // Scenes
-  h+='<div class="scenes"><button class="sc" onclick="scene(\'bright\')">☀️ Bright</button><button class="sc" onclick="scene(\'relax\')">🌅 Relax</button><button class="sc" onclick="scene(\'dim\')">🌙 Dim</button><button class="sc" onclick="scene(\'off\')">⚫ All Off</button></div>';
-
-  // LIGHTS section
-  if(allL.size){
-    const litOn=[...allL].filter(id=>S[id]&&S[id].on);
-    const anyOn=litOn.length>0;
-    const avg=anyOn?Math.round(litOn.filter(id=>S[id].bri!==undefined).reduce((a,id)=>a+S[id].bri,0)/Math.max(1,litOn.filter(id=>S[id].bri!==undefined).length)):0;
-
-    h+='<div class="sec"><div class="gh"><div class="gh-l">Lights</div><div class="gh-c">'+litOn.length+'/'+allL.size+'</div>';
-    h+='<div class="tg '+(anyOn?'on':'')+'" onclick="togAll(\'l\')"><div class="tg-k"></div></div></div>';
-
-    h+='<div class="cards">';
-    lGrps.forEach(g=>{h+=grpCard(g)});
-    const inGrp=new Set();lGrps.forEach(g=>g.members.forEach(id=>inGrp.add(id)));
-    indivL.filter(id=>!inGrp.has(id)).forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=card(d)});
-    h+='</div></div>';
+// ── CANVAS PARTICLES ─────────────────────────────────────────
+;(function(){
+  const cv=document.getElementById('bg')
+  const cx=cv.getContext('2d')
+  let W,H,pts
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+  function init(){pts=Array.from({length:26},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.1+0.3,vx:(Math.random()-.5)*.22,vy:(Math.random()-.5)*.22,a:Math.random()*.35,da:(Math.random()-.5)*.0035}))}
+  function draw(){
+    cx.clearRect(0,0,W,H)
+    pts.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy
+      p.a+=p.da
+      if(p.a<0){p.a=0;p.da*=-1}
+      if(p.a>.42){p.a=.42;p.da*=-1}
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,6.28)
+      cx.fillStyle=`rgba(201,168,76,${p.a})`;cx.fill()
+    })
+    requestAnimationFrame(draw)
   }
+  window.addEventListener('resize',()=>{resize();init()})
+  resize();init();draw()
+})()
 
-  // POWER section
-  if(allP.size){
-    const plgOn=[...allP].filter(id=>S[id]&&S[id].on);
-    const anyOn=plgOn.length>0;
+// ── CONTROLLER ───────────────────────────────────────────
+const SCENES=['s1','s2','s3','s4','s5']
+const DUR=[4200,4000,4200,4000,5200]
+let cur=0,tmr=null
 
-    h+='<div class="sec"><div class="gh"><div class="gh-l">Power</div><div class="gh-c">'+plgOn.length+'/'+allP.size+'</div>';
-    h+='<div class="tg '+(anyOn?'on':'')+'" onclick="togAll(\'p\')"><div class="tg-k"></div></div></div>';
+const navEl=document.getElementById('navDots')
+SCENES.forEach((_,i)=>{
+  const d=document.createElement('div')
+  d.className='nav-dot'+(i===0?' on':'')
+  d.onclick=()=>goTo(i)
+  navEl.appendChild(d)
+})
+function updDots(i){document.querySelectorAll('.nav-dot').forEach((d,j)=>d.classList.toggle('on',j===i))}
 
-    h+='<div class="cards">';
-    pGrps.forEach(g=>{h+=grpCard(g)});
-    const inGrp=new Set();pGrps.forEach(g=>g.members.forEach(id=>inGrp.add(id)));
-    indivP.filter(id=>!inGrp.has(id)).forEach(id=>{const d=D.find(x=>x.id===id);if(d)h+=card(d)});
-    h+='</div></div>';
-  }
-
-  h+='</div>';
-  m.innerHTML=h;
+// ── ANIMATIONS ──────────────────────────────────────────
+function aS1(){
+  const tl=gsap.timeline()
+  tl.set('#s1',{opacity:1})
+  tl.fromTo('#s1 .s1-eyebrow',{opacity:0,y:7},{opacity:1,y:0,duration:.55,ease:'power3.out'})
+  tl.to('#s1 .s1-h1 .clip-inner',{y:'0%',duration:.72,ease:'power4.out'},'-=.08')
+  tl.to('#s1 .s1-h2 .clip-inner',{y:'0%',duration:.72,ease:'power4.out'},'-=.42')
+  tl.to('#s1 .s1-h3 .clip-inner',{y:'0%',duration:.72,ease:'power4.out'},'-=.38')
+  gsap.utils.toArray('#s1 .pain-pill').forEach((p,i)=>{
+    tl.to(p,{opacity:1,y:0,duration:.48,ease:'power3.out'},i===0?'<0.1':'<0.35')
+  })
+  tl.to('#s1 .s1-h1',{scale:1.014,duration:2.8,ease:'sine.inOut'},'+=0.15')
+  return tl
 }
 
-// ═══ CARD — matches Flutter _lightCard exactly ═══
-function card(d){
-  const s=S[d.id],on=s.on,isP=d.t==='plug',bri=on?(s.bri||0):0;
-  let h='<div class="lc '+(on?'on':'')+'" onclick="tap(\''+d.id+'\')">';
-  // Row: icon · name · value · toggle
-  h+='<div class="lc-row">';
-  h+='<div class="lc-ic">'+(isP?'🔌':'💡')+'</div>';
-  h+='<div class="lc-nm">'+d.n+'</div>';
-  h+='<div class="lc-val'+(isP?' sm':'')+'">'+(isP?(on?'ON':'OFF'):(on?s.bri+'%':'Off'))+'</div>';
-  h+='<div style="width:10px"></div>';
-  h+='<div class="tg '+(on?'on':'')+'" onclick="event.stopPropagation();tog(\''+d.id+'\')"><div class="tg-k"></div></div>';
-  h+='</div>';
-  // Brightness bar — always show for lights
-  if(!isP){
-    h+='<div class="bb" onclick="event.stopPropagation()" onpointerdown="bDrag(event,\''+d.id+'\')">';
-    h+='<div class="bb-trk"></div>';
-    if(on&&bri>0)h+='<div class="bb-fl" style="width:'+bri+'%"></div>';
-    h+='<div class="bb-th '+(on?'on':'off')+'" style="left:max(0px,calc('+bri+'% - 14px))"><div class="bb-g"></div><div class="bb-g"></div><div class="bb-g"></div></div>';
-    h+='</div>';
-  }
-  h+='</div>';
-  return h;
+function aS2(){
+  const tl=gsap.timeline()
+  tl.set('#s2',{opacity:1})
+  tl.to('#s2 .s2-eyebrow .clip-inner',{y:'0%',duration:.5,ease:'power3.out'})
+  tl.to('#s2 .s2-logo .clip-inner',{y:'0%',duration:.78,ease:'power4.out'},'-=.05')
+  tl.to('#logoCheck',{strokeDashoffset:0,duration:.7,ease:'power2.out'},'-=.05')
+  gsap.utils.toArray('#s2 .s2-hl .clip-inner').forEach((c,i)=>{
+    tl.to(c,{y:'0%',duration:.65,ease:'power4.out'},i===0?'-=.05':'<0.3')
+  })
+  tl.to('#s2 .s2-sub .clip-inner',{y:'0%',duration:.58,ease:'power3.out'},'-=.12')
+  return tl
 }
 
-function grpCard(g){
-  const on=gOn(g),isP=gIsPlug(g),bri=gBri(g),pct=on?bri:0,exp=!!expanded[g.id];
-  let h='<div class="lc grp '+(on?'on':'')+'">';
-  // Header row — click to expand/collapse
-  h+='<div class="lc-row" onclick="togExp(\''+g.id+'\')" style="cursor:pointer">';
-  h+='<div class="lc-ic">👥</div>';
-  h+='<div class="lc-nm">'+g.n+'<span class="lc-mem"> · '+g.members.length+'</span></div>';
-  h+='<div class="lc-val'+(isP?' sm':'')+'">'+(isP?(on?'ON':'OFF'):(on?bri+'%':'Off'))+'</div>';
-  h+='<div style="width:10px"></div>';
-  h+='<div class="tg '+(on?'on':'')+'" onclick="event.stopPropagation();togG(\''+g.id+'\')"><div class="tg-k"></div></div>';
-  h+='<div class="lc-chev '+(exp?'open':'')+'">▼</div>';
-  h+='</div>';
-  // Group brightness bar
-  if(!isP){
-    h+='<div class="bb" onclick="event.stopPropagation()" onpointerdown="gBDrag(event,\''+g.id+'\')">';
-    h+='<div class="bb-trk"></div>';
-    if(on&&pct>0)h+='<div class="bb-fl" style="width:'+pct+'%"></div>';
-    h+='<div class="bb-th '+(on?'on':'off')+'" style="left:max(0px,calc('+pct+'% - 14px))"><div class="bb-g"></div><div class="bb-g"></div><div class="bb-g"></div></div>';
-    h+='</div>';
-  }
-  // Expanded: show all member lights individually
-  if(exp){
-    h+='<div class="grp-members">';
-    g.members.forEach(id=>{
-      const d=D.find(x=>x.id===id);
-      if(d)h+=card(d);
-    });
-    h+='</div>';
-  }
-  h+='</div>';
-  return h;
+function aS3(){
+  const tl=gsap.timeline()
+  tl.set('#s3',{opacity:1})
+  tl.to('#s3 .s3-hl .clip-inner',{y:'0%',duration:.75,ease:'power4.out'})
+  gsap.utils.toArray('#s3 .srv').forEach((s,i)=>{
+    tl.to(s,{opacity:1,y:0,duration:.58,ease:'power3.out'},i===0?'-=.05':'<0.38')
+  })
+  return tl
 }
 
-// ═══ INTERACTIONS ═══
-function go(i){cur=i;R()}
-function tog(id){S[id].on=!S[id].on;R()}
-function tap(id){const d=D.find(x=>x.id===id);if(!d)return;d.t==='plug'?tog(id):openDm(d)}
-function togG(gid){const g=G.find(x=>x.id===gid);if(!g)return;const on=gOn(g);g.members.forEach(id=>{if(on){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});R()}
-function togExp(gid){expanded[gid]=!expanded[gid];R()}
-function tapG(gid){const g=G.find(x=>x.id===gid);if(!g)return;gIsPlug(g)?togG(gid):togExp(gid)}
-
-function bDrag(e,id){
-  const b=e.currentTarget;b.setPointerCapture(e.pointerId);
-  const r=b.getBoundingClientRect();
-  const fl=b.querySelector('.bb-fl');
-  const th=b.querySelector('.bb-th');
-  const lc=b.closest('.lc');
-  const val=lc?lc.querySelector('.lc-val'):null;
-  const u=ev=>{
-    const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));
-    S[id].bri=p;S[id].on=true;
-    if(fl){fl.style.width=p+'%'}else{const nf=document.createElement('div');nf.className='bb-fl';nf.style.width=p+'%';b.insertBefore(nf,th)}
-    if(th){th.style.left='max(0px,calc('+p+'% - 14px))';th.className='bb-th on'}
-    if(val)val.textContent=p+'%';
-  };
-  u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null;R()};
-}
-function gBDrag(e,gid){
-  const g=G.find(x=>x.id===gid);if(!g)return;
-  const b=e.currentTarget;b.setPointerCapture(e.pointerId);
-  const r=b.getBoundingClientRect();
-  const fl=b.querySelector('.bb-fl');
-  const th=b.querySelector('.bb-th');
-  const lc=b.closest('.lc');
-  const val=lc?lc.querySelector('.lc-val'):null;
-  const u=ev=>{
-    const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));
-    g.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});
-    if(fl){fl.style.width=p+'%'}else{const nf=document.createElement('div');nf.className='bb-fl';nf.style.width=p+'%';b.insertBefore(nf,th)}
-    if(th){th.style.left='max(0px,calc('+p+'% - 14px))';th.className='bb-th on'}
-    if(val)val.textContent=p+'%';
-  };
-  u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null;R()};
+function aS4(){
+  const tl=gsap.timeline()
+  tl.set('#s4',{opacity:1})
+  tl.to('#s4 .s4-hl .clip-inner',{y:'0%',duration:.75,ease:'power4.out'})
+  const steps=gsap.utils.toArray('#s4 .step')
+  const conns=gsap.utils.toArray('#s4 .conn')
+  tl.to(steps[0],{opacity:1,y:0,duration:.55,ease:'power3.out'},'-=.05')
+  tl.to(conns[0],{opacity:1,duration:.32,ease:'power2.out'},'<0.28')
+  tl.to(steps[1],{opacity:1,y:0,duration:.55,ease:'power3.out'},'<0.1')
+  tl.to(conns[1],{opacity:1,duration:.32,ease:'power2.out'},'<0.28')
+  tl.to(steps[2],{opacity:1,y:0,duration:.55,ease:'power3.out'},'<0.1')
+  return tl
 }
 
-// Toggle all lights/plugs in room
-function togAll(type){
-  const rm=rooms[cur];if(!rm)return;
-  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
-  const ids=new Set();
-  if(type==='l'){
-    rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'}).forEach(id=>ids.add(id));
-    grps.filter(g=>!gIsPlug(g)).forEach(g=>g.members.forEach(id=>ids.add(id)));
-  }else{
-    rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='plug'}).forEach(id=>ids.add(id));
-    grps.filter(g=>gIsPlug(g)).forEach(g=>g.members.forEach(id=>ids.add(id)));
-  }
-  const anyOn=[...ids].some(id=>S[id]&&S[id].on);
-  ids.forEach(id=>{if(anyOn){S[id].on=false}else{S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}});
-  R();
+function aS5(){
+  const tl=gsap.timeline()
+  tl.set('#s5',{opacity:1})
+  tl.to('#s5 .s5-badge',{opacity:1,duration:.52,ease:'power3.out'})
+  tl.to('#s5 .s5-h1 .clip-inner',{y:'0%',duration:.82,ease:'power4.out'},'-=.12')
+  tl.to('#s5 .s5-h2 .clip-inner',{y:'0%',duration:.82,ease:'power4.out'},'-=.58')
+  tl.to('#s5 .s5-sub .clip-inner',{y:'0%',duration:.55,ease:'power3.out'},'-=.12')
+  tl.to('#s5 .s5-url .clip-inner',{y:'0%',duration:.72,ease:'power4.out'},'-=.08')
+  tl.to('#s5 .s5-foot .clip-inner',{y:'0%',duration:.44,ease:'power3.out'},'-=.1')
+  tl.call(()=>{const u=document.querySelector('#s5 .s5-url .clip-inner');if(u)u.classList.add('shimmer')})
+  return tl
 }
 
-// Group brightness drag (section-level)
-function gDrag(e,type){
-  const rm=rooms[cur];if(!rm)return;
-  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
-  const ids=new Set();
-  if(type==='l'){rm.devs.filter(id=>{const d=D.find(x=>x.id===id);return d&&d.t==='light'}).forEach(id=>ids.add(id));grps.filter(g=>!gIsPlug(g)).forEach(g=>g.members.forEach(id=>ids.add(id)))}
-  const b=e.currentTarget;b.setPointerCapture(e.pointerId);const r=b.getBoundingClientRect();
-  const u=ev=>{const p=Math.max(1,Math.min(100,Math.round(((ev.clientX-r.left)/r.width)*100)));ids.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=p;S[id].on=true}});R()};
-  u(e);b.onpointermove=u;b.onpointerup=()=>{b.onpointermove=null};
+const animFns=[aS1,aS2,aS3,aS4,aS5]
+
+// ── RESET ──────────────────────────────────────────────
+function resetScene(id){
+  const el=document.getElementById(id)
+  gsap.killTweensOf('#'+id+' *')
+  gsap.killTweensOf('#'+id)
+  gsap.set(el,{opacity:0})
+  el.querySelectorAll('.clip-inner').forEach(c=>gsap.set(c,{y:'110%'}))
+  el.querySelectorAll('.pain-pill').forEach(p=>gsap.set(p,{opacity:0,y:14}))
+  el.querySelectorAll('.srv').forEach(s=>gsap.set(s,{opacity:0,y:38}))
+  el.querySelectorAll('.step').forEach(s=>gsap.set(s,{opacity:0,y:30}))
+  el.querySelectorAll('.conn').forEach(c=>gsap.set(c,{opacity:0}))
+  el.querySelectorAll('.s1-eyebrow').forEach(e=>gsap.set(e,{opacity:0,y:7}))
+  el.querySelectorAll('.s1-h1').forEach(h=>gsap.set(h,{scale:1}))
+  const badge=el.querySelector('.s5-badge')
+  if(badge)gsap.set(badge,{opacity:0})
+  const urlSpan=el.querySelector('.s5-url .clip-inner')
+  if(urlSpan)urlSpan.classList.remove('shimmer')
+  if(id==='s2')gsap.set('#logoCheck',{strokeDashoffset:52})
 }
 
-// Scenes
-function scene(s){
-  const rm=rooms[cur];if(!rm)return;
-  const grps=rm.devs.filter(id=>id.startsWith('g:')).map(id=>G.find(x=>x.id===id)).filter(Boolean);
-  const allIds=new Set();rm.devs.forEach(id=>{const d=D.find(x=>x.id===id);if(d)allIds.add(id)});grps.forEach(g=>g.members.forEach(id=>allIds.add(id)));
-  allIds.forEach(id=>{
-    if(s==='off'){S[id].on=false}
-    else if(s==='bright'){S[id].on=true;if(S[id].bri!==undefined)S[id].bri=100}
-    else if(s==='relax'){S[id].on=true;if(S[id].bri!==undefined)S[id].bri=50}
-    else if(s==='dim'){S[id].on=true;if(S[id].bri!==undefined)S[id].bri=20}
-  });R();
+// ── NAVIGATION ──────────────────────────────────────────
+function goTo(idx){
+  if(tmr)clearTimeout(tmr)
+  const prev=cur
+  cur=((idx%SCENES.length)+SCENES.length)%SCENES.length
+  updDots(cur)
+
+  gsap.fromTo('#progress-bar',
+    {scaleX:cur===0?0:prev/SCENES.length},
+    {scaleX:(cur+1)/SCENES.length,duration:DUR[cur]/1000*.88,ease:'none'}
+  )
+
+  // Sweep line (concurrent)
+  const sw=document.getElementById('sweep')
+  gsap.set(sw,{top:0,opacity:.9})
+  gsap.to(sw,{top:innerHeight+2,opacity:0,duration:.48,ease:'power1.in'})
+
+  // Fade out previous, start new
+  gsap.to('#'+SCENES[prev],{opacity:0,duration:.28,ease:'power2.in',onComplete:()=>{
+    resetScene(SCENES[prev])
+    animFns[cur]()
+    tmr=setTimeout(()=>goTo(cur+1),DUR[cur])
+  }})
 }
 
-// ═══ DIMMER ═══
-function openDm(d){dmId=d.id;dmGrp=null;S[d.id].on=true;$('dmTi').textContent=d.n;setDm(S[d.id].bri);$('dmBg').classList.add('open');$('dmSh').classList.add('open')}
-function openGDm(g){dmGrp=g;dmId=null;g.members.forEach(id=>{S[id].on=true});$('dmTi').textContent=g.n;setDm(gBri(g)||100);$('dmBg').classList.add('open');$('dmSh').classList.add('open')}
-function closeDm(){$('dmBg').classList.remove('open');$('dmSh').classList.remove('open');dmGrp=null;R()}
-function setDm(v){
-  v=Math.max(1,Math.min(100,v));
-  if(dmId)S[dmId].bri=v;
-  if(dmGrp)dmGrp.members.forEach(id=>{if(S[id]&&S[id].bri!==undefined){S[id].bri=v;S[id].on=true}});
-  $('dmPct').textContent=v+'%';$('dmFl').style.height=v+'%';$('dmTh').style.bottom='calc('+v+'% - 3px)';
-  document.querySelectorAll('.dm-p').forEach(p=>p.classList.toggle('on',+p.dataset.v===v));
-}
-$('dmTrk').onpointerdown=function(e){this.setPointerCapture(e.pointerId);const r=this.getBoundingClientRect();const u=ev=>{setDm(Math.round((1-(ev.clientY-r.top)/r.height)*100))};u(e);this.onpointermove=u;this.onpointerup=()=>{this.onpointermove=null}};
-document.querySelectorAll('.dm-p').forEach(p=>p.onclick=()=>setDm(+p.dataset.v));
-$('dmBg').onclick=closeDm;
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' ')goTo(cur+1)
+  if(e.key==='ArrowLeft')goTo(cur-1)
+})
 
-// ═══ PICKER ═══
-function openPk(idx){
-  editIdx=idx;pkCk=new Set();
-  if(idx>=0){const r=rooms[idx];pkEmo=r.emoji;$('rnI').value=r.name;r.devs.forEach(d=>pkCk.add(d));$('pkTi').textContent='Edit Room'}
-  else{pkEmo='🛋️';$('rnI').value='';$('pkTi').textContent='Add Room'}
-  $('emB').textContent=pkEmo;rPk();$('pkBg').classList.add('open');$('pkSh').classList.add('open');
-}
-function closePk(){$('pkBg').classList.remove('open');$('pkSh').classList.remove('open');$('emDD').classList.remove('open')}
-function rPk(){
-  const lG=G.filter(g=>!gIsPlug(g)),pG=G.filter(g=>gIsPlug(g)),ls=D.filter(d=>d.t==='light'),ps=D.filter(d=>d.t==='plug');
-  let h='';
-  if(lG.length){h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:4px 0 6px">Light Groups</div>';
-    lG.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:#3A3A3A;font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'})}
-  h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:12px 0 6px">Individual Lights</div>';
-  ls.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">💡</div></div>'});
-  if(pG.length){h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:12px 0 6px">Plug Groups</div>';
-    pG.forEach(g=>{const on=pkCk.has(g.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+g.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+g.n+' <span style="color:#3A3A3A;font-size:10px">('+g.members.length+')</span></div><div class="pi-t">👥</div></div>'})}
-  h+='<div style="font-size:9px;font-weight:700;color:#5A5848;letter-spacing:2px;text-transform:uppercase;padding:12px 0 6px">Individual Plugs</div>';
-  ps.forEach(d=>{const on=pkCk.has(d.id);h+='<div class="pi '+(on?'on':'')+'" onclick="pkT(\''+d.id+'\')"><div class="pi-ck"></div><div class="pi-n">'+d.n+'</div><div class="pi-t">🔌</div></div>'});
-  $('pkBd').innerHTML=h;
-}
-function pkT(id){pkCk.has(id)?pkCk.delete(id):pkCk.add(id);rPk()}
-function togEm(){const g=$('emDD');if(g.classList.contains('open')){g.classList.remove('open');return}g.innerHTML=EM.map(e=>'<div class="em-o" onclick="pickE(\''+e+'\')">'+e+'</div>').join('');g.classList.add('open')}
-function pickE(e){pkEmo=e;$('emB').textContent=e;$('emDD').classList.remove('open')}
-$('pkBg').onclick=closePk;
-function savePk(){const n=$('rnI').value.trim();if(!n||!pkCk.size)return;if(editIdx>=0){rooms[editIdx]={name:n,emoji:pkEmo,devs:[...pkCk]}}else{rooms.push({name:n,emoji:pkEmo,devs:[...pkCk]});cur=rooms.length-1}closePk();R()}
+// ── INIT ────────────────────────────────────────────────
+SCENES.forEach(id=>resetScene(id))
+gsap.set('#progress-bar',{scaleX:0})
 
-// ═══ DELETE ═══
-function askDel(){$('delMsg').textContent='Remove "'+rooms[cur].name+'"?';$('delBg').classList.add('open')}
-function doDel(){rooms.splice(cur,1);if(cur>=rooms.length)cur=Math.max(0,rooms.length-1);$('delBg').classList.remove('open');R()}
-
-R();
+gsap.delayedCall(.25,()=>{
+  animFns[0]()
+  gsap.to('#progress-bar',{scaleX:1/SCENES.length,duration:DUR[0]/1000*.88,ease:'none'})
+  tmr=setTimeout(()=>goTo(1),DUR[0])
+})
 </script>
 </body>
 </html>

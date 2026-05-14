@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AusClear — Australia's Clearing & Settlement Leader</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#050A14;font-family:'Inter',sans-serif;overflow:hidden;color:#fff}
+
+/* ── CANVAS BACKGROUND ── */
+#canvas{position:fixed;inset:0;z-index:0}
+
+/* ── SCENES ── */
+.scene{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .8s ease}
+.scene.active{opacity:1;pointer-events:auto}
+
+/* ── SCENE 1: INTRO ── */
+#s1{background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(0,86,179,0.18) 0%,transparent 70%)}
+.logo-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
+.logo-ring{width:120px;height:120px;position:relative;flex-shrink:0}
+.logo-ring svg{width:100%;height:100%}
+.logo-text{text-align:center}
+.logo-name{
+  font-size:clamp(48px,7vw,88px);
+  font-weight:900;
+  letter-spacing:-2px;
+  background:linear-gradient(135deg,#fff 0%,#A8C8FF 40%,#4090FF 70%,#FFD060 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1;
+}
+.logo-tag{font-size:clamp(13px,2vw,18px);color:rgba(255,255,255,0.55);letter-spacing:4px;text-transform:uppercase;margin-top:10px;font-weight:400}
+.intro-line{width:0;height:2px;background:linear-gradient(90deg,transparent,#4090FF,#FFD060,transparent);margin:24px auto;transition:width 1.2s ease .5s}
+.scene.active .intro-line{width:min(520px,80vw)}
+.intro-sub{font-size:clamp(14px,2vw,19px);color:rgba(255,255,255,0.7);text-align:center;max-width:540px;line-height:1.6;opacity:0;transform:translateY(16px);transition:all .8s ease .9s}
+.scene.active .intro-sub{opacity:1;transform:none}
+
+/* spin ring */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes spin-rev{to{transform:rotate(-360deg)}}
+.r-outer{animation:spin 8s linear infinite}
+.r-inner{animation:spin-rev 5s linear infinite}
+
+/* ── SCENE 2: WHAT WE DO ── */
+#s2{background:radial-gradient(ellipse 70% 50% at 50% 50%,rgba(0,50,120,0.2) 0%,transparent 70%)}
+.section-label{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#4090FF;margin-bottom:18px;opacity:0;transform:translateY(12px);transition:all .6s ease .2s}
+.section-title{font-size:clamp(32px,5vw,62px);font-weight:800;letter-spacing:-1.5px;text-align:center;line-height:1.1;opacity:0;transform:translateY(16px);transition:all .7s ease .4s}
+.section-title span{background:linear-gradient(90deg,#4090FF,#60D0FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.scene.active .section-label,.scene.active .section-title{opacity:1;transform:none}
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;max-width:860px;width:90vw}
+.card{
+  padding:28px 24px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(64,144,255,0.15);
+  border-radius:16px;
+  backdrop-filter:blur(12px);
+  opacity:0;
+  transform:translateY(24px);
+  transition:all .6s ease;
+}
+.scene.active .card:nth-child(1){opacity:1;transform:none;transition-delay:.5s}
+.scene.active .card:nth-child(2){opacity:1;transform:none;transition-delay:.65s}
+.scene.active .card:nth-child(3){opacity:1;transform:none;transition-delay:.8s}
+.card-icon{font-size:32px;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:8px}
+.card-desc{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.6}
+.card:hover{border-color:rgba(64,144,255,0.4);background:rgba(64,144,255,0.06);transform:translateY(-4px)!important;box-shadow:0 20px 40px rgba(0,0,0,0.4)}
+
+/* ── SCENE 3: SERVICES ── */
+#s3{background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(0,30,80,0.3) 0%,transparent 70%)}
+.services-wrap{display:flex;gap:60px;align-items:center;max-width:960px;width:90vw;margin-top:30px}
+.service-left{flex:1}
+.service-item{display:flex;align-items:flex-start;gap:16px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,0.06);opacity:0;transform:translateX(-20px);transition:all .5s ease}
+.scene.active .service-item:nth-child(1){opacity:1;transform:none;transition-delay:.3s}
+.scene.active .service-item:nth-child(2){opacity:1;transform:none;transition-delay:.45s}
+.scene.active .service-item:nth-child(3){opacity:1;transform:none;transition-delay:.6s}
+.scene.active .service-item:nth-child(4){opacity:1;transform:none;transition-delay:.75s}
+.service-item:last-child{border:none}
+.si-num{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,rgba(64,144,255,0.2),rgba(64,144,255,0.05));border:1px solid rgba(64,144,255,0.3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#4090FF;flex-shrink:0}
+.si-body{}
+.si-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:4px}
+.si-desc{font-size:12px;color:rgba(255,255,255,0.5);line-height:1.5}
+.service-right{width:320px;flex-shrink:0;opacity:0;transform:scale(.95);transition:all .8s ease .3s}
+.scene.active .service-right{opacity:1;transform:none}
+.service-visual{
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(64,144,255,0.12);
+  border-radius:20px;
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+}
+.sv-glow{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(64,144,255,0.15),transparent 70%);top:-60px;right:-60px;pointer-events:none}
+.sv-title{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:20px}
+.sv-flow{display:flex;flex-direction:column;gap:0}
+.sv-node{display:flex;align-items:center;gap:12px;padding:10px 0}
+.sv-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sv-line{width:1px;height:28px;margin-left:5px;background:linear-gradient(to bottom,rgba(64,144,255,0.5),rgba(64,144,255,0.1))}
+.sv-label{font-size:12px;color:rgba(255,255,255,0.6);font-weight:500}
+.sv-tag{margin-left:auto;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px}
+
+/* ── SCENE 4: STATS ── */
+#s4{background:radial-gradient(ellipse 80% 60% at 50% 50%,rgba(255,180,0,0.08) 0%,transparent 65%)}
+.stats-intro{text-align:center;margin-bottom:52px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;max-width:880px;width:90vw}
+.stat-box{
+  text-align:center;
+  padding:32px 20px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:20px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:all .6s ease;
+}
+.scene.active .stat-box:nth-child(1){opacity:1;transform:none;transition-delay:.2s}
+.scene.active .stat-box:nth-child(2){opacity:1;transform:none;transition-delay:.35s}
+.scene.active .stat-box:nth-child(3){opacity:1;transform:none;transition-delay:.5s}
+.scene.active .stat-box:nth-child(4){opacity:1;transform:none;transition-delay:.65s}
+.stat-num{font-size:clamp(36px,5vw,52px);font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#FFD060,#FF9020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.stat-unit{font-size:18px;font-weight:600;color:#FFB020;vertical-align:super;margin-left:2px}
+.stat-label{font-size:12px;color:rgba(255,255,255,0.45);margin-top:10px;line-height:1.5;font-weight:500;text-transform:uppercase;letter-spacing:1px}
+
+/* ── SCENE 5: CTA ── */
+#s5{background:radial-gradient(ellipse 60% 50% at 50% 50%,rgba(0,60,150,0.25) 0%,transparent 70%)}
+.cta-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border-radius:20px;background:rgba(64,144,255,0.1);border:1px solid rgba(64,144,255,0.25);font-size:12px;font-weight:600;color:#60A8FF;margin-bottom:28px;opacity:0;transition:opacity .6s ease .2s}
+.scene.active .cta-badge{opacity:1}
+.cta-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:#4CD964;flex-shrink:0;box-shadow:0 0 8px #4CD964}
+.cta-title{font-size:clamp(36px,6vw,72px);font-weight:900;letter-spacing:-2px;text-align:center;line-height:1.05;opacity:0;transform:translateY(16px);transition:all .8s ease .3s}
+.scene.active .cta-title{opacity:1;transform:none}
+.cta-title .gold{background:linear-gradient(90deg,#FFD060,#FF9020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-sub{font-size:clamp(14px,2vw,18px);color:rgba(255,255,255,0.55);text-align:center;max-width:480px;line-height:1.6;margin:20px auto 0;opacity:0;transition:opacity .8s ease .5s}
+.scene.active .cta-sub{opacity:1}
+.cta-btns{display:flex;gap:14px;margin-top:40px;opacity:0;transform:translateY(12px);transition:all .7s ease .6s}
+.scene.active .cta-btns{opacity:1;transform:none}
+.btn-primary{padding:15px 36px;border-radius:12px;background:linear-gradient(135deg,#1A6AFF,#0050D0);border:none;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(26,106,255,0.4)}
+.btn-secondary{padding:15px 36px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.8);font-size:15px;font-weight:600;cursor:pointer;transition:.2s;font-family:inherit}
+.btn-secondary:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.2)}
+.asx-tag{margin-top:32px;font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:2px;opacity:0;transition:opacity .8s ease .9s}
+.scene.active .asx-tag{opacity:1}
+
+/* ── NAV DOTS ── */
+.nav-dots{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:10px;z-index:50}
+.dot{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,0.2);cursor:pointer;transition:.3s}
+.dot.on{width:28px;background:#4090FF}
+
+/* ── PROGRESS BAR ── */
+.progress{position:fixed;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#4090FF,#60D0FF,#FFD060);z-index:50;transition:width .3s ease}
+
+/* ── TICKER ── */
+.ticker{position:fixed;bottom:56px;left:0;right:0;z-index:20;overflow:hidden;height:32px;display:flex;align-items:center;border-top:1px solid rgba(255,255,255,0.04)}
+.ticker-inner{display:flex;gap:0;animation:ticker 25s linear infinite;white-space:nowrap}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tick-item{display:inline-flex;align-items:center;gap:8px;padding:0 32px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.3)}
+.tick-item .up{color:#4CD964}.tick-item .dn{color:#FF4C4C}
+
+/* ── FLOAT ANIM ── */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.6);opacity:0}}
+.pulse{animation:float 4s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<!-- SCENE 1: INTRO -->
+<div class="scene active" id="s1">
+  <div class="logo-wrap pulse">
+    <div class="logo-ring">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="56" stroke="rgba(64,144,255,0.15)" stroke-width="1.5"/>
+        <g class="r-outer">
+          <circle cx="60" cy="60" r="50" stroke="url(#g1)" stroke-width="1.5" stroke-dasharray="8 4" stroke-linecap="round"/>
+        </g>
+        <g class="r-inner">
+          <circle cx="60" cy="60" r="40" stroke="url(#g2)" stroke-width="1" stroke-dasharray="4 8" stroke-linecap="round"/>
+        </g>
+        <circle cx="60" cy="60" r="28" fill="rgba(64,144,255,0.08)" stroke="rgba(64,144,255,0.25)" stroke-width="1"/>
+        <!-- A monogram -->
+        <text x="60" y="66" text-anchor="middle" font-size="22" font-weight="800" fill="#4090FF" font-family="Inter,sans-serif">AC</text>
+        <!-- corner dots -->
+        <circle cx="60" cy="10" r="3" fill="#4090FF" opacity="0.8"/>
+        <circle cx="110" cy="60" r="3" fill="#60D0FF" opacity="0.8"/>
+        <circle cx="60" cy="110" r="3" fill="#FFD060" opacity="0.8"/>
+        <circle cx="10" cy="60" r="3" fill="#4090FF" opacity="0.8"/>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#4090FF"/>
+            <stop offset="100%" stop-color="#FFD060"/>
+          </linearGradient>
+          <linearGradient id="g2" x1="120" y1="0" x2="0" y2="120" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#60D0FF" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#4090FF" stop-opacity="0.2"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div class="logo-name">AusClear</div>
+      <div class="logo-tag">Trusted. Cleared. Settled.</div>
+    </div>
+  </div>
+  <div class="intro-line"></div>
+  <div class="intro-sub">Australia's premier securities clearing and settlement infrastructure — powering the financial markets that power the nation.</div>
+</div>
+
+<!-- SCENE 2: WHAT WE DO -->
+<div class="scene" id="s2">
+  <div class="section-label">What We Do</div>
+  <div class="section-title">The backbone of<br>Australian <span>financial markets</span></div>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <div class="card-title">Clearing & Settlement</div>
+      <div class="card-desc">Electronic clearing of debt securities and money market instruments with real-time DVP settlement integrated with the RBA's RITS system.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">Custody Services</div>
+      <div class="card-desc">Secure central depository for Australian government bonds, corporate bonds, and a wide range of fixed income securities.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">Risk Management</div>
+      <div class="card-desc">Robust risk frameworks protecting counterparties and systemic stability across Australia's fixed income and money markets.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 3: SERVICES -->
+<div class="scene" id="s3">
+  <div class="section-label">Our Platform</div>
+  <div class="section-title" style="margin-bottom:8px">End-to-end <span>market infrastructure</span></div>
+  <div class="services-wrap">
+    <div class="service-left">
+      <div class="service-item">
+        <div class="si-num">01</div>
+        <div class="si-body">
+          <div class="si-title">Trade Registration</div>
+          <div class="si-desc">Automated capture and confirmation of fixed income trades with instant acknowledgement across all participant types.</div>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">02</div>
+        <div class="si-body">
+          <div class="si-title">DVP Settlement</div>
+          <div class="si-desc">Delivery versus Payment settlement ensuring simultaneous transfer of securities and funds — eliminating principal risk.</div>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">03</div>
+        <div class="si-body">
+          <div class="si-title">Securities Registry</div>
+          <div class="si-desc">Definitive record of holdings for Australian government and semi-government securities markets.</div>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="si-num">04</div>
+        <div class="si-body">
+          <div class="si-title">Corporate Actions</div>
+          <div class="si-desc">Automated processing of coupon payments, maturities, and other corporate actions across the depository.</div>
+        </div>
+      </div>
+    </div>
+    <div class="service-right">
+      <div class="service-visual">
+        <div class="sv-glow"></div>
+        <div class="sv-title">Settlement Flow</div>
+        <div class="sv-flow">
+          <div class="sv-node">
+            <div class="sv-dot" style="background:#4090FF;box-shadow:0 0 8px #4090FF"></div>
+            <div class="sv-label">Trade Matched</div>
+            <div class="sv-tag" style="background:rgba(64,144,255,0.1);color:#4090FF">T</div>
+          </div>
+          <div class="sv-line"></div>
+          <div class="sv-node">
+            <div class="sv-dot" style="background:#60D0FF;box-shadow:0 0 8px #60D0FF"></div>
+            <div class="sv-label">Clearing Confirmed</div>
+            <div class="sv-tag" style="background:rgba(96,208,255,0.1);color:#60D0FF">T+0</div>
+          </div>
+          <div class="sv-line"></div>
+          <div class="sv-node">
+            <div class="sv-dot" style="background:#FFD060;box-shadow:0 0 8px #FFD060"></div>
+            <div class="sv-label">DVP Settlement</div>
+            <div class="sv-tag" style="background:rgba(255,208,96,0.1);color:#FFD060">T+2</div>
+          </div>
+          <div class="sv-line"></div>
+          <div class="sv-node">
+            <div class="sv-dot" style="background:#4CD964;box-shadow:0 0 8px #4CD964"></div>
+            <div class="sv-label">Registry Updated</div>
+            <div class="sv-tag" style="background:rgba(76,217,100,0.1);color:#4CD964">Done</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 4: STATS -->
+<div class="scene" id="s4">
+  <div class="stats-intro">
+    <div class="section-label" style="opacity:1;transform:none">By the Numbers</div>
+    <div class="section-title" style="opacity:1;transform:none">Scale that <span style="background:linear-gradient(90deg,#FFD060,#FF9020);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">inspires confidence</span></div>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num"><span class="count" data-target="1.9" data-dec="1">0</span>T</div>
+      <div class="stat-label">Daily Settlement<br>Value (AUD)</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num"><span class="count" data-target="140" data-dec="0">0</span><span class="stat-unit">+</span></div>
+      <div class="stat-label">Member<br>Institutions</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num"><span class="count" data-target="99.99" data-dec="2">0</span><span class="stat-unit">%</span></div>
+      <div class="stat-label">System<br>Availability</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num"><span class="count" data-target="35" data-dec="0">0</span><span class="stat-unit">+</span></div>
+      <div class="stat-label">Years of Market<br>Leadership</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENE 5: CTA -->
+<div class="scene" id="s5">
+  <div class="cta-badge">ASX Group — Regulated by ASIC &amp; RBA</div>
+  <div class="cta-title">Ready to clear<br>with <span class="gold">confidence?</span></div>
+  <div class="cta-sub">Join Australia's most trusted clearing and settlement infrastructure. Speak with our team about membership, connectivity, and access.</div>
+  <div class="cta-btns">
+    <button class="btn-primary" onclick="window.open('https://www2.asx.com.au/markets/clearing-settlement-and-depositing/ausclear','_blank')">Learn More</button>
+    <button class="btn-secondary">Contact Our Team</button>
+  </div>
+  <div class="asx-tag">AN ASX GROUP BUSINESS &nbsp;·&nbsp; ABN 14 006 977 779</div>
+</div>
+
+<!-- NAV DOTS -->
+<div class="nav-dots" id="navDots"></div>
+
+<!-- PROGRESS BAR -->
+<div class="progress" id="progress"></div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker"></div>
+</div>
+
+<script>
+// ── PARTICLE NETWORK ──
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], raf;
+
+function resize() {
+  W = canvas.width = innerWidth;
+  H = canvas.height = innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(true); }
+  reset(init) {
+    this.x = Math.random() * W;
+    this.y = init ? Math.random() * H : H + 10;
+    this.vx = (Math.random() - 0.5) * 0.4;
+    this.vy = -Math.random() * 0.5 - 0.1;
+    this.size = Math.random() * 1.5 + 0.5;
+    this.life = 0;
+    this.maxLife = Math.random() * 300 + 200;
+    this.hue = Math.random() > 0.6 ? 210 : 220;
+    this.sat = Math.random() * 30 + 60;
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    this.life++;
+    if (this.y < -10 || this.life > this.maxLife) this.reset(false);
+  }
+  draw() {
+    const a = Math.sin((this.life / this.maxLife) * Math.PI) * 0.6;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${this.hue},${this.sat}%,70%,${a})`;
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+function drawConnections() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 100) {
+        const a = (1 - dist / 100) * 0.12;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(64,144,255,${a})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawConnections();
+  raf = requestAnimationFrame(animate);
+}
+animate();
+
+// ── SCENES ──
+const scenes = ['s1','s2','s3','s4','s5'];
+const DURATION = 6000;
+let cur = 0, timer = null, counted = false;
+
+const navDots = document.getElementById('navDots');
+scenes.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' on' : '');
+  d.onclick = () => go(i);
+  navDots.appendChild(d);
+});
+
+function go(idx) {
+  document.getElementById(scenes[cur]).classList.remove('active');
+  cur = (idx + scenes.length) % scenes.length;
+  document.getElementById(scenes[cur]).classList.add('active');
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === cur));
+  document.getElementById('progress').style.width = ((cur + 1) / scenes.length * 100) + '%';
+  if (cur === 3 && !counted) { counted = true; runCounters(); }
+  clearTimeout(timer);
+  timer = setTimeout(() => go(cur + 1), DURATION);
+}
+
+function runCounters() {
+  document.querySelectorAll('.count').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    const dec = parseInt(el.dataset.dec);
+    const dur = 1800;
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min((now - start) / dur, 1);
+      const eased = t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2;
+      el.textContent = (target * eased).toFixed(dec);
+      if (t < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+// ── TICKER ──
+const ticks = [
+  { label: 'AGBs 10Y', val: '4.285%', up: true },
+  { label: 'AGBs 3Y', val: '3.941%', up: false },
+  { label: 'BBSW 3M', val: '4.420%', up: true },
+  { label: 'Semis NSW', val: '4.498%', up: false },
+  { label: 'Semis VIC', val: '4.512%', up: true },
+  { label: 'Corporate IG', val: '4.890%', up: true },
+  { label: 'RBA Cash Rate', val: '4.35%', up: false },
+  { label: 'Settlement Vol', val: '$1.94T', up: true },
+  { label: 'AUD/USD', val: '0.6612', up: false },
+];
+const tickHtml = ticks.map(t =>
+  `<span class="tick-item">${t.label}&nbsp;<span class="${t.up ? 'up' : 'dn'}">${t.val} ${t.up ? '▲' : '▼'}</span></span>`
+).join('') ;
+const inner = document.getElementById('ticker');
+inner.innerHTML = tickHtml + tickHtml;
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') go(cur + 1);
+  if (e.key === 'ArrowLeft') go(cur - 1);
+});
+
+// Start
+document.getElementById('progress').style.width = (1 / scenes.length * 100) + '%';
+timer = setTimeout(() => go(1), DURATION);
+</script>
+</body>
+</html>
