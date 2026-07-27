@@ -224,6 +224,13 @@ body{
   50%{opacity:0.5}
 }
 
+/* ═══ REDUCED MOTION ═══ */
+@media(prefers-reduced-motion:reduce){
+  .grain,.scratches,.flicker{display:none}
+  .scroll-hint{animation:none;opacity:0.3}
+  .reveal{opacity:1;transform:none;transition:none}
+}
+
 /* ═══ INTERTITLE CARDS ═══ */
 .intertitle{
   min-height:80vh;
@@ -702,12 +709,16 @@ body{
         <div class="tl-desc">Born in Melbourne, Victoria, to Louis and Bertha Monash, Jewish immigrants from Prussia.</div>
       </div>
       <div class="tl-item">
-        <div class="tl-year">1891</div>
-        <div class="tl-desc">Graduates with a Master of Civil Engineering from the University of Melbourne.</div>
+        <div class="tl-year">1884</div>
+        <div class="tl-desc">Joins the university company of the 4th Battalion, Victorian Rifles, beginning his military career.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1893</div>
+        <div class="tl-desc">Awarded a Master of Civil Engineering from the University of Melbourne.</div>
       </div>
       <div class="tl-item">
         <div class="tl-year">1895</div>
-        <div class="tl-desc">Completes degrees in both Arts and Law. Joins the militia, beginning his parallel military career.</div>
+        <div class="tl-desc">Completes degrees in both Arts and Law from the University of Melbourne.</div>
       </div>
       <div class="tl-item">
         <div class="tl-year">1914</div>
@@ -754,7 +765,7 @@ body{
         <div class="stat-label">Australian Note</div>
       </div>
       <div class="stat">
-        <div class="stat-val">1965</div>
+        <div class="stat-val">1958</div>
         <div class="stat-label">University Founded</div>
       </div>
       <div class="stat">
