@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sir John Monash — A Cinematic Tribute</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=UnifrakturMaguntia&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cinzel:wght@400;700;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:#0a0a0a;
+  color:#d4cfc4;
+  font-family:'Playfair Display',Georgia,serif;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ═══ FILM GRAIN OVERLAY ═══ */
+.grain{
+  position:fixed;inset:0;z-index:9999;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.06;
+  animation:grainShift 0.08s steps(1) infinite;
+}
+@keyframes grainShift{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(-2%,3%)}
+  50%{transform:translate(1%,-2%)}
+  75%{transform:translate(-3%,1%)}
+  100%{transform:translate(2%,-1%)}
+}
+
+/* ═══ FILM SCRATCHES ═══ */
+.scratches{
+  position:fixed;inset:0;z-index:9998;pointer-events:none;
+  overflow:hidden;
+}
+.scratch{
+  position:absolute;
+  width:1px;
+  height:100%;
+  background:linear-gradient(to bottom,transparent 0%,rgba(200,190,170,0.15) 10%,transparent 20%,rgba(200,190,170,0.1) 40%,transparent 50%,rgba(200,190,170,0.12) 70%,transparent 80%);
+  animation:scratchMove 0.3s steps(1) infinite;
+}
+.scratch:nth-child(1){left:15%;animation-duration:0.15s}
+.scratch:nth-child(2){left:45%;animation-duration:0.25s;animation-delay:0.05s}
+.scratch:nth-child(3){left:72%;animation-duration:0.18s;animation-delay:0.1s;width:2px;opacity:0.5}
+@keyframes scratchMove{
+  0%{opacity:1;left:15%}
+  33%{opacity:0;left:48%}
+  66%{opacity:1;left:82%}
+  100%{opacity:0;left:25%}
+}
+
+/* ═══ VIGNETTE ═══ */
+.vignette{
+  position:fixed;inset:0;z-index:9997;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,0.5) 80%,rgba(0,0,0,0.85) 100%);
+}
+
+/* ═══ FLICKER ═══ */
+.flicker{
+  position:fixed;inset:0;z-index:9996;pointer-events:none;
+  animation:flick 0.12s infinite;
+}
+@keyframes flick{
+  0%{background:rgba(0,0,0,0)}
+  4%{background:rgba(0,0,0,0.04)}
+  8%{background:rgba(0,0,0,0)}
+  12%{background:rgba(0,0,0,0.02)}
+  50%{background:rgba(0,0,0,0)}
+  70%{background:rgba(0,0,0,0.03)}
+  100%{background:rgba(0,0,0,0)}
+}
+
+/* ═══ FILM STRIP BORDERS ═══ */
+.film-border{
+  position:fixed;
+  top:0;bottom:0;
+  width:38px;
+  z-index:9995;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to bottom,
+    #0a0a0a 0px,
+    #0a0a0a 4px,
+    #1a1a1a 4px,
+    #1a1a1a 6px,
+    #0a0a0a 6px,
+    #0a0a0a 18px,
+    transparent 18px,
+    transparent 20px
+  );
+}
+.film-border::before{
+  content:'';
+  position:absolute;
+  top:0;bottom:0;
+  width:100%;
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 8px,
+    rgba(200,190,170,0.06) 8px,
+    rgba(200,190,170,0.06) 22px,
+    transparent 22px,
+    transparent 30px
+  );
+}
+.film-border.left{left:0;border-right:2px solid #1a1a1a}
+.film-border.right{right:0;border-left:2px solid #1a1a1a}
+@media(max-width:700px){
+  .film-border{width:18px}
+}
+
+/* ═══ SPROCKET HOLES ═══ */
+.sprockets{
+  position:fixed;top:0;bottom:0;width:20px;z-index:9995;pointer-events:none;
+}
+.sprockets.left{left:9px}
+.sprockets.right{right:9px}
+@media(max-width:700px){
+  .sprockets.left{left:2px}
+  .sprockets.right{right:2px}
+  .sprockets .hole{width:8px;height:10px;border-radius:2px}
+}
+.sprockets .hole{
+  width:12px;height:16px;
+  border-radius:3px;
+  border:1px solid rgba(200,190,170,0.08);
+  background:rgba(0,0,0,0.5);
+  margin:14px auto;
+}
+
+/* ═══ MAIN CONTENT ═══ */
+.content{
+  position:relative;
+  z-index:1;
+  max-width:820px;
+  margin:0 auto;
+  padding:0 56px;
+}
+@media(max-width:700px){
+  .content{padding:0 32px}
+}
+
+/* ═══ TITLE CARD (opening) ═══ */
+.title-card{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  position:relative;
+  padding:40px 0;
+}
+.title-card::before{
+  content:'';
+  position:absolute;
+  top:15%;bottom:15%;left:5%;right:5%;
+  border:2px solid rgba(200,190,170,0.12);
+  border-radius:2px;
+}
+.title-card::after{
+  content:'';
+  position:absolute;
+  top:calc(15% + 8px);bottom:calc(15% + 8px);left:calc(5% + 8px);right:calc(5% + 8px);
+  border:1px solid rgba(200,190,170,0.06);
+}
+
+.ornament{
+  font-size:28px;
+  color:rgba(200,190,170,0.2);
+  letter-spacing:12px;
+  margin-bottom:24px;
+  font-family:'Cinzel',serif;
+}
+
+.main-title{
+  font-family:'Cinzel',serif;
+  font-weight:900;
+  font-size:clamp(36px,7vw,72px);
+  letter-spacing:6px;
+  text-transform:uppercase;
+  color:#e8e0d0;
+  text-shadow:0 0 40px rgba(200,190,170,0.15);
+  line-height:1.1;
+  margin-bottom:16px;
+}
+
+.subtitle{
+  font-family:'IM Fell English SC',serif;
+  font-size:clamp(14px,2.5vw,20px);
+  letter-spacing:8px;
+  text-transform:uppercase;
+  color:rgba(200,190,170,0.45);
+  margin-bottom:32px;
+}
+
+.year-badge{
+  display:inline-block;
+  padding:8px 28px;
+  border:1px solid rgba(200,190,170,0.2);
+  font-family:'Cinzel',serif;
+  font-size:clamp(12px,2vw,16px);
+  letter-spacing:6px;
+  color:rgba(200,190,170,0.5);
+}
+
+.scroll-hint{
+  position:absolute;
+  bottom:40px;
+  font-family:'IM Fell English SC',serif;
+  font-size:12px;
+  letter-spacing:4px;
+  color:rgba(200,190,170,0.2);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:0.2}
+  50%{opacity:0.5}
+}
+
+/* ═══ INTERTITLE CARDS ═══ */
+.intertitle{
+  min-height:80vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:60px 0;
+  position:relative;
+}
+.intertitle::before{
+  content:'';
+  position:absolute;
+  top:10%;bottom:10%;left:0;right:0;
+  border-top:1px solid rgba(200,190,170,0.08);
+  border-bottom:1px solid rgba(200,190,170,0.08);
+}
+
+.inter-text{
+  font-family:'IM Fell English SC',serif;
+  font-size:clamp(20px,4vw,36px);
+  line-height:1.7;
+  color:#c8c0b0;
+  max-width:600px;
+  text-shadow:0 0 20px rgba(200,190,170,0.1);
+}
+.inter-text em{
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  color:#d8d0c0;
+}
+
+/* ═══ SCENE SECTIONS ═══ */
+.scene{
+  padding:80px 0;
+  border-bottom:1px solid rgba(200,190,170,0.04);
+  position:relative;
+}
+
+.scene-number{
+  font-family:'Cinzel',serif;
+  font-size:10px;
+  letter-spacing:8px;
+  text-transform:uppercase;
+  color:rgba(200,190,170,0.2);
+  margin-bottom:32px;
+}
+
+.scene-title{
+  font-family:'Cinzel',serif;
+  font-weight:700;
+  font-size:clamp(22px,4vw,38px);
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:#d8d0c0;
+  margin-bottom:24px;
+  text-shadow:0 0 30px rgba(200,190,170,0.08);
+}
+
+.scene-body{
+  font-size:clamp(15px,2vw,18px);
+  line-height:1.9;
+  color:rgba(200,190,170,0.65);
+  max-width:640px;
+}
+.scene-body p{margin-bottom:20px}
+
+/* ═══ PORTRAIT FRAME ═══ */
+.portrait-frame{
+  margin:48px auto;
+  max-width:380px;
+  position:relative;
+  padding:16px;
+  border:2px solid rgba(200,190,170,0.1);
+}
+.portrait-frame::before{
+  content:'';
+  position:absolute;
+  inset:6px;
+  border:1px solid rgba(200,190,170,0.06);
+}
+.portrait-inner{
+  width:100%;
+  aspect-ratio:3/4;
+  background:linear-gradient(145deg,#181614,#1e1c18,#141210);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:40px;
+  position:relative;
+  overflow:hidden;
+}
+.portrait-inner::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,0.6) 100%);
+}
+.portrait-silhouette{
+  width:120px;height:120px;
+  border-radius:50%;
+  border:2px solid rgba(200,190,170,0.12);
+  background:radial-gradient(circle at 50% 40%,#2a2620,#161412);
+  margin-bottom:24px;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:60px;
+  color:rgba(200,190,170,0.15);
+}
+.portrait-name{
+  font-family:'Cinzel',serif;
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:4px;
+  color:#c8c0b0;
+  position:relative;
+  margin-bottom:8px;
+}
+.portrait-dates{
+  font-family:'IM Fell English SC',serif;
+  font-size:13px;
+  letter-spacing:3px;
+  color:rgba(200,190,170,0.35);
+  position:relative;
+}
+.portrait-caption{
+  text-align:center;
+  font-family:'IM Fell English SC',serif;
+  font-size:12px;
+  letter-spacing:2px;
+  color:rgba(200,190,170,0.3);
+  margin-top:12px;
+}
+
+/* ═══ QUOTE CARD ═══ */
+.quote-card{
+  margin:48px 0;
+  padding:40px;
+  border-left:3px solid rgba(200,190,170,0.1);
+  background:rgba(200,190,170,0.015);
+  position:relative;
+}
+.quote-card::before{
+  content:'\201C';
+  font-family:'Cinzel',serif;
+  font-size:80px;
+  color:rgba(200,190,170,0.06);
+  position:absolute;
+  top:-10px;left:20px;
+  line-height:1;
+}
+.quote-text{
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-size:clamp(16px,2.5vw,22px);
+  line-height:1.8;
+  color:rgba(200,190,170,0.6);
+  position:relative;
+}
+.quote-attr{
+  font-family:'IM Fell English SC',serif;
+  font-size:12px;
+  letter-spacing:3px;
+  color:rgba(200,190,170,0.3);
+  margin-top:16px;
+  position:relative;
+}
+
+/* ═══ TIMELINE ═══ */
+.timeline{
+  position:relative;
+  padding:20px 0;
+  margin:40px 0;
+}
+.timeline::before{
+  content:'';
+  position:absolute;
+  left:20px;top:0;bottom:0;
+  width:1px;
+  background:rgba(200,190,170,0.08);
+}
+@media(max-width:500px){
+  .timeline::before{left:12px}
+}
+.tl-item{
+  position:relative;
+  padding:0 0 40px 56px;
+}
+@media(max-width:500px){
+  .tl-item{padding-left:40px}
+}
+.tl-item::before{
+  content:'';
+  position:absolute;
+  left:16px;top:6px;
+  width:9px;height:9px;
+  border-radius:50%;
+  border:1.5px solid rgba(200,190,170,0.2);
+  background:#0a0a0a;
+}
+@media(max-width:500px){
+  .tl-item::before{left:8px}
+}
+.tl-year{
+  font-family:'Cinzel',serif;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:4px;
+  color:rgba(200,190,170,0.4);
+  margin-bottom:6px;
+}
+.tl-desc{
+  font-size:14px;
+  line-height:1.7;
+  color:rgba(200,190,170,0.5);
+}
+
+/* ═══ STAT CARDS ═══ */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:16px;
+  margin:40px 0;
+}
+.stat{
+  padding:28px 20px;
+  border:1px solid rgba(200,190,170,0.06);
+  text-align:center;
+  background:rgba(200,190,170,0.01);
+}
+.stat-val{
+  font-family:'Cinzel',serif;
+  font-size:clamp(28px,4vw,40px);
+  font-weight:900;
+  color:#c8c0b0;
+  margin-bottom:4px;
+}
+.stat-label{
+  font-family:'IM Fell English SC',serif;
+  font-size:11px;
+  letter-spacing:3px;
+  color:rgba(200,190,170,0.3);
+  text-transform:uppercase;
+}
+
+/* ═══ DIVIDERS ═══ */
+.divider{
+  text-align:center;
+  padding:40px 0;
+  color:rgba(200,190,170,0.12);
+  font-size:18px;
+  letter-spacing:12px;
+}
+
+/* ═══ CLOSING CARD ═══ */
+.closing-card{
+  min-height:70vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:60px 0;
+}
+.closing-text{
+  font-family:'Cinzel',serif;
+  font-size:clamp(11px,1.8vw,14px);
+  letter-spacing:6px;
+  text-transform:uppercase;
+  color:rgba(200,190,170,0.25);
+  margin-bottom:32px;
+}
+.closing-title{
+  font-family:'Cinzel',serif;
+  font-weight:900;
+  font-size:clamp(28px,5vw,52px);
+  letter-spacing:4px;
+  color:#d8d0c0;
+  margin-bottom:16px;
+}
+.closing-sub{
+  font-family:'IM Fell English SC',serif;
+  font-size:clamp(13px,2vw,18px);
+  color:rgba(200,190,170,0.35);
+  letter-spacing:4px;
+}
+.fin{
+  font-family:'UnifrakturMaguntia',serif;
+  font-size:clamp(36px,6vw,60px);
+  color:rgba(200,190,170,0.15);
+  margin-top:60px;
+}
+
+/* ═══ REVEAL ANIMATION ═══ */
+.reveal{
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity 0.8s ease,transform 0.8s ease;
+}
+.reveal.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ═══ SEPIA TINT TOGGLE ═══ */
+.sepia-mode .content{
+  filter:sepia(0.15);
+}
+</style>
+</head>
+<body>
+
+<!-- Film effects overlays -->
+<div class="grain"></div>
+<div class="scratches"><div class="scratch"></div><div class="scratch"></div><div class="scratch"></div></div>
+<div class="vignette"></div>
+<div class="flicker"></div>
+
+<!-- Film strip borders -->
+<div class="film-border left"></div>
+<div class="film-border right"></div>
+
+<!-- Sprocket holes -->
+<div class="sprockets left" id="sprL"></div>
+<div class="sprockets right" id="sprR"></div>
+
+<!-- ═══ MAIN CONTENT ═══ -->
+<div class="content">
+
+  <!-- OPENING TITLE CARD -->
+  <section class="title-card">
+    <div class="ornament">&#x2726; &#x2726; &#x2726;</div>
+    <h1 class="main-title">Sir John<br>Monash</h1>
+    <div class="subtitle">A Life of Extraordinary Service</div>
+    <div class="year-badge">1865 &mdash; 1931</div>
+    <div class="scroll-hint">&darr;&ensp;S C R O L L&ensp;&darr;</div>
+  </section>
+
+  <div class="divider">&mdash; &#x2726; &mdash;</div>
+
+  <!-- INTERTITLE 1 -->
+  <section class="intertitle reveal">
+    <div class="inter-text">
+      <em>&ldquo;The greatest living Australian&rdquo;</em><br>
+      &mdash; so proclaimed upon the fields of France,<br>
+      where a scholar turned soldier<br>
+      changed the course of a war.
+    </div>
+  </section>
+
+  <div class="divider">&mdash; &#x2726; &mdash;</div>
+
+  <!-- PORTRAIT -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene I</div>
+    <div class="scene-title">The Man</div>
+
+    <div class="portrait-frame">
+      <div class="portrait-inner">
+        <div class="portrait-silhouette">&#9733;</div>
+        <div class="portrait-name">MONASH</div>
+        <div class="portrait-dates">1865 &ndash; 1931</div>
+      </div>
+      <div class="portrait-caption">General Sir John Monash, GCMG, KCB, VD</div>
+    </div>
+
+    <div class="scene-body">
+      <p>Born on 27 June 1865 in Melbourne to Jewish immigrants from Prussia, John Monash would rise to become one of the most brilliant military commanders the world has known and one of Australia's most accomplished citizens.</p>
+      <p>A polymath in the truest sense, he was at once an engineer, a soldier, a scholar, and a leader of men. He earned degrees in engineering, arts, and law from the University of Melbourne &mdash; a feat almost unheard of in his day.</p>
+    </div>
+  </section>
+
+  <div class="divider">&#x2734; &#x2734; &#x2734;</div>
+
+  <!-- SCENE II -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene II</div>
+    <div class="scene-title">The Engineer</div>
+
+    <div class="scene-body">
+      <p>Before the guns of war called, Monash was already a man of distinction. As a civil engineer, he became a pioneer in the use of reinforced concrete in Australia, constructing bridges, buildings, and public works across Victoria.</p>
+      <p>His engineering mind &mdash; methodical, precise, relentlessly logical &mdash; would later become his greatest weapon on the battlefield, where he planned operations like an engineer builds a bridge: every load calculated, every stress accounted for.</p>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">&ldquo;I don't care a damn for your loyal service when you think I am right; when I really want it most is when you think I am wrong.&rdquo;</div>
+      <div class="quote-attr">&mdash; Sir John Monash</div>
+    </div>
+  </section>
+
+  <div class="divider">&mdash; &#x2726; &mdash;</div>
+
+  <!-- INTERTITLE 2 -->
+  <section class="intertitle reveal">
+    <div class="inter-text">
+      When the Great War erupted in 1914,<br>
+      Monash answered the call &mdash;<br>
+      first at <em>Gallipoli</em>,<br>
+      then upon the tortured fields<br>
+      of the <em>Western Front</em>.
+    </div>
+  </section>
+
+  <div class="divider">&#x2734; &#x2734; &#x2734;</div>
+
+  <!-- SCENE III -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene III</div>
+    <div class="scene-title">The Soldier</div>
+
+    <div class="scene-body">
+      <p>At Gallipoli in 1915, Monash commanded the 4th Infantry Brigade under impossible conditions. Though the campaign ended in withdrawal, his leadership under fire marked him as a commander of rare calibre.</p>
+      <p>On the Western Front, he rose to command the Australian Corps &mdash; the first time an Australian had commanded a corps-sized formation in battle. What followed was nothing short of revolutionary.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val">1918</div>
+        <div class="stat-label">Corps Command</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">208K</div>
+        <div class="stat-label">Troops Led</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">GCMG</div>
+        <div class="stat-label">Highest Honour</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">&mdash; &#x2726; &mdash;</div>
+
+  <!-- SCENE IV -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene IV</div>
+    <div class="scene-title">The Battle of Hamel</div>
+
+    <div class="scene-body">
+      <p>On 4 July 1918, Monash orchestrated the Battle of Hamel &mdash; a masterpiece of modern combined-arms warfare. For the first time, infantry, artillery, tanks, and aircraft were coordinated in a single, unified plan.</p>
+      <p>He predicted the battle would last ninety minutes. It was over in ninety-three. The precision stunned the Allied command and became the template for every major offensive that followed, ultimately breaking the Hindenburg Line and hastening the end of the war.</p>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">&ldquo;I had formed the theory that the true role of the infantry was not to expend itself upon heroic physical effort, but on the contrary, to advance under the maximum possible protection of the maximum possible array of mechanical resources.&rdquo;</div>
+      <div class="quote-attr">&mdash; Sir John Monash, Australian Victories in France in 1918</div>
+    </div>
+  </section>
+
+  <div class="divider">&#x2734; &#x2734; &#x2734;</div>
+
+  <!-- SCENE V -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene V</div>
+    <div class="scene-title">After the Guns</div>
+
+    <div class="scene-body">
+      <p>After the war, Monash was appointed to oversee the repatriation of Australian troops &mdash; a monumental logistical task he executed with characteristic efficiency and care for his men.</p>
+      <p>Returning to civilian life, he became chairman of the State Electricity Commission of Victoria, transforming the state's power infrastructure. He also served as vice-chancellor of the University of Melbourne and championed the construction of the Shrine of Remembrance in Melbourne.</p>
+    </div>
+  </section>
+
+  <div class="divider">&mdash; &#x2726; &mdash;</div>
+
+  <!-- TIMELINE -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene VI</div>
+    <div class="scene-title">A Life in Frames</div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-year">1865</div>
+        <div class="tl-desc">Born in Melbourne, Victoria, to Louis and Bertha Monash, Jewish immigrants from Prussia.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1891</div>
+        <div class="tl-desc">Graduates with a Master of Civil Engineering from the University of Melbourne.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1895</div>
+        <div class="tl-desc">Completes degrees in both Arts and Law. Joins the militia, beginning his parallel military career.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1914</div>
+        <div class="tl-desc">Commands the 4th Infantry Brigade upon the outbreak of the Great War.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1915</div>
+        <div class="tl-desc">Leads troops at Gallipoli, earning distinction for leadership under fire.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1918</div>
+        <div class="tl-desc">Appointed commander of the Australian Corps. Wins the Battle of Hamel in 93 minutes.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1918</div>
+        <div class="tl-desc">Knighted by King George V on the battlefield &mdash; the first such honour since the age of the Plantagenets.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1920</div>
+        <div class="tl-desc">Appointed chairman of the State Electricity Commission of Victoria.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">1931</div>
+        <div class="tl-desc">Dies on 8 October, aged 66. Given a state funeral attended by 300,000 mourners.</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider">&mdash; &#x2726; &mdash;</div>
+
+  <!-- LEGACY -->
+  <section class="scene reveal">
+    <div class="scene-number">Scene VII</div>
+    <div class="scene-title">Legacy</div>
+
+    <div class="scene-body">
+      <p>Today, Sir John Monash is remembered as Australia's greatest military commander and one of the finest generals of the First World War. His face appears on the Australian $100 note. Monash University, one of the nation's leading institutions, bears his name.</p>
+      <p>Field Marshal Montgomery later called Monash the best general on the Western Front and perhaps any front during the Great War. His methods of combined-arms warfare became the foundation of modern military doctrine.</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-val">$100</div>
+        <div class="stat-label">Australian Note</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">1965</div>
+        <div class="stat-label">University Founded</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">300K</div>
+        <div class="stat-label">Funeral Mourners</div>
+      </div>
+    </div>
+
+    <div class="quote-card">
+      <div class="quote-text">&ldquo;Monash was the most resourceful general in the whole British Army.&rdquo;</div>
+      <div class="quote-attr">&mdash; Field Marshal Bernard Montgomery</div>
+    </div>
+  </section>
+
+  <div class="divider">&#x2734; &#x2734; &#x2734;</div>
+
+  <!-- CLOSING -->
+  <section class="closing-card reveal">
+    <div class="closing-text">In Memoriam</div>
+    <div class="closing-title">Sir John Monash</div>
+    <div class="closing-sub">GCMG &middot; KCB &middot; VD</div>
+    <div class="fin">Fin</div>
+  </section>
+
+</div>
+
+<script>
+// Generate sprocket holes
+function genSprockets(){
+  const h=document.documentElement.scrollHeight;
+  const count=Math.ceil(h/30);
+  let html='';
+  for(let i=0;i<count;i++) html+='<div class="hole"></div>';
+  document.getElementById('sprL').innerHTML=html;
+  document.getElementById('sprR').innerHTML=html;
+}
+genSprockets();
+window.addEventListener('resize',genSprockets);
+
+// Scroll-driven reveal
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add('visible');
+  });
+},{threshold:0.15});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
